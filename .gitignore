@@ -1,0 +1,19 @@
+# Blacklist the highest level directory with /*
+/*
+
+# Whitelist the files that should be part of the respository.
+!.gitignore
+!.github
+!.mvn
+# Note:
+# Do not use single or double asteriks at the end. They are not working properly.
+# To ignore all files in a dir recursively just add / at the end.
+!src/
+src/main/resources/static/client/
+!.editorconfig
+!Jenkinsfile
+!mvnw
+!mvnw.cmd
+!pom.xml
+!HELP.md
+!README.md

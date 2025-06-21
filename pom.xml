@@ -1,0 +1,1059 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.4.5</version>
+    <relativePath/>
+  </parent>
+  <groupId>com.promptwise</groupId>
+  <artifactId>promptchain</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>PromptChain</name>
+  <description>PromptChain</description>
+  <url>https://TODO</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <properties>
+    <java.version>17</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <main-resources-dir>${project.basedir}/src/main/resources</main-resources-dir>
+    <test-resources-dir>${project.basedir}/src/test/resources</test-resources-dir>
+    <generated-sources-dir>${project.build.directory}/generated-sources</generated-sources-dir>
+    <builder-resources-dir>${project.basedir}/src/builder-resources</builder-resources-dir>
+    <builder-checkstyle-dir>${builder-resources-dir}/checkstyle</builder-checkstyle-dir>
+    <!-- The dir where angular.json is placed -->
+    <client-root-dir>${project.basedir}/src/main/client</client-root-dir>
+    <!-- The output dir of the npm build command -->
+    <client-dist-dir>${project.basedir}/src/main/resources/static/client</client-dist-dir>
+
+    <antrun.echo.property>Usage mvn antrun:run@echo -Dantrun.echo.property=&lt;property-name&gt;</antrun.echo.property>
+
+    <!-- Jacoco: -->
+    <surefireArgLine/>
+    <failsafeArgLine/>
+    <jacoco.coverage-data-dir>${project.build.directory}/jacoco-coverage-data</jacoco.coverage-data-dir>
+    <jacoco.coverage-data-file.unit-test>${jacoco.coverage-data-dir}/coverage-data.unit-test.exec
+    </jacoco.coverage-data-file.unit-test>
+    <jacoco.coverage-data-file.integration-test>${jacoco.coverage-data-dir}/coverage-data.integration-test.exec
+    </jacoco.coverage-data-file.integration-test>
+    <jacoco.coverage-data-file.merged>${jacoco.coverage-data-dir}/coverage-data.merged.exec
+    </jacoco.coverage-data-file.merged>
+    <jacoco.report-dir.unit-test>${project.reporting.outputDirectory}/jacoco</jacoco.report-dir.unit-test>
+    <jacoco.report-dir.integration-test>${project.reporting.outputDirectory}/jacoco-it
+    </jacoco.report-dir.integration-test>
+    <jacoco.report-dir.merged>${project.reporting.outputDirectory}/jacoco-merged</jacoco.report-dir.merged>
+    <!--
+      Have to define this as well otherwise the jacoco-maven-plugin in reporting section always looks in
+      the default location
+    -->
+    <jacoco.dataFile>${jacoco.coverage-data-file.unit-test}</jacoco.dataFile>
+
+    <!--    sonar.projectKey=MyExampleLib-->
+    <!--    sonar.projectName=MyExample Library-->
+    <!--    sonar.sources=src/main/java-->
+    <!--    sonar.jacoco.reportPath=build/jacoco/test.exec-->
+    <!--    sonar.junit.reportsPath=build/test-results/test-->
+    <!--    sonar.java.test.binaries=build/classes/test-->
+    <!--    sonar.java.binaries=build/classes/java/main-->
+    <!--    sonar.binaries=build/classes-->
+    <sonar.junit.reportsPath>${project.build.directory}/surefire-reports</sonar.junit.reportsPath>
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ${jacoco.report-dir.unit-test}/jacoco.xml,${jacoco.report-dir.integration-test}/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
+
+    <!-- Sonar: -->
+    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
+    <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+    <sonar.host.url>http://source.fxdms.net/sonar</sonar.host.url>
+    <sonar.dependencyCheck.reportPath>target/dependency-check-report.xml</sonar.dependencyCheck.reportPath>
+    <sonar.dependencyCheck.htmlReportPath>target/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
+    <sonar.dependencyCheck.jsonReportPath>target/dependency-check-report.json</sonar.dependencyCheck.jsonReportPath>
+    <sonar.login>TODO</sonar.login>
+
+    <testcontainers.version>1.20.4</testcontainers.version>
+  </properties>
+
+  <dependencies>
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>33.1.0-jre</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-afterburner</artifactId> <!-- Optional, for performance -->
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>5.4.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.18.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.14.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.2.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!--
+       Mapstruct is a very fast and simple Object to Object mapper (i.e. a model-mapper) lib.
+       https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+    -->
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>1.6.3</version>
+    </dependency>
+
+    <!---->
+    <!-- START: Dependencies related to JAXB and JAX-WS support in Java 11 and onwards. -->
+    <!---->
+
+    <!--
+      Configure Jackson XML serialization/deserialization. This automatically uses com.fasterxml.woodstox
+      (because woodstox-core is autoconfigured via jackson via starter-web) instead of StaX implementation
+      provided by Java (which is used by JAXB), which is much slower.
+
+      Note that we have configured both Jackson and JAXB in this project (because in some complex
+      use-cases we would have to use JAXB since Jackson XML would not be able to handle those.
+    -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.sun.xml.ws/jaxws-ri -->
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-ri</artifactId>
+      <version>4.0.1</version>
+      <type>pom</type>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>4.0.4</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>4.0.1</version>
+    </dependency>
+
+    <!---->
+    <!-- END: Dependencies related to JAXB and JAX-WS support in Java 11 and onwards. -->
+    <!---->
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <!-- For @Validated and field or constructor param validations such as @NotNull -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>${main-resources-dir}</directory>
+        <!--
+          Enable filtering explicitly, because otherwise only files directly under resources are processed
+          as templates and any files in sub-dirs are not.
+        -->
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>${test-resources-dir}</directory>
+        <!--
+          Enable filtering explicitly, because otherwise only files directly under resources are processed
+          as templates and any files in sub-dirs are not.
+        -->
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+
+    <plugins>
+
+      <!-- Enable and configure execution of unit tests via the surefire plugin. -->
+      <plugin>
+        <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <!-- https://stackoverflow.com/questions/24115142/intellij-error-when-running-unit-test-could-not-find-or-load-main-class-suref-->
+          <argLine>-Xmx1024m @{surefireArgLine}</argLine>
+          <!-- The <groups> and <excludeGroups> elements can include/exclude by @Tag values.
+               Note: Including something implicitly excludes anything that is not included. -->
+          <!-- <groups>Group:UnitTests</groups> -->
+          <!-- <excludedGroups>Group:IntegrationTests</excludedGroups> -->
+          <includes>
+            <include>com/promptwise/promptchain/tests/unittests/**/*UnitTests.java</include>
+          </includes>
+          <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
+               a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
+          <!-- <test> -->
+          <!--   net.fbdms.iflowxwsservice.IFlowXwsRestControllerUnitTests#testGetApplicationWorkflows_ResultIsFound -->
+          <!-- </test> -->
+          <parallel>methods</parallel>
+          <threadCount>10</threadCount>
+          <reportFormat>plain</reportFormat>
+          <consoleOutputReporter>
+            <disable>true</disable>
+          </consoleOutputReporter>
+          <statelessTestsetInfoReporter
+                  implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+            <theme>UNICODE</theme>
+            <printStacktraceOnError>true</printStacktraceOnError>
+            <printStacktraceOnFailure>true</printStacktraceOnFailure>
+            <printStdoutOnError>true</printStdoutOnError>
+            <printStdoutOnFailure>true</printStdoutOnFailure>
+            <printStdoutOnSuccess>false</printStdoutOnSuccess>
+            <printStderrOnError>true</printStderrOnError>
+            <printStderrOnFailure>true</printStderrOnFailure>
+            <printStderrOnSuccess>false</printStderrOnSuccess>
+          </statelessTestsetInfoReporter>
+        </configuration>
+        <dependencies>
+          <!-- https://mvnrepository.com/artifact/me.fabriciorby/maven-surefire-junit5-tree-reporter -->
+          <dependency>
+            <groupId>me.fabriciorby</groupId>
+            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+            <version>1.4.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!--      TODO-Jawad-now: Is this necessary??-->
+      <!--      <plugin>-->
+      <!--        <groupId>org.apache.maven.plugins</groupId>-->
+      <!--        <artifactId>maven-surefire-report-plugin</artifactId>-->
+      <!--        <version>3.5.2</version>-->
+      <!--        <executions>-->
+      <!--          <execution>-->
+      <!--            <id>default-report</id>-->
+      <!--            <goals>-->
+      <!--              <goal>report</goal>-->
+      <!--            </goals>-->
+      <!--          </execution>-->
+      <!--        </executions>-->
+      <!--      </plugin>-->
+
+      <!-- Enable and configure execution of integration tests via the failsafe plugin. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>-Xmx1024m @{failsafeArgLine}</argLine>
+          <!--<groups>Group:IntegrationTests</groups>-->
+          <includes>
+            <include>com/promptwise/promptchain/tests/integrationtests/**/*IntegrationTests.java</include>
+          </includes>
+          <reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Enable and configure execution of jacoco and generation of code-coverage report. -->
+      <!-- https://stackoverflow.com/questions/33349864/merging-integration-and-unit-test-reports-with-jacoco-->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
+        <executions>
+          <execution>
+            <!--
+              Use the default-prepare-agent id to re-use and override the execution. This is not necessary but if we
+              don't override it and give a different id to our execution then the default one will be executed
+              anyway, which is just a waste of build time.
+            -->
+            <id>default-prepare-agent</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <destFile>${jacoco.coverage-data-file.unit-test}</destFile>
+              <propertyName>surefireArgLine</propertyName>
+              <!-- Set to true if you want to skip unit tests. -->
+              <skip>false</skip>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-prepare-agent-integration</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+            <configuration>
+              <destFile>${jacoco.coverage-data-file.integration-test}</destFile>
+              <propertyName>failsafeArgLine</propertyName>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <dataFile>${jacoco.coverage-data-file.unit-test}</dataFile>
+              <rules>
+                <rule>
+                  <!-- See https://www.jacoco.org/jacoco/trunk/doc/counters.html -->
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0</minimum>
+                    </limit>
+                    <limit>
+                      <counter>CLASS</counter>
+                      <value>MISSEDRATIO</value>
+                      <maximum>1</maximum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>integration-tests-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <dataFile>${jacoco.coverage-data-file.integration-test}</dataFile>
+              <rules>
+                <rule>
+                  <!-- See https://www.jacoco.org/jacoco/trunk/doc/counters.html -->
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0</minimum>
+                    </limit>
+                    <limit>
+                      <counter>CLASS</counter>
+                      <value>MISSEDRATIO</value>
+                      <maximum>1</maximum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+          <!-- See https://natritmeyer.com/howto/reporting-aggregated-unit-and-integration-test-coverage-with-jacoco/ -->
+          <!--          <execution>-->
+          <!--            <id>default-merge</id>-->
+          <!--            <phase>post-integration-test</phase>-->
+          <!--            <goals>-->
+          <!--              <goal>merge</goal>-->
+          <!--            </goals>-->
+          <!--            <configuration>-->
+          <!--              <fileSets>-->
+          <!--                <fileSet>-->
+          <!--                  <directory>${jacoco.coverage-data-dir}</directory>-->
+          <!--                  <includes>-->
+          <!--                    <include>*.exec</include>-->
+          <!--                  </includes>-->
+          <!--                </fileSet>-->
+          <!--              </fileSets>-->
+          <!--              <destFile>${jacoco.coverage-data-file.merged}</destFile>-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
+          <execution>
+            <!--
+              Use the default-report id to re-use and override the execution. This is not necessary, but if we
+              don't override it and give a different id to our execution, then the default one will be executed
+              anyway, which is just a waste of build time.
+            -->
+            <id>default-report</id>
+            <!--
+              The 'report' goal binds by default to the verify phase, but that does not make sense, generally
+              goals should execute as soon as they can, so we choose prepare-package phase which is right after
+              the unit tests have run.
+            -->
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <dataFile>${jacoco.coverage-data-file.unit-test}</dataFile>
+              <outputDirectory>${jacoco.report-dir.unit-test}</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-report-integration</id>
+            <!--            <phase>verify</phase>-->
+            <goals>
+              <goal>report-integration</goal>
+            </goals>
+            <configuration>
+              <dataFile>${jacoco.coverage-data-file.integration-test}</dataFile>
+              <outputDirectory>${jacoco.report-dir.integration-test}</outputDirectory>
+            </configuration>
+          </execution>
+          <!--          <execution>-->
+          <!--            <id>aggregate-report</id>-->
+          <!--            <phase>verify</phase>-->
+          <!--            <goals>-->
+          <!--              <goal>report</goal>-->
+          <!--            </goals>-->
+          <!--            <configuration>-->
+          <!--              <dataFile>${jacoco.coverage-data-file.merged}</dataFile>-->
+          <!--              <outputDirectory>${jacoco.report-dir.merged}</outputDirectory>-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
+        </executions>
+      </plugin>
+
+      <!--
+        For one time executions, use either of the following:
+          - mvn checkstyle:checkstyle (executes and outputs violations in a report)
+          - mvn checkstyle:check (executes and outputs violations on the console)
+
+        If you want it to run as part of the build process then set skip to false
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <skip>true</skip>
+          <configLocation>${builder-checkstyle-dir}/promptwise-sun_checks.xml</configLocation>
+          <consoleOutput>false</consoleOutput>
+          <excludeGeneratedSources>true</excludeGeneratedSources>
+          <excludes>${generated-sources-dir}/**</excludes>
+          <failsOnError>false</failsOnError>
+          <failOnViolation>false</failOnViolation>
+          <includeResources>false</includeResources>
+          <linkXRef>false</linkXRef>
+          <logViolationCountToConsole>false</logViolationCountToConsole>
+          <suppressionsLocation>${builder-checkstyle-dir}/checkstyle-suppressions.xml</suppressionsLocation>
+          <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+          <useFile>${project.build.directory}/checkstyle-console-log.txt</useFile>
+        </configuration>
+        <executions>
+          <execution>
+            <id>checkstyle_verify</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        DO NOT RUN THIS PLUGIN UNLESS you have setup authentication in your maven settings.xml for the nist gov cve
+        site. Otherwise, your domain account will be locked out and you will need to call support.
+        This goal is set up to run in Jenkins file (see the sonar stage) however ideally it should be here in POM
+        so we can run it locally as well.
+      -->
+      <!--        <plugin>-->
+      <!--          <groupId>org.owasp</groupId>-->
+      <!--          <artifactId>dependency-check-maven</artifactId>-->
+      <!--          <version>12.1.0</version>-->
+      <!--          <configuration>-->
+      <!--            &lt;!&ndash;-->
+      <!--              TODO - caching - this needs to be addressed because if the remote call fails or internet is down, then build will fail-->
+      <!--              Issue is unresolved. The plugin is actually run from Jenkins, so Jenkinsfile-->
+      <!--              might need config changes (obsolete parameters, etc)-->
+      <!--            &ndash;&gt;-->
+      <!--            <nvdApiKey>90593592-3ef6-4cf4-aaca-eba5ecfc3b09</nvdApiKey>-->
+      <!--            <formats>-->
+      <!--              <format>HTML</format>-->
+      <!--              <format>JSON</format>-->
+      <!--            </formats>-->
+      <!--            <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>-->
+      <!--            <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>-->
+      <!--            <formats>-->
+      <!--              ALL-->
+      <!--            </formats>-->
+      <!--&lt;!&ndash;            <nvdDatafeedUrl>http://build.fxdms.net/artifactory/nist-nvd/feeds/json/cve/1.1/nvdcve-1.1-modified.json.gz&ndash;&gt;-->
+      <!--&lt;!&ndash;            </nvdDatafeedUrl>&ndash;&gt;-->
+      <!--          </configuration>-->
+      <!--          <executions>-->
+      <!--            <execution>-->
+      <!--              <goals>-->
+      <!--                <goal>check</goal>-->
+      <!--              </goals>-->
+      <!--            </execution>-->
+      <!--          </executions>-->
+      <!--        </plugin>-->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.21.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+            <configuration>
+              <additionalProperties>
+                <applicationId>
+                  ${project.artifactId}
+                </applicationId>
+                <description>
+                  ${project.description}
+                </description>
+                <majorVersion>
+                  ${parsedVersion.majorVersion}
+                </majorVersion>
+                <minorVersion>
+                  ${parsedVersion.minorVersion}
+                </minorVersion>
+                <incrementalVersion>
+                  ${parsedVersion.incrementalVersion}
+                </incrementalVersion>
+                <snapshotQualifier>
+                  ${parsedVersion.qualifier}
+                </snapshotQualifier>
+                <scmUrl>
+                  ${project.scm.url}
+                </scmUrl>
+              </additionalProperties>
+            </configuration>
+          </execution>
+        </executions>
+        <!-- TODO check this -->
+        <excludes>
+          <exclude>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+          </exclude>
+        </excludes>
+
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-help-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${generated-sources-dir}</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>parse-versions-for-release</id>
+            <!--
+              Though not necessary but since the version values are used by the spring-boot-maven-plugin:build-info goal,
+               which runs in the validate phase, so we run this goal before validate phase.
+            -->
+            <phase>initialize</phase>
+            <goals>
+              <goal>parse-version</goal>
+            </goals>
+            <configuration>
+              <!-- To see the parsed version number run (run in windows shell, does not work in intellij terminal):  -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.majorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nexMajorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.MinorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nextMinorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.incrementalVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nextIncrementalVersion} -->
+              <propertyPrefix>parsedVersion</propertyPrefix>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-maven-plugin</artifactId>
+        <version>1.4</version>
+        <configuration>
+          <!--          <apiDocsUrl>http://localhost:8080/v3/api-docs</apiDocsUrl>-->
+        </configuration>
+        <executions>
+          <execution>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <configuration>
+              <annotationProcessorPaths>
+                <path>
+                  <groupId>org.mapstruct</groupId>
+                  <artifactId>mapstruct-processor</artifactId>
+                  <version>1.6.3</version>
+                </path>
+                <!-- Other annotation processors can be added here -->
+              </annotationProcessorPaths>
+              <!-- due to problem in maven-compiler-plugin, for verbose mode add showWarnings -->
+              <!--              <showWarnings>true</showWarnings>-->
+              <!-- Processor options can be configured as follows: -->
+              <!--              <compilerArgs>-->
+              <!--                <arg>-->
+              <!--                  -Amapstruct.suppressGeneratorTimestamp=true-->
+              <!--                </arg>-->
+              <!--                <arg>-->
+              <!--                  -Amapstruct.suppressGeneratorVersionInfoComment=true-->
+              <!--                </arg>-->
+              <!--                <arg>-->
+              <!--                  -Amapstruct.verbose=true-->
+              <!--                </arg>-->
+              <!--              </compilerArgs>-->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <!-- add this so that image files used for unit test don't get corrupted -->
+          <nonFilteredFileExtensions>
+            <nonFilteredFileExtension>dll</nonFilteredFileExtension>
+            <nonFilteredFileExtension>eot</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>png</nonFilteredFileExtension>
+            <nonFilteredFileExtension>svg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tiff</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+          </nonFilteredFileExtensions>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${client-dist-dir}</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>echo</id>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <configuration>
+                <target>
+                  <echo message="${antrun.echo.property}"/>
+                </target>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>generate-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!--
+          The Sonar plugin goals can only be executed if the host running this build has been configured and can
+          connect to the SONAR server. Also, in some organisations, the SONAR server is only accessible to the
+          build servers (like Jenkins nodes, etc.). In that case, the sonar:sonar goal should be configured in the
+          corresponding build server's script (for example, in case of Jenkins, a Jenkins pipeline file) so that it
+          is executed  only on the build server rather than through pom.xml
+        -->
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+        </plugin>
+
+        <!-- Configured for 'batch' (non-interactive) release support -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <configuration>
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <!-- Commenting because the default value is the same. -->
+            <!-- <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat> -->
+            <useReleaseProfile>false</useReleaseProfile>
+          </configuration>
+          <executions>
+            <execution>
+              <id>major-release</id>
+              <goals>
+                <goal>prepare</goal>
+              </goals>
+              <configuration>
+                <developmentVersion>${parsedVersion.nextMajorVersion}.0.1${parsedVersion.qualifier?}
+                </developmentVersion>
+                <releaseVersion>${parsedVersion.nextMajorVersion}.0.0</releaseVersion>
+              </configuration>
+            </execution>
+            <execution>
+              <id>minor-release</id>
+              <goals>
+                <goal>prepare</goal>
+              </goals>
+              <configuration>
+                <developmentVersion>
+                  ${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.1${parsedVersion.qualifier?}
+                </developmentVersion>
+                <releaseVersion>${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0</releaseVersion>
+              </configuration>
+            </execution>
+            <execution>
+              <id>incremental-release</id>
+              <goals>
+                <goal>prepare</goal>
+              </goals>
+              <configuration>
+                <developmentVersion>
+                  ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}${parsedVersion.qualifier?}
+                </developmentVersion>
+                <releaseVersion>
+                  ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}
+                </releaseVersion>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+
+
+  </build>
+
+  <!-- The reporting plugins configure generation of the corresponding reports when the 'site' phase is executed. -->
+  <reporting>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>3.9.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.18.0</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>dependency-updates-report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- Enable generation of surefire (JUnit) tests report and failsafe (i.e. integration) tests report. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>3.5.2</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <!-- select non-aggregate reports -->
+              <report>report</report>
+              <report>report-integration</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- Enable and configure the 'checkstyle' plugin report (all report plugins are executed by the 'site' lifecycle. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <configLocation>${builder-checkstyle-dir}/promptwise-sun_checks.xml</configLocation>
+          <consoleOutput>false</consoleOutput>
+          <excludeGeneratedSources>true</excludeGeneratedSources>
+          <excludes>${generated-sources-dir}/**</excludes>
+          <failsOnError>false</failsOnError>
+          <failOnViolation>false</failOnViolation>
+          <includeResources>false</includeResources>
+          <linkXRef>false</linkXRef>
+          <logViolationCountToConsole>false</logViolationCountToConsole>
+          <suppressionsLocation>${builder-checkstyle-dir}/checkstyle-suppressions.xml</suppressionsLocation>
+          <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+          <useFile>${project.build.directory}/checkstyle-console-log.txt</useFile>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.10.1</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </reporting>
+
+  <scm>
+    <url>http://source.fxdms.net/bitbucket/projects/serv-luv/repos/lrv-view/browse</url>
+    <connection>scm:git:ssh://git@bitbucket.fxdms.net:7999/serv-luv/lrv-view.git</connection>
+    <developerConnection>scm:git:ssh://git@bitbucket.fxdms.net:7999/serv-luv/lrv-view.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+  <repositories>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>https://jira.fxdms.net/jira/projects/LRVVIEW/issues/LRVVIEW-44?filter=allopenissues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>jenkins</system>
+    <url>http://build.fxdms.net/jenkins2/view/SERV/job/serv-lrv-view/</url>
+    <!-- Notifications will be sent by Jenkins so no need to configure here, otherwise local build failures will
+         also send emails. -->
+    <!--    <notifiers>-->
+    <!--      <notifier>-->
+    <!--        <type>mail</type>-->
+    <!--        <sendOnError>false</sendOnError>-->
+    <!--        <sendOnFailure>false</sendOnFailure>-->
+    <!--        <sendOnSuccess>false</sendOnSuccess>-->
+    <!--        <sendOnWarning>false</sendOnWarning>-->
+    <!--        <configuration>-->
+    <!--          <address></address>-->
+    <!--        </configuration>-->
+    <!--      </notifier>-->
+    <!--    </notifiers>-->
+  </ciManagement>
+
+  <distributionManagement>
+    <repository>
+      <id>promptchain</id>
+      <name>PromptChain Releases Repository</name>
+      <url>https://maven.pkg.github.com/mjawadbutt/promptchain</url>
+    </repository>
+    <snapshotRepository>
+      <id>promptchain-snapshots</id>
+      <name>PromptChain Snapshots Repository</name>
+      <url>https://maven.pkg.github.com/mjawadbutt/promptchain-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <developers>
+    <developer>
+      <id>mjawadbutt</id>
+      <name>Muhammad Jawad Butt</name>
+      <email>m_jawad_butt@yahoo.com</email>
+      <url>https://www.linkedin.com/in/muhammad-jawad-butt/</url>
+      <organization>Promptwise</organization>
+      <organizationUrl>TODO</organizationUrl>
+      <roles>
+        <role>Software Development Lead</role>
+      </roles>
+      <timezone>Australia/Sydney</timezone>
+      <properties>
+        <picUrl>TODO</picUrl>
+      </properties>
+    </developer>
+    <developer>
+      <id>smsufyian</id>
+      <name>Syed Muhammad Sufyian</name>
+      <email>s.m.sufyian@gmail.com</email>
+      <url>https://www.linkedin.com/in/syedmuhammadsufyian/</url>
+      <organization>Promptwise</organization>
+      <organizationUrl>TODO</organizationUrl>
+      <roles>
+        <role>Software Development Lead</role>
+      </roles>
+      <timezone>Berlin/Germany</timezone>
+      <properties>
+        <picUrl>TODO</picUrl>
+      </properties>
+    </developer>
+  </developers>
+</project>
