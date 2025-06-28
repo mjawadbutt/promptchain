@@ -2,11 +2,11 @@ package com.promptchain.tests.unittests;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DocmaintUnitTestConfiguration {
+public class PromptChainUnitTestConfiguration {
 
 
   @Autowired
-  public DocmaintUnitTestConfiguration() {
+  public PromptChainUnitTestConfiguration() {
   }
 
   /**

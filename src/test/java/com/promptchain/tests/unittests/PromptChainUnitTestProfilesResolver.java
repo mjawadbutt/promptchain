@@ -2,7 +2,7 @@ package com.promptchain.tests.unittests;
 
 import org.springframework.test.context.ActiveProfilesResolver;
 
-public class DocmaintUnitTestProfilesResolver implements ActiveProfilesResolver {
+public class PromptChainUnitTestProfilesResolver implements ActiveProfilesResolver {
 
   @Override
   public String[] resolve(Class<?> testClass) {

@@ -14,7 +14,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>PromptChain</name>
   <description>PromptChain</description>
-  <url>https://TODO</url>
+  <url>https://github.com/mjawadbutt/promptchain</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -81,6 +81,11 @@
     <sonar.dependencyCheck.jsonReportPath>target/dependency-check-report.json</sonar.dependencyCheck.jsonReportPath>
     <sonar.login>TODO</sonar.login>
 
+    <!--
+      Initially setting to the GITHUB_ACTOR env var value assuming we are running inside GITHUB-Workflow script.
+      However, value will fallback to our local env var: GHCRIO_USERNAME if not defined.
+    -->
+    <ghcrio.username>${env.GITHUB_ACTOR}</ghcrio.username>
     <testcontainers.version>1.20.4</testcontainers.version>
   </properties>
 
@@ -128,10 +133,29 @@
       <scope>test</scope>
     </dependency>
 
+    <!--
+     To be able to spinup redis in docker (we use this instead of the
+     "Testcontainers Redis :: JUnit Jupiter Extension" (com.redis.testcontainers -> testcontainers-redis-junit)
+     because the JUnit extension is more tightly integrated with JUnit testing whereas we want to use redis when
+     running locally, in build server (unit/integration test phases), as well as prod in a seamless profile
+     based configuration.
+    -->
+    <!-- https://mvnrepository.com/artifact/com.redis.testcontainers/testcontainers-redis -->
+    <dependency>
+      <groupId>com.redis.testcontainers</groupId>
+      <artifactId>testcontainers-redis</artifactId>
+      <version>1.6.4</version>
+    </dependency>
+
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
     </dependency>
 
     <dependency>
@@ -143,6 +167,25 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
+    </dependency>
+
+    <!--
+      Commenting out because we do not want autoconfiguration of redisson and will instead do manual configuration.
+      This is because we are using it inside a container so even if auto-config is done we
+      would have to manually override some aspects (eg: ip, which won't be static, etc.) anyway.
+    -->
+    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
+    <!--    <dependency>-->
+    <!--      <groupId>org.redisson</groupId>-->
+    <!--      <artifactId>redisson-spring-boot-starter</artifactId>-->
+    <!--      <version>3.45.1</version>-->
+    <!--    </dependency>-->
+
+    <!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson</artifactId>
+      <version>3.45.1</version>
     </dependency>
 
     <!--
@@ -197,6 +240,10 @@
     <!-- END: Dependencies related to JAXB and JAX-WS support in Java 11 and onwards. -->
     <!---->
 
+    <!--
+      To be able to use Spring's caching annotations with the configured JSR-107 compliant jcache-manager
+      (no matter what underlying caching impl it is connected to, like radisson in our case)
+    -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-cache</artifactId>
@@ -272,6 +319,72 @@
 
     <plugins>
 
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.41.0</version>
+        <configuration>
+          <images>
+            <image>
+              <!-- This is the full image name -->
+              <name>ghcr.io/${ghcrio.username}/${project.artifactId}</name>
+              <build>
+                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
+                <tags>
+                  <tag>${project.version}</tag>
+                  <tag>latest</tag>
+                </tags>
+              </build>
+              <push>true</push>
+            </image>
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <id>build-image</id>
+            <phase>install</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>build-and-push</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>build</goal>
+              <goal>push</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- If io.fabric8.docker-maven-plugin does not work properly then we can do plain exec as follows:  -->
+      <!--      <plugin>-->
+      <!--        <groupId>org.codehaus.mojo</groupId>-->
+      <!--        <artifactId>exec-maven-plugin</artifactId>-->
+      <!--        <version>3.1.0</version>-->
+      <!--        <executions>-->
+      <!--          <execution>-->
+      <!--            <id>docker-push</id>-->
+      <!--            <phase>deploy</phase>-->
+      <!--            <goals>-->
+      <!--              <goal>exec</goal>-->
+      <!--            </goals>-->
+      <!--            <configuration>-->
+      <!--              <executable>sh</executable>-->
+      <!--              <arguments>-->
+      <!--                <argument>-c</argument>-->
+      <!--                <argument>-->
+      <!--                  docker login ghcr.io -u ${env.GITHUB_ACTOR} -p ${env.GITHUB_TOKEN} &amp;&amp;-->
+      <!--                  docker build -t ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest . &amp;&amp;-->
+      <!--                  docker push ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest-->
+      <!--                </argument>-->
+      <!--              </arguments>-->
+      <!--            </configuration>-->
+      <!--          </execution>-->
+      <!--        </executions>-->
+      <!--      </plugin>-->
+
       <!-- Enable and configure execution of unit tests via the surefire plugin. -->
       <plugin>
         <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html -->
@@ -321,21 +434,6 @@
           </dependency>
         </dependencies>
       </plugin>
-
-      <!--      TODO-Jawad-now: Is this necessary??-->
-      <!--      <plugin>-->
-      <!--        <groupId>org.apache.maven.plugins</groupId>-->
-      <!--        <artifactId>maven-surefire-report-plugin</artifactId>-->
-      <!--        <version>3.5.2</version>-->
-      <!--        <executions>-->
-      <!--          <execution>-->
-      <!--            <id>default-report</id>-->
-      <!--            <goals>-->
-      <!--              <goal>report</goal>-->
-      <!--            </goals>-->
-      <!--          </execution>-->
-      <!--        </executions>-->
-      <!--      </plugin>-->
 
       <!-- Enable and configure execution of integration tests via the failsafe plugin. -->
       <plugin>
@@ -630,14 +728,6 @@
             </configuration>
           </execution>
         </executions>
-        <!-- TODO check this -->
-        <excludes>
-          <exclude>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-          </exclude>
-        </excludes>
-
       </plugin>
 
       <plugin>
@@ -960,10 +1050,28 @@
     </plugins>
   </reporting>
 
+  <profiles>
+    <profile>
+      <id>set-default-ghcrio-username</id>
+      <activation>
+        <property>
+          <!--
+            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not
+            running in the GITHUB-Actions script (such as running locally).
+          -->
+          <name>!env.GITHUB_ACTOR</name>
+        </property>
+      </activation>
+      <properties>
+        <ghcrio.username>${GHCRIO_USERNAME}</ghcrio.username>
+      </properties>
+    </profile>
+  </profiles>
+
   <scm>
-    <url>http://source.fxdms.net/bitbucket/projects/serv-luv/repos/lrv-view/browse</url>
-    <connection>scm:git:ssh://git@bitbucket.fxdms.net:7999/serv-luv/lrv-view.git</connection>
-    <developerConnection>scm:git:ssh://git@bitbucket.fxdms.net:7999/serv-luv/lrv-view.git</developerConnection>
+    <url>https://github.com/mjawadbutt/promptchain</url>
+    <connection>scm:git:ssh://git@github.com:mjawadbutt/promptchain.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:mjawadbutt/promptchain.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <repositories>
@@ -988,39 +1096,29 @@
   </pluginRepositories>
 
   <issueManagement>
-    <system>JIRA</system>
-    <url>https://jira.fxdms.net/jira/projects/LRVVIEW/issues/LRVVIEW-44?filter=allopenissues</url>
+    <system>GITHUB Issues</system>
+    <url>https://github.com/mjawadbutt/promptchain/issues</url>
   </issueManagement>
 
   <ciManagement>
-    <system>jenkins</system>
-    <url>http://build.fxdms.net/jenkins2/view/SERV/job/serv-lrv-view/</url>
-    <!-- Notifications will be sent by Jenkins so no need to configure here, otherwise local build failures will
-         also send emails. -->
-    <!--    <notifiers>-->
-    <!--      <notifier>-->
-    <!--        <type>mail</type>-->
-    <!--        <sendOnError>false</sendOnError>-->
-    <!--        <sendOnFailure>false</sendOnFailure>-->
-    <!--        <sendOnSuccess>false</sendOnSuccess>-->
-    <!--        <sendOnWarning>false</sendOnWarning>-->
-    <!--        <configuration>-->
-    <!--          <address></address>-->
-    <!--        </configuration>-->
-    <!--      </notifier>-->
-    <!--    </notifiers>-->
+    <system>GITHUB Workflow</system>
+    <url>https://github.com/mjawadbutt/promptchain/actions</url>
   </ciManagement>
 
   <distributionManagement>
+    <!--
+      Ensure that both these repo servers are configured in <userdir>/.m2/settings.xml with a fine-grained PAT
+      generated from github.com which has the rights to publish to the repo
+    -->
     <repository>
-      <id>promptchain</id>
-      <name>PromptChain Releases Repository</name>
-      <url>https://maven.pkg.github.com/mjawadbutt/promptchain</url>
+      <id>ghcrio-promptchain</id>
+      <name>PromptChain Releases Repository in ghcr.io</name>
+      <url>https://ghcr.io/mjawadbutt/promptchain</url>
     </repository>
     <snapshotRepository>
-      <id>promptchain-snapshots</id>
-      <name>PromptChain Snapshots Repository</name>
-      <url>https://maven.pkg.github.com/mjawadbutt/promptchain-snapshots</url>
+      <id>ghcrio-promptchain-snapshots</id>
+      <name>PromptChain Snapshots Repository in ghcr.io</name>
+      <url>https://ghcr.io/mjawadbutt/promptchain-snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 

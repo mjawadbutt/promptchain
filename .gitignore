@@ -15,5 +15,13 @@ src/main/resources/static/client/
 !mvnw
 !mvnw.cmd
 !pom.xml
+
+!docker-compose.override.yml
+!docker-compose.prod.yml
+!docker-compose.yml
+!Dockerfile
+!redisson.yml
+
 !HELP.md
 !README.md
+!GIT-GITHUB-GPG-SETUP.md

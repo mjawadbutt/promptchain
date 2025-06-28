@@ -28,12 +28,12 @@ public class PromptChainApplication {
 
   //-- Even though there is no real need for storing these three in this class other than for ease of debugging,
   //-- however let's not remove them since it is not causing any issues.
-  private final DocmaintApplicationProperties applicationProperties;
+  private final PromptChainApplicationProperties applicationProperties;
   private final ApplicationRuntimeInfo applicationRuntimeInfo;
   private final ApplicationBuildInfo applicationBuildInfo;
   private final ApplicationContext applicationContext;
 
-  public PromptChainApplication(DocmaintApplicationProperties applicationProperties,
+  public PromptChainApplication(PromptChainApplicationProperties applicationProperties,
                                 ApplicationRuntimeInfo applicationRuntimeInfo,
                                 ApplicationBuildInfo applicationBuildInfo,
                                 ApplicationContext applicationContext) {

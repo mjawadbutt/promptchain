@@ -19,10 +19,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@DocmaintUnitTestClass
-class DocmaintUnitTests {
+@PromptChainUnitTestClass
+class PromptChainUnitTests {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DocmaintUnitTests.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainUnitTests.class);
 
 	@Test
 	@DisplayName("testHelloWorld: A sample test.")

@@ -1,6 +1,6 @@
 package com.promptchain.tests.unittests;
 
-import au.gov.vic.luv.docmaint.DocmaintApplication;
+import com.promptwise.promptchain.PromptChainApplication;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,11 +36,11 @@ import java.lang.annotation.Target;
 //-- are running to be able to set the order of profiles (which essentially means the order of property file loading).
 //-- And it seems that the OS cannot be determined statically and needs to be done programmatically by implementing
 //-- an ActiveProfilesResolver.
-@ActiveProfiles(resolver = DocmaintUnitTestProfilesResolver.class)
+@ActiveProfiles(resolver = PromptChainUnitTestProfilesResolver.class)
 
 //-- It is very important that the test-configuration is AFTER the application-configuration so that the
 //-- test-configuration can properly utilize the bean overriding feature to override any bean(s) (as needed) in the
 //-- application-configuration
-@Import({DocmaintApplication.class, DocmaintUnitTestConfiguration.class})
-public @interface DocmaintUnitTestClass {
+@Import({PromptChainApplication.class, PromptChainUnitTestConfiguration.class})
+public @interface PromptChainUnitTestClass {
 }

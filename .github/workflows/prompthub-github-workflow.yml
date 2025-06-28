@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -29,5 +32,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build and run tests
-        run: mvn clean verify
+      - name: Build and Push Docker Image via Maven
+        # The maven-settings file is needed because fabric8 plugin that were are using only supports readiing
+        # repo creds from setting.xml and does not allow providing them directly.
+        run: mvn -s .github/maven-settings.xml --batch-mode deploy

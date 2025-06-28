@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  app:
+    # overridden in override for local build
+    image: promptchain:latest
+    environment:
+      - REDIS_HOST=redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "TODOhttp://localhost"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    networks:
+      - app-net
+
+  redis:
+    image: redis:8
+    mem_limit: 128m
+    command:
+      [
+        "redis-server",
+        "--save", "",
+        "--appendonly", "no",
+        "--maxmemory", "128mb",
+        "--maxmemory-policy", "allkeys-lru"
+      ]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    # Let Docker choose the correct driver (bridge in case of compose up and overlay in case of swarm mode)
+    #driver: ${NETWORK_DRIVER:-bridge}
+    driver: bridge
