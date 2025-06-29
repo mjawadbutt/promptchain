@@ -8,6 +8,7 @@
 # Note:
 # Do not use single or double asteriks at the end. They are not working properly.
 # To ignore all files in a dir recursively just add / at the end.
+!db-scripts/
 !src/
 src/main/resources/static/client/
 !.editorconfig
@@ -17,14 +18,16 @@ src/main/resources/static/client/
 !pom.xml
 
 !docker-compose.override.yml
+!docker-compose.prod.db-init.yml
 !docker-compose.prod.yml
 !docker-compose.yml
 !Dockerfile
-!redisson.yml
+!init-env.*
 !local-compose-start-services.*
 !local-compose-stop-services.*
 !local-swarm-deploy-stack.*
 !local-swarm-remove-stack.*
+!redisson.yml
 
 !HELP.md
 !README.md

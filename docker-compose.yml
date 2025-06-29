@@ -3,6 +3,11 @@ version: "3.9"
 
 services:
   app:
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=mydb # Default database name
+      - POSTGRES_USER=myappuser_local # App connects as less privileged user
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
@@ -10,17 +15,13 @@ services:
       timeout: 2s
       retries: 5
       start_period: 20s
-    networks:
-      - app-net
-    environment:
-      - REDIS_HOST=redis
-      - POSTGRES_HOST=postgres
-      - POSTGRES_DB=mydb # Default database name
     depends_on:
       redis:
         condition: service_healthy
       postgres:
         condition: service_healthy
+    networks:
+      - app-net
 
   redis:
     image: redis:8
@@ -73,17 +74,16 @@ services:
           memory: 1GB    # Reserve 1GB of RAM
 
   # Service to initialize the database (e.g., create app user)
+  # This service is designed to run once and exit successfully
+  # Its command will be overridden in docker-compose.override.yml
   db-init:
+    profiles: ["db-setup"] # Only run this service explicitly using --profile db-setup
     image: postgres:15
-    networks:
-      - app-net
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_DB: mydb
-      # POSTGRES_SUPER_PASSWORD will be set in override file
     depends_on:
       postgres:
         condition: service_healthy # Ensure Postgres is healthy before running init commands
-    profiles: ["db-setup"] # Only run this service explicitly using --profile db-setup
-    # This service is designed to run once and exit successfully
-    # Its command will be overridden in docker-compose.override.yml
+    networks:
+      - app-net

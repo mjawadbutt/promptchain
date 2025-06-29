@@ -396,7 +396,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>start-docker-services-local</id>
+            <id>local-compose-start-services-sh</id>
             <phase>pre-integration-test</phase>
             <goals>
               <goal>exec</goal>
@@ -404,14 +404,14 @@
             <configuration>
               <executable>bash</executable>
               <arguments>
-                <argument>${project.basedir}/start-local-services.sh</argument>
+                <argument>${project.basedir}/local-compose-start-services.sh</argument>
               </arguments>
               <workingDirectory>${project.basedir}</workingDirectory>
               <longRunning>true</longRunning>
             </configuration>
           </execution>
           <execution>
-            <id>stop-docker-services-local</id>
+            <id>local-compose-stop-services-sh</id>
             <phase>post-integration-test</phase>
             <goals>
               <goal>exec</goal>
@@ -1107,7 +1107,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>start-docker-services-local</id>
+                <id>local-compose-start-services-bat</id>
                 <phase>pre-integration-test</phase>
                 <goals>
                   <goal>exec</goal>
@@ -1116,14 +1116,14 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}\start-local-services.bat</argument>
+                    <argument>${project.basedir}\local-compose-start-services.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
                   <longRunning>true</longRunning>
                 </configuration>
               </execution>
               <execution>
-                <id>stop-docker-services-local</id>
+                <id>local-compose-stop-services-bat</id>
                 <phase>post-integration-test</phase>
                 <goals>
                   <goal>exec</goal>
@@ -1132,7 +1132,7 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}\stop-local-services.bat</argument>
+                    <argument>${project.basedir}\local-compose-stop-services.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
                 </configuration>

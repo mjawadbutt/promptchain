@@ -1,19 +1,20 @@
-# docker-compose.override.yml
 version: "3.9"
 
 services:
   app:
-    build: .
-    ports:
-      - "8080:8080"
-      - "5005:5005"
     environment:
       - DEBUG_ENABLED=true
       - DEBUG_PORT=5005
       - JAVA_OPTS=-Xms256m -Xmx1g
-      - POSTGRES_USER=myappuser_local # App connects as less privileged user
-      - POSTGRES_PASSWORD=myappsecret_local # Password for less privileged user
+      # Password for app's user
+      - POSTGRES_PASSWORD=myappsecret_local
+    build: .
+    ports:
+      - "8080:8080"
+      # Remote debug port for IntelliJ
+      - "5005:5005"
     volumes:
+      # Optional: for live code reload
       - .:/app
 
   redis:
@@ -23,33 +24,30 @@ services:
   postgres:
     environment:
       # Password for the default 'postgres' superuser in local development
-      - POSTGRES_PASSWORD=my_super_secret_prod
+      - POSTGRES_PASSWORD: ${POSTGRES_SUPER_PASSWORD_LOCAL}
     # Only needed for non-prod (non-swarm) executions.
     ports:
       - "5432:5432"
 
+  # === New/Updated db-init service for Local Development ===
   db-init:
+    image: postgres:15 # Use the same PostgreSQL image
+    profiles:
+      - db-setup # This profile will be used by your local `start-local-services.sh/.bat`
+    networks:
+      - app-net # Connects to the same local network as your other services
     environment:
-      # Pass the superuser password to db-init service's environment
-      POSTGRES_SUPER_PASSWORD: my_super_secret_local
-    command: >
-      bash -c "
-      # Set PGPASSWORD for psql command
-      export PGPASSWORD=\"$$POSTGRES_SUPER_PASSWORD\"
-      # Execute idempotent SQL to create user if it doesn't exist
-      psql -h postgres -U postgres -d mydb -v ON_ERROR_STOP=1 -c '
-        DO \$\$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_user WHERE usename = '\''myappuser_local'\'') THEN
-            CREATE USER myappuser_local WITH PASSWORD '\''myappsecret_local'\'';
-            GRANT CONNECT ON DATABASE mydb TO myappuser_local;
-            GRANT USAGE ON SCHEMA public TO myappuser_local;
-            ALTER DEFAULT PRIVILEGES FOR USER myappuser_local IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO myappuser_local;
-            RAISE NOTICE '\''User myappuser_local created.'\'';
-          ELSE
-            RAISE NOTICE '\''User myappuser_local already exists, skipping creation.'\'';
-          END IF;
-        END
-        \$$;
-      '
-      "
+      POSTGRES_HOST: postgres # 'postgres' is the name of your PostgreSQL service
+      POSTGRES_DB: mydb
+      # IMPORTANT: Use a *local* superuser password here.
+      # This should be provided as an environment variable (e.g., in your shell, or a .env file for local compose)
+      POSTGRES_SUPER_PASSWORD: ${POSTGRES_SUPER_PASSWORD_LOCAL}
+    volumes:
+      # Mount the shared initialization script into the container
+      - ./mounted-scripts/init-db.sh:/usr/local/bin/init-db.sh:ro
+    # Ensure Postgres is healthy before trying to run the init script
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # The command now simply executes the mounted script
+    command: ["bash", "/usr/local/bin/init-db.sh"]
