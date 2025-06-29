@@ -7,12 +7,12 @@ WORKDIR /app
 COPY target/my-app.jar app.jar
 COPY redisson.yaml .
 
-# Set default JVM options (adjust as needed)
-ENV JAVA_OPTS="-Xms256m -Xmx512m"
-
-# Enable remote debugging conditionally
-ENV DEBUG_ENABLED=false
-ENV DEBUG_PORT=5005
+# # Set default JVM options (can be overridden by environment variables)
+# ENV JAVA_OPTS="-Xms256m -Xmx512m"
+#
+# # Enable remote debugging conditionally
+# ENV DEBUG_ENABLED=false
+# ENV DEBUG_PORT=5005
 
 # Entry point with conditional debug logic and proper signal handling
 ENTRYPOINT sh -c '

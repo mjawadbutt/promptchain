@@ -1,3 +1,4 @@
+# docker-compose.override.yml
 version: "3.9"
 
 services:
@@ -5,18 +6,50 @@ services:
     build: .
     ports:
       - "8080:8080"
-      # Remote debug port for IntelliJ
       - "5005:5005"
     environment:
       - DEBUG_ENABLED=true
       - DEBUG_PORT=5005
       - JAVA_OPTS=-Xms256m -Xmx1g
+      - POSTGRES_USER=myappuser_local # App connects as less privileged user
+      - POSTGRES_PASSWORD=myappsecret_local # Password for less privileged user
     volumes:
-      # Optional: for live code reload
       - .:/app
-    depends_on:
-      - redis
 
   redis:
     ports:
       - "6379:6379"
+
+  postgres:
+    environment:
+      # Password for the default 'postgres' superuser in local development
+      - POSTGRES_PASSWORD=my_super_secret_prod
+    # Only needed for non-prod (non-swarm) executions.
+    ports:
+      - "5432:5432"
+
+  db-init:
+    environment:
+      # Pass the superuser password to db-init service's environment
+      POSTGRES_SUPER_PASSWORD: my_super_secret_local
+    command: >
+      bash -c "
+      # Set PGPASSWORD for psql command
+      export PGPASSWORD=\"$$POSTGRES_SUPER_PASSWORD\"
+      # Execute idempotent SQL to create user if it doesn't exist
+      psql -h postgres -U postgres -d mydb -v ON_ERROR_STOP=1 -c '
+        DO \$\$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_user WHERE usename = '\''myappuser_local'\'') THEN
+            CREATE USER myappuser_local WITH PASSWORD '\''myappsecret_local'\'';
+            GRANT CONNECT ON DATABASE mydb TO myappuser_local;
+            GRANT USAGE ON SCHEMA public TO myappuser_local;
+            ALTER DEFAULT PRIVILEGES FOR USER myappuser_local IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO myappuser_local;
+            RAISE NOTICE '\''User myappuser_local created.'\'';
+          ELSE
+            RAISE NOTICE '\''User myappuser_local already exists, skipping creation.'\'';
+          END IF;
+        END
+        \$$;
+      '
+      "

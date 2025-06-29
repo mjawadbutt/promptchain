@@ -32,6 +32,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+# TODO:before doing test or verify, do chmod +x local-compose-start-services.sh local-compose-stop-services.sh so maven-exec can start/stop servcics
+      # TODO:also set profiles.active = linuxLocal
       - name: Build and Push Docker Image via Maven
         # The maven-settings file is needed because fabric8 plugin that were are using only supports readiing
         # repo creds from setting.xml and does not allow providing them directly.

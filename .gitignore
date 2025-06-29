@@ -21,6 +21,10 @@ src/main/resources/static/client/
 !docker-compose.yml
 !Dockerfile
 !redisson.yml
+!local-compose-start-services.*
+!local-compose-stop-services.*
+!local-swarm-deploy-stack.*
+!local-swarm-remove-stack.*
 
 !HELP.md
 !README.md

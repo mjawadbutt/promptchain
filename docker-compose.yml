@@ -1,29 +1,35 @@
+# docker-compose.yml
 version: "3.9"
 
 services:
   app:
-    # overridden in override for local build
-    image: promptchain:latest
-    environment:
-      - REDIS_HOST=redis
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "TODOhttp://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 5s
       timeout: 2s
       retries: 5
+      start_period: 20s
     networks:
       - app-net
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=mydb # Default database name
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   redis:
     image: redis:8
-    mem_limit: 128m
     command:
       [
         "redis-server",
         "--save", "",
         "--appendonly", "no",
-        "--maxmemory", "128mb",
+        "--maxmemory", "64mb",
         "--maxmemory-policy", "allkeys-lru"
       ]
     restart: unless-stopped
@@ -34,9 +40,50 @@ services:
       retries: 5
     networks:
       - app-net
+    # Even though the 'deploy' section is only applicable to swarm mode, but only the 'resources' section is
+    # applicable to both compose and swarm.
+    deploy:
+      resources:
+        limits:
+          memory: 68m
 
-networks:
-  app-net:
-    # Let Docker choose the correct driver (bridge in case of compose up and overlay in case of swarm mode)
-    #driver: ${NETWORK_DRIVER:-bridge}
-    driver: bridge
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: mydb # TODO Database name
+      # TODO: update comment in override file about how this env var is used by postgre on first run (initialization) POSTGRES_PASSWORD for the 'postgres' superuser will be set in overrides.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data
+    restart: unless-stopped
+    healthcheck:
+      # Standard practice is to use the default 'postgres' super-user for health check.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-net
+    deploy: # Added deploy section for resource limits
+      resources:
+        limits:
+          cpus: '2'      # Limit to 2 CPU cores
+          memory: 4GB    # Limit to 4GB of RAM
+        reservations:
+          cpus: '0.5'    # Reserve 0.5 CPU cores
+          memory: 1GB    # Reserve 1GB of RAM
+
+  # Service to initialize the database (e.g., create app user)
+  db-init:
+    image: postgres:15
+    networks:
+      - app-net
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: mydb
+      # POSTGRES_SUPER_PASSWORD will be set in override file
+    depends_on:
+      postgres:
+        condition: service_healthy # Ensure Postgres is healthy before running init commands
+    profiles: ["db-setup"] # Only run this service explicitly using --profile db-setup
+    # This service is designed to run once and exit successfully
+    # Its command will be overridden in docker-compose.override.yml
