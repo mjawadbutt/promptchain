@@ -1,12 +1,12 @@
 package com.promptwise.promptchain;
 
-import au.gov.vic.luv.docmaint.config.DocmaintApplicationProperties;
 import au.gov.vic.luv.docmaint.config.InvalidApplicationConfigurationException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.promptwise.promptchain.common.util.ApplicationBuildInfo;
 import com.promptwise.promptchain.common.util.ApplicationRuntimeInfo;
 import com.promptwise.promptchain.common.util.fileio.FileIoUtil;
 import com.promptwise.promptchain.common.util.json.JacksonUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.promptwise.promptchain.config.ApplicationProperties;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -21,19 +22,21 @@ import org.springframework.context.annotation.Bean;
 import java.nio.file.Path;
 
 @SpringBootApplication
-@EnableConfigurationProperties({DocmaintApplicationProperties.class})
+@EnableConfigurationProperties({ApplicationProperties.class})
+@EnableCaching
 public class PromptChainApplication {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DocmaintApplication.class);
+  public static final String WEB_CONTEXT = "/promptchain";
+  private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainApplication.class);
 
   //-- Even though there is no real need for storing these three in this class other than for ease of debugging,
   //-- however let's not remove them since it is not causing any issues.
-  private final PromptChainApplicationProperties applicationProperties;
+  private final ApplicationProperties applicationProperties;
   private final ApplicationRuntimeInfo applicationRuntimeInfo;
   private final ApplicationBuildInfo applicationBuildInfo;
   private final ApplicationContext applicationContext;
 
-  public PromptChainApplication(PromptChainApplicationProperties applicationProperties,
+  public PromptChainApplication(ApplicationProperties applicationProperties,
                                 ApplicationRuntimeInfo applicationRuntimeInfo,
                                 ApplicationBuildInfo applicationBuildInfo,
                                 ApplicationContext applicationContext) {
@@ -44,7 +47,7 @@ public class PromptChainApplication {
   }
 
   public static void main(String[] args) {
-    ConfigurableApplicationContext context = SpringApplication.run(DocmaintApplication.class, args);
+    ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
   }
 
   @PostConstruct
@@ -73,14 +76,15 @@ public class PromptChainApplication {
 
   @PreDestroy
   public void preDestroy() {
-    LOGGER.debug("Shutting down the application server.");
+    LOGGER.info("Shutting down the application server.");
 //    stopHsqlServer();
-    LOGGER.debug("Successfully shut down the application server.");
+    LOGGER.info("Successfully shut down the application server.");
   }
 
   @Bean
   public ObjectMapper objectMapper() {
-    return getJacksonUtil().getObjectMapper();
+    ObjectMapper objectMapper = getJacksonUtil().getObjectMapper();
+    return objectMapper;
   }
 
 //  /**
@@ -98,7 +102,7 @@ public class PromptChainApplication {
     return getApplicationContext().getBean(beanClass);
   }
 
-  public DocmaintApplicationProperties getApplicationProperties() {
+  public ApplicationProperties getApplicationProperties() {
     return applicationProperties;
   }
 

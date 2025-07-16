@@ -3,12 +3,10 @@ version: "3.9"
 
 services:
   app:
-    image: ghcr.io/${GHCRIO_USERNAME}/your-artifact-id:latest
+    image: ghcr.io/${GHCRIO_USERNAME}/${PROJECT_ARTIFACT_ID}:${PROJECT_VERSION}
     environment:
-      - DEBUG_ENABLED=false
-      - JAVA_OPTS=-Xms256m -Xmx1g
-      - POSTGRES_USER=myappuser_prod # User for app in production
-      - POSTGRES_PASSWORD=myappsecret_prod # Password for app in production (future Vault)
+      DEBUG_ENABLED: false
+      JAVA_OPTS: -Xms256m -Xmx1g
     deploy:
       replicas: 2
       restart_policy:
@@ -27,12 +25,7 @@ services:
         window: 30s
 
   postgres:
-    image: postgres:15 # Standard PostgreSQL image
-    environment:
-      # Password for the default 'postgres' superuser in production (future Vault)
-      - POSTGRES_PASSWORD=my_super_secret_prod
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    image: postgres:15
     deploy:
       replicas: 1
       restart_policy:
@@ -43,8 +36,6 @@ services:
       placement:
         constraints:
           - node.labels.type == database
-
-# Removed: db-init service is entirely absent from production setup
 
 networks:
   app-net:

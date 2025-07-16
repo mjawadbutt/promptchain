@@ -19,6 +19,75 @@ public class EnumHelper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EnumHelper.class);
 
+//  public static <T extends Enum<T>> T getEnumFromValue(String value, Class<T> enumClass) throws EnumParseException {
+//    Assert.notNull(enumClass, "The parameter 'enumClass' cannot be null!");
+//
+//    Method[] methods = enumClass.getDeclaredMethods();
+//    Method customValueGetterMethod = null;
+//    for (Method method : methods) {
+//      if (method.isAnnotationPresent(CustomValueGetterMethod.class)) {
+//        if (Modifier.isStatic(method.getModifiers())) {
+//          throw new EnumHelperException(String.format("""
+//                          Invalid use of the annotation: '%s' on the method: '%s' within the Enum: '%s'!
+//                          This annotation can be used on only one method within an Enum, and this method must be a
+//                          NON_STATIC METHOD that takes no parameters and returns a String""",
+//                  CustomValueGetterMethod.class.getName(), method, enumClass.getName()));
+//        } else if (method.getParameterCount() != 0) {
+//          throw new EnumHelperException(String.format("""
+//                          Invalid use of the annotation: '%s' on the method: '%s' within the Enum: '%s'!
+//                          This method must NOT take ANY PARAMETERS.""",
+//                  CustomValueGetterMethod.class.getName(), method, enumClass.getName()));
+//        } else if (String.class != method.getReturnType()) {
+//          throw new EnumHelperException(String.format("""
+//                          Invalid use of the annotation: '%s' on the method: '%s' within the Enum: '%s'!
+//                          This annotation can be used on only one method within an Enum, and this method must be a
+//                          non-static method that takes no parameters and RETURNS A STRING""",
+//                  CustomValueGetterMethod.class.getName(), method, enumClass.getName()));
+//        } else if (customValueGetterMethod != null) {
+//          throw new EnumHelperException(String.format("""
+//                          Invalid use of the annotation: '%s' on the method: '%s' within the Enum: '%s'!
+//                          This annotation can be used on ONLY ONE method within an Enum, and this method must be a
+//                          non-static method that takes no parameters and returns a String""",
+//                  CustomValueGetterMethod.class.getName(), method, enumClass.getName()));
+//        } else {
+//          customValueGetterMethod = method;
+//        }
+//      }
+//    }
+//
+//    if (customValueGetterMethod == null) {
+//      try {
+//        customValueGetterMethod = enumClass.getMethod("name");
+//      } catch (NoSuchMethodException e) {
+//        throw new EnumHelperException("Unable to find the Java language defined instance method: 'name()' on an Enum class!", e);
+//      }
+//    }
+//
+//    T[] enumConstants = enumClass.getEnumConstants();
+//    try {
+//      T matchingEnumConstant = null;
+//      for (T t : enumConstants) {
+//        String valueForEnumConstant = (String) customValueGetterMethod.invoke(t);
+//        if (Objects.equals(value, valueForEnumConstant)) {
+//          if (matchingEnumConstant == null) {
+//            matchingEnumConstant = t;
+//          } else {
+//            throw EnumParseException.createForNonUniqueValues(value, enumClass);
+//          }
+//        }
+//      }
+//      if (matchingEnumConstant == null) {
+//        throw EnumParseException.createForInvalidValue(value, enumClass);
+//      } else {
+//        return matchingEnumConstant;
+//      }
+//    } catch (IllegalAccessException | InvocationTargetException e) {
+//      throw new EnumHelperException(
+//              String.format("Unable to invoke the value-getter-method: %s on the Enum: %s! See cause for details",
+//                      customValueGetterMethod.getName(), enumClass.getName()), e);
+//    }
+//  }
+
   public static <T extends Enum<T>> List<String> getAllValues(Class<T> enumClass) {
     Objects.requireNonNull(enumClass, "The parameter 'enumClass' cannot be null!");
 

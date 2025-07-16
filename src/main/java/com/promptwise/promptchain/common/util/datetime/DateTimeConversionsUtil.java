@@ -1,6 +1,6 @@
 package com.promptwise.promptchain.common.util.datetime;
 
-import com.promptwise.promptchain.common.util.CommonUtilSystemException;
+import com.promptwise.promptchain.common.exception.LuvCommonLibSystemException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.util.Assert;
 
@@ -9,6 +9,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -31,7 +32,7 @@ public class DateTimeConversionsUtil {
       return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
     } catch (DatatypeConfigurationException var3) {
       DatatypeConfigurationException dce = var3;
-      throw CommonUtilSystemException.create("An exception occurred while converting GregorianCalendar to XMLGregorianCalendar\nduring ZonedDateTime to XMLGregorianCalendar conversion! Please see cause for details.\n", dce);
+      throw LuvCommonLibSystemException.create("An exception occurred while converting GregorianCalendar to XMLGregorianCalendar\nduring ZonedDateTime to XMLGregorianCalendar conversion! Please see cause for details.\n", dce);
     }
   }
 
@@ -53,9 +54,19 @@ public class DateTimeConversionsUtil {
     return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
 
+  public static Date localDateTimeToDate(final @NotNull LocalDateTime localDateTime) {
+    Assert.notNull(localDateTime, "The 'localDateTime' cannot be 'null'!");
+    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+  }
+
   public static LocalDate dateToLocalDate(final @NotNull Date date) {
     Assert.notNull(date, "The 'date' cannot be 'null'!");
     return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+  }
+
+  public static LocalDateTime dateToLocalDateTime(final @NotNull Date date) {
+    Assert.notNull(date, "The 'date' cannot be 'null'!");
+    return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
   }
 
   public static java.sql.Date localDateToSqlDate(final @NotNull LocalDate localDate) {

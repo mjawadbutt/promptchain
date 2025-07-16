@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
-import org.testcontainers.containers.GenericContainer;
 
 import java.io.IOException;
 
@@ -18,15 +17,6 @@ public class RedissonConfig {
 
   @Value("${spring.redis.config-path:redisson.yaml}")
   private String configPath;
-
-
-  @Bean(destroyMethod = "stop")
-  public GenericContainer<?> redisContainer() {
-    GenericContainer<?> redis = new GenericContainer<>("redis:latest")
-            .withExposedPorts(6379);
-    redis.start();
-    return redis;
-  }
 
   @Bean(destroyMethod = "shutdown")
   public RedissonClient redissonClient() throws IOException {

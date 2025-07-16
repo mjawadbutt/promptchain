@@ -4,13 +4,14 @@ version: "3.9"
 services:
   app:
     environment:
-      - REDIS_HOST=redis
-      - POSTGRES_HOST=postgres
-      - POSTGRES_DB=mydb # Default database name
-      - POSTGRES_USER=myappuser_local # App connects as less privileged user
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres  # Should match the name of the 'postgres' service as defined under 'services'
+      POSTGRES_DB: ${POSTGRES_DB_NAME_PROD}
+      APP_DB_USER_NAME: ${APP_DB_USER_NAME_PROD}
+      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD_PROD}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 5s
       timeout: 2s
       retries: 5
@@ -35,7 +36,7 @@ services:
       ]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 2s
       retries: 5
@@ -48,22 +49,29 @@ services:
         limits:
           memory: 68m
 
+  # Note that the POSTGRES_XXX env vars (defined in override and prod yamls) are not used by the POSTGRES server,
+  # they are used by POSTGRES docker images. When a docker-based POSTGRES is started for the VERY FIRST TIME, it
+  # executes a bundled shell script that runs the POSTGRES 'initdb' process. This script actually uses the
+  # env vars such as POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB to initialize and configure the default db
+  # and the superuser account. Only the POSTGRES_PASSWORD needs to be specified. The other two, if not specified,
+  #  default to 'postgres'.
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: mydb # TODO Database name
-      # TODO: update comment in override file about how this env var is used by postgre on first run (initialization) POSTGRES_PASSWORD for the 'postgres' superuser will be set in overrides.
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_SUPER_USER_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data # Persist data
+    networks:
+      - app-net
     restart: unless-stopped
     healthcheck:
       # Standard practice is to use the default 'postgres' super-user for health check.
-      test: ["CMD-SHELL", "pg_isready -U postgres -d mydb"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d mydb" ]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - app-net
     deploy: # Added deploy section for resource limits
       resources:
         limits:
@@ -77,13 +85,17 @@ services:
   # This service is designed to run once and exit successfully
   # Its command will be overridden in docker-compose.override.yml
   db-init:
-    profiles: ["db-setup"] # Only run this service explicitly using --profile db-setup
+    profiles: [ "db-setup" ] # Only run this service explicitly using --profile db-setup
     image: postgres:15
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_DB: mydb
+      POSTGRES_HOST: postgres # Should match the name of the 'postgres' service as defined under 'services'
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_SUPER_USER_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD}
+      APP_DB_USER_NAME: ${APP_DB_USER_NAME}
+      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
+    networks:
+      - app-net
     depends_on:
       postgres:
         condition: service_healthy # Ensure Postgres is healthy before running init commands
-    networks:
-      - app-net

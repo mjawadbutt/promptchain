@@ -3,28 +3,22 @@ version: "3.9"
 
 services:
   db-init:
-    image: postgres:15 # Use the same PostgreSQL image as your main Postgres service
+    image: postgres:15
+    # The command now simply executes the mounted script
+    command: [ "bash", "/usr/local/bin/init-db.sh" ]
+#    volumes:
+#      # Mount the initialization script into a suitable location in the container
+#      - ./mounted-scripts/init-db.sh:/usr/local/bin/init-db.sh:ro
     networks:
-      - app-net # This service needs to connect to the *production overlay network*
-    environment:
-      # These environment variables will be picked up by the psql command in your db-init service
-      POSTGRES_HOST: postgres # 'postgres' is the name of your PostgreSQL service in the 'myapp_stack'
-      POSTGRES_DB: mydb
-      # This sensitive password MUST be provided via environment variable when running the script
-      POSTGRES_SUPER_PASSWORD: ${POSTGRES_SUPER_PASSWORD_PROD}
-    volumes:
-      # Mount the initialization script into a suitable location in the container
-      - ./mounted-scripts/init-db.sh:/usr/local/bin/init-db.sh:ro
+      - app-net
     # The 'depends_on' condition ensures Postgres is healthy before db-init attempts to connect
     depends_on:
       postgres:
         condition: service_healthy
-    # The command now simply executes the mounted script
-    command: ["bash", "/usr/local/bin/init-db.sh"]
 
 # Define the network that this db-init service will connect to.
 # It MUST be an external network that matches the one created by 'docker stack deploy'.
 networks:
   app-net:
     external: true
-    name: myapp_stack_app-net # Name should be <stack_name>_<network_name> (e.g., 'myapp_stack_app-net')
+    name: promptchain-stack_app-net # Name should be <stack_name>_<network_name> (e.g., 'promptchain-stack_app-net')

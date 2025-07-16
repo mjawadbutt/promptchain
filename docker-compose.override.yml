@@ -3,11 +3,10 @@ version: "3.9"
 services:
   app:
     environment:
-      - DEBUG_ENABLED=true
-      - DEBUG_PORT=5005
-      - JAVA_OPTS=-Xms256m -Xmx1g
-      # Password for app's user
-      - POSTGRES_PASSWORD=myappsecret_local
+      DEBUG_ENABLED: true
+      DEBUG_PORT: 5005
+      JAVA_OPTS: -Xms256m -Xmx1g
+    image: ghcr.io/${GHCRIO_USERNAME}/${PROJECT_ARTIFACT_ID}:${PROJECT_VERSION}
     build: .
     ports:
       - "8080:8080"
@@ -22,32 +21,31 @@ services:
       - "6379:6379"
 
   postgres:
-    environment:
-      # Password for the default 'postgres' superuser in local development
-      - POSTGRES_PASSWORD: ${POSTGRES_SUPER_PASSWORD_LOCAL}
     # Only needed for non-prod (non-swarm) executions.
     ports:
       - "5432:5432"
 
-  # === New/Updated db-init service for Local Development ===
+  # Creates the application's db-user (if it does not already exist).
+  # Note that this is not a long-running service but just a shell script.
+  # Also note that it is idempotent. So if the user already exists, then running it will not have any effect.
   db-init:
     image: postgres:15 # Use the same PostgreSQL image
     profiles:
       - db-setup # This profile will be used by your local `start-local-services.sh/.bat`
-    networks:
-      - app-net # Connects to the same local network as your other services
     environment:
-      POSTGRES_HOST: postgres # 'postgres' is the name of your PostgreSQL service
-      POSTGRES_DB: mydb
-      # IMPORTANT: Use a *local* superuser password here.
-      # This should be provided as an environment variable (e.g., in your shell, or a .env file for local compose)
-      POSTGRES_SUPER_PASSWORD: ${POSTGRES_SUPER_PASSWORD_LOCAL}
+      POSTGRES_DB: postgres # Hardcoding the default value for local.
+      POSTGRES_USER: postgres # Hardcoding the default value for local.
+      POSTGRES_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD_LOCAL}
+      APP_DB_USER_NAME: ${APP_DB_USER_NAME_LOCAL}
+      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD_LOCAL}
+    # The command now simply executes the mounted script
+    command: [ "bash", "/usr/local/bin/init-db.sh" ]
     volumes:
       # Mount the shared initialization script into the container
       - ./mounted-scripts/init-db.sh:/usr/local/bin/init-db.sh:ro
+    networks:
+      - app-net # Connects to the same local network as your other services
     # Ensure Postgres is healthy before trying to run the init script
     depends_on:
       postgres:
         condition: service_healthy
-    # The command now simply executes the mounted script
-    command: ["bash", "/usr/local/bin/init-db.sh"]

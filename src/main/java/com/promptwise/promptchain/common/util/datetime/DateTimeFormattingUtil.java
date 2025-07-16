@@ -1,7 +1,7 @@
 package com.promptwise.promptchain.common.util.datetime;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
@@ -22,12 +22,22 @@ public class DateTimeFormattingUtil {
           DTP_HHmmddMMyyyy_COLON_SPACE_FS, Locale.ENGLISH);
 
   public static Date parseDate(String strDate, DateTimeFormatter dateTimeFormatter) {
-    LocalDateTime localDateTime = LocalDateTime.parse(strDate, dateTimeFormatter);
-    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    LocalDate localDate = LocalDate.parse(strDate, dateTimeFormatter);
+    return DateTimeConversionsUtil.localDateToDate(localDate);
+  }
+
+  public static Date parseDateTime(String strDateTime, DateTimeFormatter dateTimeFormatter) {
+    LocalDateTime localDateTime = LocalDateTime.parse(strDateTime, dateTimeFormatter);
+    return DateTimeConversionsUtil.localDateTimeToDate(localDateTime);
   }
 
   public static String formatDate(Date date, DateTimeFormatter dateTimeFormatter) {
-    LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    LocalDate localDate = DateTimeConversionsUtil.dateToLocalDate(date);
+    return localDate.format(dateTimeFormatter);
+  }
+
+  public static String formatDateTime(Date date, DateTimeFormatter dateTimeFormatter) {
+    LocalDateTime localDateTime = DateTimeConversionsUtil.dateToLocalDateTime(date);
     return localDateTime.format(dateTimeFormatter);
   }
 

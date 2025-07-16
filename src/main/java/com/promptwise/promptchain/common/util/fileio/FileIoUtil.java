@@ -202,15 +202,8 @@ public final class FileIoUtil {
   }
 
   public static String loadTextFileToString(File textFile, Charset charset) throws IOException {
-    InputStream inputStream = new FileInputStream(textFile);
-    try {
+    try (InputStream inputStream = new FileInputStream(textFile)) {
       return loadInputStreamToString(inputStream, charset);
-    } finally {
-      try {
-        inputStream.close();
-      } catch (Exception e) {
-        //-- Ignore exception.
-      }
     }
   }
 

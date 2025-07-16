@@ -1,9 +1,9 @@
 package com.promptwise.promptchain.common.util.json;
 
+import com.promptwise.promptchain.common.util.ResourceLoaderUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.promptwise.promptchain.common.util.ResourceLoaderUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -14,7 +14,7 @@ public class JacksonDeserializerForUrl extends JsonDeserializer<URL> {
   public URL deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
           throws IOException {
     String urlString = jsonParser.getText();
-    URL url = ResourceLoaderUtil.deserializeUrl(urlString);
+    URL url = ResourceLoaderUtil.deserializeUrl(urlString, null);
     return url;
   }
 

@@ -1,3 +1,25 @@
+Need to define 2 env vars for local setup to run in compose mode (always debug enabled):
+
+REM 1. GitHub Container Registry (GHCR) Username:
+REM This is used in POM.xml as the github username when pushing a Docker image to ghcr.io from local machine.
+REM However when pushing via GITHUB-Workflow, this env.GITHUB_ACTOR is used.
+set GHCRIO_USERNAME="%GHCRIO_USERNAME%"
+
+REM 2. PostgreSQL Superuser Password for Local Development:
+REM Used by 'docker-compose.override.yml' for the 'postgres' service and 'db-init' service.
+REM TODO-SECURITY: Use a vault.
+set POSTGRES_SUPER_PASSWORD_LOCAL="postgres"
+
+
+
+Need the following env var only if you want to run the app in swarm mode ('prod' like but not debuggable)  
+REM 3. PostgreSQL Superuser Password for Production Deployment:
+REM Used by 'docker-compose.prod.yml' for the 'postgres' service and by 'docker-compose.db-init.prod.yml'
+REM when running the one-off db-init for production.
+REM TODO-SECURITY: Use a vault.
+set POSTGRES_SUPER_PASSWORD_PROD="postgres"
+
+
 to run in non-swarm mode use:
 
 Force rebuild of image (build) and then start container in background (-d)

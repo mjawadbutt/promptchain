@@ -6,8 +6,8 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.5</version>
-    <relativePath/>
+    <version>3.5.3</version>
+    <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.promptwise</groupId>
   <artifactId>promptchain</artifactId>
@@ -23,15 +23,17 @@
     </license>
   </licenses>
   <properties>
-    <java.version>17</java.version>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+
+    <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main-resources-dir>${project.basedir}/src/main/resources</main-resources-dir>
     <test-resources-dir>${project.basedir}/src/test/resources</test-resources-dir>
     <generated-sources-dir>${project.build.directory}/generated-sources</generated-sources-dir>
+    <jooq-generated-sources-dir>${generated-sources-dir}/jooq</jooq-generated-sources-dir>
+    <annotations-generated-sources-dir>${generated-sources-dir}/annotations</annotations-generated-sources-dir>
     <builder-resources-dir>${project.basedir}/src/builder-resources</builder-resources-dir>
     <builder-checkstyle-dir>${builder-resources-dir}/checkstyle</builder-checkstyle-dir>
+
     <!-- The dir where angular.json is placed -->
     <client-root-dir>${project.basedir}/src/main/client</client-root-dir>
     <!-- The output dir of the npm build command -->
@@ -53,6 +55,7 @@
     <jacoco.report-dir.integration-test>${project.reporting.outputDirectory}/jacoco-it
     </jacoco.report-dir.integration-test>
     <jacoco.report-dir.merged>${project.reporting.outputDirectory}/jacoco-merged</jacoco.report-dir.merged>
+
     <!--
       Have to define this as well otherwise the jacoco-maven-plugin in reporting section always looks in
       the default location
@@ -76,36 +79,94 @@
     <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
     <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
     <sonar.host.url>http://source.fxdms.net/sonar</sonar.host.url>
-    <sonar.dependencyCheck.reportPath>target/dependency-check-report.xml</sonar.dependencyCheck.reportPath>
-    <sonar.dependencyCheck.htmlReportPath>target/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
-    <sonar.dependencyCheck.jsonReportPath>target/dependency-check-report.json</sonar.dependencyCheck.jsonReportPath>
-    <sonar.login>TODO</sonar.login>
+    <sonar.dependencyCheck.reportPath>${project.build.directory}/dependency-check-report.xml
+    </sonar.dependencyCheck.reportPath>
+    <sonar.dependencyCheck.htmlReportPath>${project.build.directory}/dependency-check-report.html
+    </sonar.dependencyCheck.htmlReportPath>
+    <sonar.dependencyCheck.jsonReportPath>${project.build.directory}/dependency-check-report.json
+    </sonar.dependencyCheck.jsonReportPath>
+    <!--    <sonar.login>TODO</sonar.login>-->
+
+    <hsqldb.driver-class-name>org.hsqldb.jdbc.JDBCDriver</hsqldb.driver-class-name>
+    <hsqldb.user>sa</hsqldb.user>
+    <hsqldb.password>sa</hsqldb.password>
+    <hsqldb.common-options>
+      hsqldb.write_delay=false;check_props=true;sql.enforce_names=true;sql.enforce_refs=true;sql.truncate_trailing=false;sql.syntax_pgs=true;
+    </hsqldb.common-options>
+    <hsqldb.jooq.db-name>jooq-hsqldb</hsqldb.jooq.db-name>
+    <hsqldb.jooq.db-path>${project.build.directory}/${hsqldb.jooq.db-name}</hsqldb.jooq.db-path>
+
+    <jooq-generated-classes-package>${project.groupId}.promptchain.generated.jooq</jooq-generated-classes-package>
 
     <!--
-      Initially setting to the GITHUB_ACTOR env var value assuming we are running inside GITHUB-Workflow script.
-      However, value will fallback to our local env var: GHCRIO_USERNAME if not defined.
+      GitHub Container Registry (GHCR) Username. This is used to authenticate to GHCR whenever needed (such as
+      when publishing a container image or downloading it from the registry)
+      Here we are setting it to the GITHUB_ACTOR env-var value, assuming we are running via the GITHUB-Workflow script.
+      However, the value will fall back to the value defined in settings.xml (see the profile
+      'set-default-ghcrio-username') if env.GITHUB_ACTOR is not defined (which is the case when we are running locally)
     -->
     <ghcrio.username>${env.GITHUB_ACTOR}</ghcrio.username>
-    <testcontainers.version>1.20.4</testcontainers.version>
+
+    <postgres.db_name_local>postgres</postgres.db_name_local>
+    <postgres.super_user_name_local>postgres</postgres.super_user_name_local>
+    <postgres.super_user_password_local>postgres</postgres.super_user_password_local>
+
+    <!--
+      This cannot be changed because it must match the name of the service as defined in the services section of
+      the docker compose files, unless the names are changed there as well.
+    -->
+    <app_db.host_name>postgres</app_db.host_name>
+
+    <app_db.db_name_local>${postgres.db_name_local}</app_db.db_name_local>
+    <app_db.user_name_local>promptchain</app_db.user_name_local>
+    <app_db.user_password_local>promptchain</app_db.user_password_local>
+
+    <org.liquibase.version>4.33.0</org.liquibase.version>
+    <org.jooq.version>3.20.5</org.jooq.version>
+    <org.mapstruct.version>1.6.3</org.mapstruct.version>
+    <org.hsqldb.version>2.7.4</org.hsqldb.version>
   </properties>
 
   <dependencies>
-    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+
+    <!--
+      Commenting out because we do not want autoconfiguration of redisson and will instead do manual configuration.
+      This is because we are using it inside a container so even if auto-config is done we
+      would have to manually override some aspects (eg: ip, which won't be static, etc.) anyway.
+    -->
+    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
+    <!--    <dependency>-->
+    <!--      <groupId>org.redisson</groupId>-->
+    <!--      <artifactId>redisson-spring-boot-starter</artifactId>-->
+    <!--      <version>3.45.1</version>-->
+    <!--    </dependency>-->
+
+    <!-- Redisson JCache (JSR-107) integration -->
+    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-data-35 -->
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>33.1.0-jre</version>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-spring-data-35</artifactId>
+      <version>3.50.0</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
     <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-afterburner</artifactId> <!-- Optional, for performance -->
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson</artifactId>
+      <version>3.45.1</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
       <artifactId>httpclient5</artifactId>
       <version>5.4.1</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>33.1.0-jre</version>
     </dependency>
 
     <dependency>
@@ -124,43 +185,83 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.2.0</version>
+      <version>2.8.9</version>
     </dependency>
 
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>postgresql</artifactId>
-      <scope>test</scope>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-afterburner</artifactId> <!-- Optional, for performance -->
     </dependency>
 
-    <!--
-     To be able to spinup redis in docker (we use this instead of the
-     "Testcontainers Redis :: JUnit Jupiter Extension" (com.redis.testcontainers -> testcontainers-redis-junit)
-     because the JUnit extension is more tightly integrated with JUnit testing whereas we want to use redis when
-     running locally, in build server (unit/integration test phases), as well as prod in a seamless profile
-     based configuration.
-    -->
-    <!-- https://mvnrepository.com/artifact/com.redis.testcontainers/testcontainers-redis -->
+    <!--    <dependency>-->
+    <!--      <groupId>org.testcontainers</groupId>-->
+    <!--      <artifactId>postgresql</artifactId>-->
+    <!--      <scope>test</scope>-->
+    <!--    </dependency>-->
+
+    <!--    &lt;!&ndash;-->
+    <!--     To be able to spinup redis in docker (we use this instead of the-->
+    <!--     "Testcontainers Redis :: JUnit Jupiter Extension" (com.redis.testcontainers -> testcontainers-redis-junit)-->
+    <!--     because the JUnit extension is more tightly integrated with JUnit testing whereas we want to use redis when-->
+    <!--     running locally, in build server (unit/integration test phases), as well as prod in a seamless profile-->
+    <!--     based configuration.-->
+    <!--    &ndash;&gt;-->
+    <!--    &lt;!&ndash; https://mvnrepository.com/artifact/com.redis.testcontainers/testcontainers-redis &ndash;&gt;-->
+    <!--    <dependency>-->
+    <!--      <groupId>com.redis.testcontainers</groupId>-->
+    <!--      <artifactId>testcontainers-redis</artifactId>-->
+    <!--      <version>1.6.4</version>-->
+    <!--    </dependency>-->
+
+    <!--    <dependency>-->
+    <!--      <groupId>org.testcontainers</groupId>-->
+    <!--      <artifactId>junit-jupiter</artifactId>-->
+    <!--      <scope>test</scope>-->
+    <!--    </dependency>-->
+
+    <!--    <dependency>-->
+    <!--      <groupId>org.testcontainers</groupId>-->
+    <!--      <artifactId>testcontainers</artifactId>-->
+    <!--    </dependency>-->
+
     <dependency>
-      <groupId>com.redis.testcontainers</groupId>
-      <artifactId>testcontainers-redis</artifactId>
-      <version>1.6.4</version>
+      <groupId>org.jooq</groupId>
+      <artifactId>jooq-meta-extensions</artifactId>
+      <version>${org.jooq.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jooq</groupId>
+      <artifactId>jooq-meta</artifactId>
+      <version>${org.jooq.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jooq</groupId>
+      <artifactId>jooq-codegen</artifactId>
+      <version>${org.jooq.version}</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.jooq/jooq-meta-extensions-liquibase -->
+    <dependency>
+      <groupId>org.jooq</groupId>
+      <artifactId>jooq-meta-extensions-liquibase</artifactId>
+      <version>${org.jooq.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jooq</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
+      <version>${org.liquibase.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>${org.hsqldb.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -170,32 +271,13 @@
     </dependency>
 
     <!--
-      Commenting out because we do not want autoconfiguration of redisson and will instead do manual configuration.
-      This is because we are using it inside a container so even if auto-config is done we
-      would have to manually override some aspects (eg: ip, which won't be static, etc.) anyway.
-    -->
-    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
-    <!--    <dependency>-->
-    <!--      <groupId>org.redisson</groupId>-->
-    <!--      <artifactId>redisson-spring-boot-starter</artifactId>-->
-    <!--      <version>3.45.1</version>-->
-    <!--    </dependency>-->
-
-    <!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
-    <dependency>
-      <groupId>org.redisson</groupId>
-      <artifactId>redisson</artifactId>
-      <version>3.45.1</version>
-    </dependency>
-
-    <!--
-       Mapstruct is a very fast and simple Object to Object mapper (i.e. a model-mapper) lib.
-       https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+      Mapstruct is a very fast and simple Object to Object mapper (i.e. a model-mapper) lib.
+      https://mvnrepository.com/artifact/org.mapstruct/mapstruct
     -->
     <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>
-      <version>1.6.3</version>
+      <version>${org.mapstruct.version}</version>
     </dependency>
 
     <!---->
@@ -208,13 +290,12 @@
       provided by Java (which is used by JAXB), which is much slower.
 
       Note that we have configured both Jackson and JAXB in this project (because in some complex
-      use-cases we would have to use JAXB since Jackson XML would not be able to handle those.
+      use-cases, we would have to use JAXB since Jackson XML would not be able to handle those.
     -->
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
     </dependency>
-
     <!-- https://mvnrepository.com/artifact/com.sun.xml.ws/jaxws-ri -->
     <dependency>
       <groupId>com.sun.xml.ws</groupId>
@@ -222,18 +303,16 @@
       <version>4.0.1</version>
       <type>pom</type>
     </dependency>
-
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-impl</artifactId>
-      <version>4.0.4</version>
+      <version>4.0.5</version>
       <scope>runtime</scope>
     </dependency>
-
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>4.0.1</version>
+      <version>4.0.2</version>
     </dependency>
 
     <!---->
@@ -249,6 +328,12 @@
       <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-core -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+      <version>1.14.5</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
@@ -260,11 +345,11 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-webflux</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!-- Will be enabled when security is implemented. -->
+    <!--    <dependency>-->
+    <!--      <groupId>org.springframework.boot</groupId>-->
+    <!--      <artifactId>spring-boot-starter-security</artifactId>-->
+    <!--    </dependency>-->
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -283,22 +368,25 @@
     </dependency>
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers-bom</artifactId>
-        <version>${testcontainers.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <!--  <dependencyManagement>-->
+  <!--    <dependencies>-->
+  <!--      <dependency>-->
+  <!--        <groupId>org.testcontainers</groupId>-->
+  <!--        <artifactId>testcontainers-bom</artifactId>-->
+  <!--        <version>${testcontainers.version}</version>-->
+  <!--        <type>pom</type>-->
+  <!--        <scope>import</scope>-->
+  <!--      </dependency>-->
+  <!--    </dependencies>-->
+  <!--  </dependencyManagement>-->
 
   <build>
     <resources>
       <resource>
         <directory>${main-resources-dir}</directory>
+        <excludes>
+          <exclude>project-info.properties</exclude>
+        </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
           as templates and any files in sub-dirs are not.
@@ -316,185 +404,58 @@
         <filtering>true</filtering>
       </testResource>
     </testResources>
-
     <plugins>
 
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>0.41.0</version>
-        <configuration>
-          <images>
-            <image>
-              <!--
-                Even though here we could specify the version also, but we are not doing that because we want
-                the version to be appended based on the <tag> entries. So if we want to deploy two copies of the
-                image (one with the 'latest' tag and one with the actual version-number) then we cannot specify
-                the version directly over here and have to use the <tags> element.
-              -->
-              <name>ghcr.io/${ghcrio.username}/${project.artifactId}</name>
-              <build>
-                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
-                <!-- One image will be published for each tag entry. -->
-                <tags>
-                  <tag>${project.version}</tag>
-                  <tag>latest</tag>
-                </tags>
-              </build>
-              <push>true</push>
-            </image>
-          </images>
-        </configuration>
-        <executions>
-          <execution>
-            <id>build-image</id>
-            <phase>install</phase>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>build-and-push</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>build</goal>
-              <goal>push</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
-      <!-- If io.fabric8.docker-maven-plugin does not work properly then we can do plain exec as follows:  -->
-      <!--      <plugin>-->
-      <!--        <groupId>org.codehaus.mojo</groupId>-->
-      <!--        <artifactId>exec-maven-plugin</artifactId>-->
-      <!--        <version>3.1.0</version>-->
-      <!--        <executions>-->
-      <!--          <execution>-->
-      <!--            <id>docker-push</id>-->
-      <!--            <phase>deploy</phase>-->
-      <!--            <goals>-->
-      <!--              <goal>exec</goal>-->
-      <!--            </goals>-->
-      <!--            <configuration>-->
-      <!--              <executable>sh</executable>-->
-      <!--              <arguments>-->
-      <!--                <argument>-c</argument>-->
-      <!--                <argument>-->
-      <!--                  docker login ghcr.io -u ${env.GITHUB_ACTOR} -p ${env.GITHUB_TOKEN} &amp;&amp;-->
-      <!--                  docker build -t ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest . &amp;&amp;-->
-      <!--                  docker push ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest-->
-      <!--                </argument>-->
-      <!--              </arguments>-->
-      <!--            </configuration>-->
-      <!--          </execution>-->
-      <!--        </executions>-->
-      <!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project.basedir}</directory>
+              <includes>
+                <include>local-compose-start-services.bat</include>
+                <include>local-compose-start-services.sh</include>
+                <include>local-compose-stop-services.bat</include>
+                <include>local-compose-stop-services.sh</include>
+                <include>local-swarm-start-services.bat</include>
+                <include>local-swarm-start-services.sh</include>
+                <include>local-swarm-stop-services.bat</include>
+                <include>local-swarm-stop-services.sh</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+              <useDefaultExcludes>true</useDefaultExcludes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
+        <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>local-compose-start-services-sh</id>
-            <phase>pre-integration-test</phase>
+            <id>parse-versions-for-release</id>
+            <!--
+              Though not necessary, but since the version values are used by the
+               spring-boot-maven-plugin:build-info goal, which runs in the validate phase, so we run this goal
+               before validate phase.
+            -->
+            <phase>initialize</phase>
             <goals>
-              <goal>exec</goal>
+              <goal>parse-version</goal>
             </goals>
             <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/local-compose-start-services.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-              <longRunning>true</longRunning>
+              <!-- To see the parsed version number run (run in windows shell, does not work in intellij terminal):  -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.majorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nexMajorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.MinorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nextMinorVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.incrementalVersion} -->
+              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nextIncrementalVersion} -->
+              <propertyPrefix>parsedVersion</propertyPrefix>
             </configuration>
-          </execution>
-          <execution>
-            <id>local-compose-stop-services-sh</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/stop-local-services.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Enable and configure execution of unit tests via the surefire plugin. -->
-      <plugin>
-        <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.2</version>
-        <configuration>
-          <!-- https://stackoverflow.com/questions/24115142/intellij-error-when-running-unit-test-could-not-find-or-load-main-class-suref-->
-          <argLine>-Xmx1024m @{surefireArgLine}</argLine>
-          <!-- The <groups> and <excludeGroups> elements can include/exclude by @Tag values.
-               Note: Including something implicitly excludes anything that is not included. -->
-          <!-- <groups>Group:UnitTests</groups> -->
-          <!-- <excludedGroups>Group:IntegrationTests</excludedGroups> -->
-          <includes>
-            <include>com/promptwise/promptchain/tests/unittests/**/*UnitTests.java</include>
-          </includes>
-          <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
-               a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
-          <!-- <test> -->
-          <!--   net.fbdms.iflowxwsservice.IFlowXwsRestControllerUnitTests#testGetApplicationWorkflows_ResultIsFound -->
-          <!-- </test> -->
-          <parallel>methods</parallel>
-          <threadCount>10</threadCount>
-          <reportFormat>plain</reportFormat>
-          <consoleOutputReporter>
-            <disable>true</disable>
-          </consoleOutputReporter>
-          <statelessTestsetInfoReporter
-                  implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
-            <theme>UNICODE</theme>
-            <printStacktraceOnError>true</printStacktraceOnError>
-            <printStacktraceOnFailure>true</printStacktraceOnFailure>
-            <printStdoutOnError>true</printStdoutOnError>
-            <printStdoutOnFailure>true</printStdoutOnFailure>
-            <printStdoutOnSuccess>false</printStdoutOnSuccess>
-            <printStderrOnError>true</printStderrOnError>
-            <printStderrOnFailure>true</printStderrOnFailure>
-            <printStderrOnSuccess>false</printStderrOnSuccess>
-          </statelessTestsetInfoReporter>
-        </configuration>
-        <dependencies>
-          <!-- https://mvnrepository.com/artifact/me.fabriciorby/maven-surefire-junit5-tree-reporter -->
-          <dependency>
-            <groupId>me.fabriciorby</groupId>
-            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-            <version>1.4.0</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
-      <!-- Enable and configure execution of integration tests via the failsafe plugin. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <argLine>-Xmx1024m @{failsafeArgLine}</argLine>
-          <!--<groups>Group:IntegrationTests</groups>-->
-          <includes>
-            <include>com/promptwise/promptchain/tests/integrationtests/**/*IntegrationTests.java</include>
-          </includes>
-          <reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
@@ -504,7 +465,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
+        <version>0.8.13</version>
         <executions>
           <execution>
             <!--
@@ -513,7 +474,7 @@
               anyway, which is just a waste of build time.
             -->
             <id>default-prepare-agent</id>
-            <phase>initialize</phase>
+            <!--            <phase>initialize</phase>-->
             <goals>
               <goal>prepare-agent</goal>
             </goals>
@@ -526,7 +487,7 @@
           </execution>
           <execution>
             <id>default-prepare-agent-integration</id>
-            <phase>pre-integration-test</phase>
+            <!--            <phase>pre-integration-test</phase>-->
             <goals>
               <goal>prepare-agent-integration</goal>
             </goals>
@@ -620,7 +581,7 @@
               goals should execute as soon as they can, so we choose prepare-package phase which is right after
               the unit tests have run.
             -->
-            <phase>prepare-package</phase>
+            <!--            <phase>prepare-package</phase>-->
             <goals>
               <goal>report</goal>
             </goals>
@@ -656,10 +617,10 @@
 
       <!--
         For one time executions, use either of the following:
-          - mvn checkstyle:checkstyle (executes and outputs violations in a report)
-          - mvn checkstyle:check (executes and outputs violations on the console)
+          - mvn checkstyle:checkstyle  (executes and outputs violations in a report)
+          - mvn checkstyle:check  (executes and outputs violations on the console)
 
-        If you want it to run as part of the build process then set skip to false
+        If you want it to run as part of the build-process, then set skip to false
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -667,7 +628,7 @@
         <version>3.6.0</version>
         <configuration>
           <skip>true</skip>
-          <configLocation>${builder-checkstyle-dir}/promptwise-sun_checks.xml</configLocation>
+          <configLocation>${builder-checkstyle-dir}/fbdms-sun_checks.xml</configLocation>
           <consoleOutput>false</consoleOutput>
           <excludeGeneratedSources>true</excludeGeneratedSources>
           <excludes>${generated-sources-dir}/**</excludes>
@@ -683,7 +644,7 @@
         <executions>
           <execution>
             <id>checkstyle_verify</id>
-            <phase>verify</phase>
+            <!--            <phase>verify</phase>-->
             <goals>
               <goal>check</goal>
             </goals>
@@ -693,7 +654,7 @@
 
       <!--
         DO NOT RUN THIS PLUGIN UNLESS you have setup authentication in your maven settings.xml for the nist gov cve
-        site. Otherwise, your domain account will be locked out and you will need to call support.
+        site. Otherwise, your company domain account will be locked out, and you will need to call support.
         This goal is set up to run in Jenkins file (see the sonar stage) however ideally it should be here in POM
         so we can run it locally as well.
       -->
@@ -729,44 +690,472 @@
       <!--          </executions>-->
       <!--        </plugin>-->
 
+      <!--
+        Used to deploy the app's schema to an actual file-based HSQLDB instance. This will be used by the JOOQ
+        code-generator to generate the type safe DSL classes via reverse engineering.
+        Docs at: https://docs.liquibase.com/tools-integrations/maven/commands/maven-update.html
+      -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>3.21.0</version>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-maven-plugin</artifactId>
+        <!-- Do not use version 4.32.0, it has bugs. Try upgrade to a later version whenever needed. -->
+        <version>4.31.0</version>
+        <configuration>
+          <changeLogFile>src/main/resources/liquibase/changelog-master.xml</changeLogFile>
+          <url>
+            jdbc:hsqldb:file:${hsqldb.jooq.db-path};create=true;shutdown=true;${hsqldb.common-options}
+          </url>
+          <username>${hsqldb.user}</username>
+          <password>${hsqldb.password}</password>
+          <driver>${hsqldb.driver-class-name}</driver>
+        </configuration>
+        <executions>
+          <execution>
+            <!--
+              Note that since the output of this plugin is used by the jooq-codegen-maven plugin (defined just below),
+              AND, since it executes in the same phase as the jooq-codegen-maven plugin, it HAS TO BE DEFINED before
+              the jooq-codegen-maven plugin in order to make sure it executes before the jooq-codegen-maven plugin.
+              Alternatively, we could bind it to the initialize phase and then the order would no longer matter,
+              however the generate-sources phase seems more appropriate for this goal.
+            -->
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>update</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Enable and configure execution of jooq generation of sql mapping classes using Liquibase. -->
+      <plugin>
+        <groupId>org.jooq</groupId>
+        <artifactId>jooq-codegen-maven</artifactId>
+        <version>3.19.24</version>
+        <configuration>
+          <generator>
+
+            <generate>
+              <generatedAnnotation>true</generatedAnnotation>
+              <!-- Possible values for generatedAnnotationType
+                 - DETECT_FROM_JDK
+                 - JAVAX_ANNOTATION_GENERATED
+                 - JAVAX_ANNOTATION_PROCESSING_GENERATED -->
+              <generatedAnnotationType>DETECT_FROM_JDK</generatedAnnotationType>
+              <generatedAnnotationDate>true</generatedAnnotationDate>
+              <generatedAnnotationJooqVersion>true</generatedAnnotationJooqVersion>
+
+              <nullableAnnotation>true</nullableAnnotation>
+              <nullableAnnotationType>jakarta.annotation.Nullable</nullableAnnotationType>
+              <nonnullAnnotation>true</nonnullAnnotation>
+              <nonnullAnnotationType>jakarta.validation.constraints.NotNull</nonnullAnnotationType>
+
+              <!--
+                DO NOT TURN ON JPA Annotations. This will cause issue in case we have a composite primary key in
+                any table. The issue is that it will generate all other annotations but not generate an @Id or
+                @EmbeddedId or @Embeddable annotation, which will cause JPA to fail when instantiating the Datasource.
+              -->
+              <!-- <jpaAnnotations>true</jpaAnnotations> -->
+              <!--   <jpaVersion>2.2</jpaVersion> -->
+
+              <validationAnnotations>true</validationAnnotations>
+
+              <constructorPropertiesAnnotation>true</constructorPropertiesAnnotation>
+              <constructorPropertiesAnnotationOnRecords>true</constructorPropertiesAnnotationOnRecords>
+
+              <!--              <pojos>true</pojos>-->
+              <!--              <constructorPropertiesAnnotationOnPojos>true</constructorPropertiesAnnotationOnPojos>-->
+              <!--              <pojosAsJavaRecordClasses>true</pojosAsJavaRecordClasses>-->
+              <!--              <pojosToString>true</pojosToString>-->
+              <!--              <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>-->
+
+              <javaTimeTypes>true</javaTimeTypes>
+            </generate>
+
+            <target>
+              <!-- The destination package of your generated classes (within the destination directory) -->
+              <packageName>${jooq-generated-classes-package}</packageName>
+              <directory>${jooq-generated-sources-dir}</directory>
+            </target>
+
+          </generator>
+        </configuration>
+        <executions>
+
+          <!--
+             This is the main execution of jooq code gen
+          -->
+          <execution>
+            <id>generate-via-hsqldb</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <generator>
+
+                <database>
+                  <name>org.jooq.meta.hsqldb.HSQLDBDatabase</name>
+                  <!--
+                    Only target the default 'PUBLIC' schema which is where user tables, etc. are created by
+                    default (unless it is configured to some other value when the liquibase-maven-plugin runs).
+                  -->
+                  <inputSchema>PUBLIC</inputSchema>
+                  <!--
+                    Prevent JOOQ from generating code with schema qualification i.e. PUBLIC.<tablename>
+                  -->
+                  <outputSchemaToDefault>true</outputSchemaToDefault>
+
+                  <!-- Optimistic locking -->
+                  <!-- TODO             <recordTimestampFields>TODO_REC_TIMESTAMP</recordTimestampFields>-->
+                  <forcedTypes>
+                    <forcedType>
+
+                      <!-- Specify any data type that is supported in your database, or if unsupported,
+                           a type from org.jooq.impl.SQLDataType -->
+                      <name>BOOLEAN</name>
+
+                      <!-- A Java regex matching data types to be forced to have this type.
+
+                           Data types may be reported by your database as:
+                           - NUMBER              regexp suggestion: NUMBER
+                           - NUMBER(5)           regexp suggestion: NUMBER\(5\)
+                           - NUMBER(5, 2)        regexp suggestion: NUMBER\(5,\s*2\)
+                           - any other form.
+
+                           It is thus recommended to use defensive regexes for types. -->
+                      <!--                  <includeTypes>CHAR\(\s*1\s*CHAR\)</includeTypes>-->
+                      <includeTypes>CHARACTER\(1\)</includeTypes>
+
+                      <!-- Can further restrict the conversion logic to be applied to only these columns during code gen. -->
+                      <!--                  &lt;!&ndash; A Java regex matching fully-qualified columns, attributes, parameters. Use the pipe to separate several expressions. &ndash;&gt;-->
+                      <!--                  <includeExpression>APPLICATION\.[PIT]WS_USER_PWD_IS_PLAINTEXT(</includeExpression>-->
+
+
+                      <!--                  &lt;!&ndash; Apply the built in org.jooq.impl.AutoConverter. This flag can also be omitted &ndash;&gt;-->
+                      <!--                  <autoConverter>true</autoConverter>-->
+
+
+                      <!-- Force a type depending on data type nullability. Default is ALL.
+
+                            - ALL - Force a type regardless of whether data type is nullable or not (default)
+                            - NULL - Force a type only when data type is nullable
+                            - NOT_NULL - Force a type only when data type is not null -->
+                      <nullability>ALL</nullability>
+
+                      <!-- Force a type on ALL or specific object types. Default is ALL. Options include:
+                           ATTRIBUTE, COLUMN, ELEMENT, PARAMETER, SEQUENCE -->
+                      <objectType>COLUMN</objectType>
+                    </forcedType>
+                  </forcedTypes>
+                </database>
+
+              </generator>
+              <jdbc>
+                <driver>org.hsqldb.jdbc.JDBCDriver</driver>
+                <url>
+                  jdbc:hsqldb:file:${hsqldb.jooq.db-path};shutdown=true;${hsqldb.common-options}
+                </url>
+                <user>${hsqldb.user}</user>
+                <password>${hsqldb.password}</password>
+              </jdbc>
+            </configuration>
+          </execution>
+
+          <!--
+             This execution is not part of the build process. Can only be executed manually only, if needed.
+             To execute, run "mvn jooq-codegen:generate@generate-via-oracle-schema"
+             Also, please change the datasource configuration in the <jdbc> section below as needed.
+           -->
+          <execution>
+            <id>generate-via-oracle-schema</id>
+            <phase>none</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <generator>
+                <database>
+                  <!--
+                    The <name> element is optional. If it is given, then the generated classes will have db-specific
+                    features as well. Otherwise, the JOOQ generator and runtime will fall back to standard JDBC
+                    (org.jooq.meta.jdbc.JDBCDatabase).
+                    Also, even though we are using Oracle in production, we can't use it since the Oracle DSL
+                    is not free. However, that is not an issue because standard JDBC is more than enough for us.
+                  -->
+                  <!-- <name>org.jooq.meta.oracle.OracleDatabase</name>-->
+                  <name>org.jooq.meta.jdbc.JDBCDatabase</name>
+
+                  <!--
+                    This HAS to be in caps, it is case-sensitive in ORACLE. All ORACLE objects (tables, views, etc.)
+                    are upper case by default unless specified in double quotes.
+                  -->
+                  <inputSchema>PROMPTCHAIN</inputSchema>
+
+                  <!--
+                    All elements that are generated from your schema
+                    (A Java regular expression. Use the pipe to separate several expressions)
+                    Watch out for case-sensitivity. Depending on your database, this might be important!
+                  -->
+                  <includes>.*</includes>
+                </database>
+              </generator>
+              <jdbc>
+                <driver>oracle.jdbc.OracleDriver</driver>
+                <url>jdbc:oracle:thin:@//localhost:1521/xe</url>
+                <user>${app_db.user_name_local}</user>
+                <password>${app_db.user_password_local}</password>
+              </jdbc>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>generate-via-postgres-schema</id>
+            <phase>none</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <generator>
+                <database>
+                  <!--
+                    The <name> element is optional. If it is given, then the generated classes will have db-specific
+                    features as well. Otherwise, the JOOQ generator and runtime will fall back to standard JDBC
+                    (org.jooq.meta.jdbc.JDBCDatabase).
+                  -->
+                  <name>org.jooq.meta.postgres.PostgresDatabase</name>
+
+                  <inputSchema>public</inputSchema>
+
+                  <!--
+                    All elements that are generated from your schema
+                    (A Java regular expression. Use the pipe to separate several expressions)
+                    Watch out for case-sensitivity. Depending on your database, this might be important!
+                  -->
+                  <includes>.*</includes>
+                </database>
+              </generator>
+              <jdbc>
+                <driver>org.postgresql.Driver</driver>
+                <url>jdbc:postgresql://${app_db.host_name}:5432/${app_db.db_name_local}</url>
+                <user>${app_db.user_name_local}</user>
+                <password>${app_db.user_password_local}</password>
+              </jdbc>
+            </configuration>
+          </execution>
+
+          <!--
+             This execution is not part of the build process. Can only be executed manually only, if needed.
+             To execute, run "mvn jooq-codegen:generate@generate-via-sql"
+             Also, please change the datasource configuration in the <jdbc> section below as needed.
+           -->
+          <execution>
+            <id>generate-via-sql</id>
+            <phase>none</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- A boolean property (or constant) can be specified here to tell the plugin not to do anything -->
+              <!-- <skip>${skip.jooq.generation}</skip>-->
+              <!-- Log levels: TRACE, DEBUG, INFO, WARN (default), ERROR, FATAL-->
+              <logging>INFO</logging>
+              <generator>
+                <database>
+                  <name>org.jooq.meta.extensions.ddl.DDLDatabase</name>
+                  <properties>
+                    <!-- Specify the location of your SQL script.
+                         You may use ant-style file matching, e.g. /path/**/to/*.sql
+
+                         Where:
+                         - ** matches any directory subtree
+                         - * matches any number of characters in a directory / file name
+                         - ? matches a single character in a directory / file name -->
+                    <property>
+                      <key>scripts</key>
+                      <value>src/main/resources/sql/create-*.sql</value>
+                    </property>
+                    <!-- Default is semantic and we are using it. Commented out and left here just for reference. -->
+                    <!--                <property>-->
+                    <!--                  <key>sort</key>-->
+                    <!--                  <value>semantic</value>-->
+                    <!--                </property>-->
+                    <!-- The default schema for unqualified objects:
+
+                         - public: all unqualified objects are located in the PUBLIC (upper case) schema
+                         - none: all unqualified objects are located in the default schema (default)
+
+                         This configuration can be overridden with the schema mapping feature -->
+                    <property>
+                      <key>unqualifiedSchema</key>
+                      <value>none</value>
+                    </property>
+                    <!-- The default name case for unquoted objects:
+
+                         - as_is: unquoted object names are kept unquoted
+                         - upper: unquoted object names are turned into upper case (most databases)
+                         - lower: unquoted object names are turned into lower case (e.g. PostgreSQL) -->
+                    <property>
+                      <key>defaultNameCase</key>
+                      <value>as_is</value>
+                    </property>
+                    <!-- Turn on/off ignoring contents between such tokens. Defaults to true -->
+                    <property>
+                      <key>parseIgnoreComments</key>
+                      <value>true</value>
+                    </property>
+                    <!-- Change the starting token -->
+                    <property>
+                      <key>parseIgnoreCommentStart</key>
+                      <value>[jooq ignore start]</value>
+                    </property>
+                    <!-- Change the stopping token -->
+                    <property>
+                      <key>parseIgnoreCommentStop</key>
+                      <value>[jooq ignore stop]</value>
+                    </property>
+                  </properties>
+                  <!-- Optimistic locking -->
+                  <!-- TODO             <recordTimestampFields>TODO_REC_TIMESTAMP</recordTimestampFields>-->
+                  <forcedTypes>
+                    <forcedType>
+
+                      <!-- Specify any data type that is supported in your database, or if unsupported,
+                           a type from org.jooq.impl.SQLDataType -->
+                      <name>BOOLEAN</name>
+
+                      <!-- A Java regex matching data types to be forced to have this type.
+
+                           Data types may be reported by your database as:
+                           - NUMBER              regexp suggestion: NUMBER
+                           - NUMBER(5)           regexp suggestion: NUMBER\(5\)
+                           - NUMBER(5, 2)        regexp suggestion: NUMBER\(5,\s*2\)
+                           - any other form.
+
+                           It is thus recommended to use defensive regexes for types. -->
+                      <!--                  <includeTypes>CHAR\(\s*1\s*CHAR\)</includeTypes>-->
+                      <includeTypes>CHARACTER\(1\)</includeTypes>
+
+                      <!-- Can further restrict the conversion logic to be applied to only these columns during code gen. -->
+                      <!--                  &lt;!&ndash; A Java regex matching fully-qualified columns, attributes, parameters. Use the pipe to separate several expressions. &ndash;&gt;-->
+                      <!--                  <includeExpression>APPLICATION\.[PIT]WS_USER_PWD_IS_PLAINTEXT(</includeExpression>-->
+
+
+                      <!--                  &lt;!&ndash; Apply the built in org.jooq.impl.AutoConverter. This flag can also be omitted &ndash;&gt;-->
+                      <!--                  <autoConverter>true</autoConverter>-->
+
+
+                      <!-- Force a type depending on data type nullability. Default is ALL.
+
+                            - ALL - Force a type regardless of whether data type is nullable or not (default)
+                            - NULL - Force a type only when data type is nullable
+                            - NOT_NULL - Force a type only when data type is not null -->
+                      <nullability>ALL</nullability>
+
+                      <!-- Force a type on ALL or specific object types. Default is ALL. Options include:
+                           ATTRIBUTE, COLUMN, ELEMENT, PARAMETER, SEQUENCE -->
+                      <objectType>COLUMN</objectType>
+                    </forcedType>
+                  </forcedTypes>
+                </database>
+              </generator>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>${org.hsqldb.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <!--
+              This execution defines the meta-data (artifact id, version, classpath, etc) all dependencies as properties.
+            -->
+            <id>init-dependency-properties</id>
+            <phase>initialize</phase>
             <goals>
-              <goal>build-info</goal>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+          <!--          <execution>-->
+          <!--            <id>copy-hsqldb-jar</id>-->
+          <!--            <goals>-->
+          <!--              <goal>copy-dependencies</goal>-->
+          <!--            </goals>-->
+          <!--            <phase>process-test-sources</phase>-->
+          <!--            <configuration>-->
+          <!--              <includeArtifactIds>hsqldb</includeArtifactIds>-->
+          <!--              <outputDirectory>${hsqldb.home-dir}</outputDirectory>-->
+          <!--              <overWriteIfNewer>true</overWriteIfNewer>-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <!-- add this so that image files used for unit test don't get corrupted -->
+          <nonFilteredFileExtensions>
+            <nonFilteredFileExtension>dll</nonFilteredFileExtension>
+            <nonFilteredFileExtension>eot</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>png</nonFilteredFileExtension>
+            <nonFilteredFileExtension>svg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tiff</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+          </nonFilteredFileExtensions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>copy-project-info-properties</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <additionalProperties>
-                <applicationId>
-                  ${project.artifactId}
-                </applicationId>
-                <description>
-                  ${project.description}
-                </description>
-                <majorVersion>
-                  ${parsedVersion.majorVersion}
-                </majorVersion>
-                <minorVersion>
-                  ${parsedVersion.minorVersion}
-                </minorVersion>
-                <incrementalVersion>
-                  ${parsedVersion.incrementalVersion}
-                </incrementalVersion>
-                <snapshotQualifier>
-                  ${parsedVersion.qualifier}
-                </snapshotQualifier>
-                <scmUrl>
-                  ${project.scm.url}
-                </scmUrl>
-              </additionalProperties>
+              <resources>
+                <resource>
+                  <directory>${main-resources-dir}</directory>
+                  <includes>
+                    <include>project-info.properties</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+              <outputDirectory>${project.build.directory}/classes/com/promptwise/promptchain</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-startup-scripts</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>${builder-resources-dir}/startup-script-templates</directory>
+                  <includes>
+                    <include>*.sh</include>
+                    <include>*.bat</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+              <outputDirectory>${project.basedir}</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -774,45 +1163,209 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-help-plugin</artifactId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>set-permissions-for-generated-scripts</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <chmod file="${project.basedir}/*.sh" perm="755"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>echo</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo message="${antrun.echo.property}"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${org.mapstruct.version}</version>
+            </path>
+            <!-- Other annotation processors can be added here -->
+          </annotationProcessorPaths>
+          <!-- due to problem in maven-compiler-plugin, for verbose mode add showWarnings -->
+          <!--              <showWarnings>true</showWarnings>-->
+          <!-- Processor options can be configured as follows: -->
+          <!--              <compilerArgs>-->
+          <!--                <arg>-->
+          <!--                  -Amapstruct.suppressGeneratorTimestamp=true-->
+          <!--                </arg>-->
+          <!--                <arg>-->
+          <!--                  -Amapstruct.suppressGeneratorVersionInfoComment=true-->
+          <!--                </arg>-->
+          <!--                <arg>-->
+          <!--                  -Amapstruct.verbose=true-->
+          <!--                </arg>-->
+          <!--              </compilerArgs>-->
+          <!--
+            Even though the 'generatedSourcesDirectory' config has a default value of
+            ${project.build.directory}/generated-sources/annotations, however we are explicitly setting it
+            because we have made it configurable.
+            The reason we have made it configurable is that we do not want the generatedSourceDirectory of the
+            compiler's annotation processor to be used by any other code-gen plugins (such as JOOQ) to generate it's
+            in the same generated-sources dir. This is because the compiler's annotation processor deletes generated
+            sources in case the compiler detects the need to re-compile any class, and, if the dir is shared with
+            any other code-gen plugins, the code generated by those plugins will also be deleted. This is incorrect
+            behavior because, even though the code generated by the annotation-processor based code generator
+            (as configured by the annotationProcessorPaths property) will be generated again (because the compiler
+            will invoke all configured annotation processors), however, the code generated by the 'other'
+            code-gen plugins will not be generated again. And thus compile will fail.
+          -->
+          <generatedSourcesDirectory>${annotations-generated-sources-dir}</generatedSourcesDirectory>
+        </configuration>
+      </plugin>
+
+      <!-- Enable and configure execution of unit tests via the surefire plugin. -->
+      <plugin>
+        <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- https://stackoverflow.com/questions/24115142/intellij-error-when-running-unit-test-could-not-find-or-load-main-class-suref-->
+          <argLine>-Xmx1024m @{surefireArgLine}</argLine>
+          <!-- The <groups> and <excludeGroups> elements can include/exclude by @Tag values.
+               Note: Including something implicitly excludes anything that is not included. -->
+          <!-- <groups>Group:UnitTests</groups> -->
+          <!-- <excludedGroups>Group:IntegrationTests</excludedGroups> -->
+          <includes>
+            <include>com/promptwise/promptchain/test/unittest/**/*UnitTests.java</include>
+          </includes>
+          <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
+               a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
+          <!-- <test> -->
+          <!--   com/promptwise/promptchain.unittest.PromptChainRestControllerUnitTests#testGetXXX_ResultIsFound -->
+          <!-- </test> -->
+          <parallel>methods</parallel>
+          <threadCount>10</threadCount>
+          <reportFormat>plain</reportFormat>
+          <consoleOutputReporter>
+            <disable>true</disable>
+          </consoleOutputReporter>
+          <statelessTestsetInfoReporter
+                  implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+            <theme>UNICODE</theme>
+            <printStacktraceOnError>true</printStacktraceOnError>
+            <printStacktraceOnFailure>true</printStacktraceOnFailure>
+            <printStdoutOnError>true</printStdoutOnError>
+            <printStdoutOnFailure>true</printStdoutOnFailure>
+            <printStdoutOnSuccess>false</printStdoutOnSuccess>
+            <printStderrOnError>true</printStderrOnError>
+            <printStderrOnFailure>true</printStderrOnFailure>
+            <printStderrOnSuccess>false</printStderrOnSuccess>
+          </statelessTestsetInfoReporter>
+        </configuration>
+        <dependencies>
+          <!-- https://mvnrepository.com/artifact/me.fabriciorby/maven-surefire-junit5-tree-reporter -->
+          <dependency>
+            <groupId>me.fabriciorby</groupId>
+            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+            <version>1.4.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
+        <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
+            <id>local-compose-start-services</id>
+            <phase>pre-integration-test</phase>
             <goals>
-              <goal>add-source</goal>
+              <goal>exec</goal>
             </goals>
             <configuration>
-              <sources>
-                <source>${generated-sources-dir}</source>
-              </sources>
+              <executable>bash</executable>
+              <arguments>
+                <argument>${project.basedir}/local-compose-start-services.sh</argument>
+              </arguments>
+              <workingDirectory>${project.basedir}</workingDirectory>
+              <environmentVariables>
+                <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>
+                <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>
+                <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
+                <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>
+                <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>
+                <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>
+                <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
+                <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
+                <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
+              </environmentVariables>
+              <longRunning>true</longRunning>
             </configuration>
           </execution>
           <execution>
-            <id>parse-versions-for-release</id>
-            <!--
-              Though not necessary but since the version values are used by the spring-boot-maven-plugin:build-info goal,
-               which runs in the validate phase, so we run this goal before validate phase.
-            -->
-            <phase>initialize</phase>
+            <id>local-compose-stop-services</id>
+            <phase>post-integration-test</phase>
             <goals>
-              <goal>parse-version</goal>
+              <goal>exec</goal>
             </goals>
             <configuration>
-              <!-- To see the parsed version number run (run in windows shell, does not work in intellij terminal):  -->
-              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.majorVersion} -->
-              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nexMajorVersion} -->
-              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.MinorVersion} -->
-              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nextMinorVersion} -->
-              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.incrementalVersion} -->
-              <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nextIncrementalVersion} -->
-              <propertyPrefix>parsedVersion</propertyPrefix>
+              <executable>bash</executable>
+              <arguments>
+                <argument>${project.basedir}/stop-local-services.sh</argument>
+              </arguments>
+              <workingDirectory>${project.basedir}</workingDirectory>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Enable and configure execution of integration tests via the failsafe plugin. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+          <argLine>-Xmx1024m @{failsafeArgLine}</argLine>
+          <!--<groups>Group:IntegrationTests</groups>-->
+          <includes>
+            <include>com/promptwise/promptchain/test/integrationtest/**/*IntegrationTests.java</include>
+          </includes>
+          <reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -820,7 +1373,7 @@
       <plugin>
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-maven-plugin</artifactId>
-        <version>1.4</version>
+        <version>1.5</version>
         <configuration>
           <!--          <apiDocsUrl>http://localhost:8080/v3/api-docs</apiDocsUrl>-->
         </configuration>
@@ -835,177 +1388,192 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <additionalProperties>
+            <applicationId>
+              ${project.artifactId}
+            </applicationId>
+            <description>
+              ${project.description}
+            </description>
+            <majorVersion>
+              ${parsedVersion.majorVersion}
+            </majorVersion>
+            <minorVersion>
+              ${parsedVersion.minorVersion}
+            </minorVersion>
+            <incrementalVersion>
+              ${parsedVersion.incrementalVersion}
+            </incrementalVersion>
+            <snapshotQualifier>
+              ${parsedVersion.qualifier}
+            </snapshotQualifier>
+            <scmUrl>
+              ${project.scm.url}
+            </scmUrl>
+          </additionalProperties>
+        </configuration>
         <executions>
           <execution>
-            <id>default-compile</id>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Configured for batch-release (non-interactive) support -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <!-- Commenting because the default value is the same. -->
+          <!-- <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat> -->
+          <useReleaseProfile>false</useReleaseProfile>
+        </configuration>
+        <executions>
+          <execution>
+            <id>major-release</id>
+            <goals>
+              <goal>prepare</goal>
+            </goals>
             <configuration>
-              <annotationProcessorPaths>
-                <path>
-                  <groupId>org.mapstruct</groupId>
-                  <artifactId>mapstruct-processor</artifactId>
-                  <version>1.6.3</version>
-                </path>
-                <!-- Other annotation processors can be added here -->
-              </annotationProcessorPaths>
-              <!-- due to problem in maven-compiler-plugin, for verbose mode add showWarnings -->
-              <!--              <showWarnings>true</showWarnings>-->
-              <!-- Processor options can be configured as follows: -->
-              <!--              <compilerArgs>-->
-              <!--                <arg>-->
-              <!--                  -Amapstruct.suppressGeneratorTimestamp=true-->
-              <!--                </arg>-->
-              <!--                <arg>-->
-              <!--                  -Amapstruct.suppressGeneratorVersionInfoComment=true-->
-              <!--                </arg>-->
-              <!--                <arg>-->
-              <!--                  -Amapstruct.verbose=true-->
-              <!--                </arg>-->
-              <!--              </compilerArgs>-->
+              <developmentVersion>${parsedVersion.nextMajorVersion}.0.1${parsedVersion.qualifier?}
+              </developmentVersion>
+              <releaseVersion>${parsedVersion.nextMajorVersion}.0.0</releaseVersion>
+            </configuration>
+          </execution>
+          <execution>
+            <id>minor-release</id>
+            <goals>
+              <goal>prepare</goal>
+            </goals>
+            <configuration>
+              <developmentVersion>
+                ${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.1${parsedVersion.qualifier?}
+              </developmentVersion>
+              <releaseVersion>${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0</releaseVersion>
+            </configuration>
+          </execution>
+          <execution>
+            <id>incremental-release</id>
+            <goals>
+              <goal>prepare</goal>
+            </goals>
+            <configuration>
+              <developmentVersion>
+                ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}${parsedVersion.qualifier?}
+              </developmentVersion>
+              <releaseVersion>
+                ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}
+              </releaseVersion>
             </configuration>
           </execution>
         </executions>
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.41.0</version>
         <configuration>
-          <!-- add this so that image files used for unit test don't get corrupted -->
-          <nonFilteredFileExtensions>
-            <nonFilteredFileExtension>dll</nonFilteredFileExtension>
-            <nonFilteredFileExtension>eot</nonFilteredFileExtension>
-            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
-            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
-            <nonFilteredFileExtension>png</nonFilteredFileExtension>
-            <nonFilteredFileExtension>svg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>tif</nonFilteredFileExtension>
-            <nonFilteredFileExtension>tiff</nonFilteredFileExtension>
-            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
-          </nonFilteredFileExtensions>
+          <images>
+            <image>
+              <!--
+                Even though here we could specify the version also, but we are not doing that because we want
+                the version to be appended based on the <tag> entries. So if we want to deploy two copies of the
+                image (one with the 'latest' tag and one with the actual version-number) then we cannot specify
+                the version directly over here and have to use the <tags> element.
+              -->
+              <name>ghcr.io/${ghcrio.username}/${project.artifactId}</name>
+              <build>
+                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
+                <!-- One image will be published for each tag entry. -->
+                <tags>
+                  <tag>${project.version}</tag>
+                  <tag>latest</tag>
+                </tags>
+                <buildArgs>
+                  <PROJECT_BUILD_DIRECTORY>${project.build.directory}</PROJECT_BUILD_DIRECTORY>
+                  <PROJECT_BUILD_FINAL_NAME>${project.build.finalName}</PROJECT_BUILD_FINAL_NAME>
+                </buildArgs>
+              </build>
+              <push>true</push>
+            </image>
+          </images>
         </configuration>
+        <executions>
+          <execution>
+            <id>build-image</id>
+            <phase>install</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>build-and-push</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>build</goal>
+              <goal>push</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
+
+      <!-- If io.fabric8.docker-maven-plugin does not work properly, then we can do plain exec as follows:  -->
+      <!--      <plugin>-->
+      <!--        <groupId>org.codehaus.mojo</groupId>-->
+      <!--        <artifactId>exec-maven-plugin</artifactId>-->
+      <!--        <version>3.1.0</version>-->
+      <!--        <executions>-->
+      <!--          <execution>-->
+      <!--            <id>docker-push</id>-->
+      <!--            <phase>deploy</phase>-->
+      <!--            <goals>-->
+      <!--              <goal>exec</goal>-->
+      <!--            </goals>-->
+      <!--            <configuration>-->
+      <!--              <executable>sh</executable>-->
+      <!--              <arguments>-->
+      <!--                <argument>-c</argument>-->
+      <!--                <argument>-->
+      <!--                  docker login ghcr.io -u ${env.GITHUB_ACTOR} -p ${env.GITHUB_TOKEN} &amp;&amp;-->
+      <!--                  docker build -t ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest . &amp;&amp;-->
+      <!--                  docker push ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest-->
+      <!--                </argument>-->
+      <!--              </arguments>-->
+      <!--            </configuration>-->
+      <!--          </execution>-->
+      <!--        </executions>-->
+      <!--      </plugin>-->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${client-dist-dir}</directory>
-            </fileset>
-          </filesets>
-        </configuration>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.21.0</version>
+      </plugin>
+
+      <!-- Currently not bound to any life-cycle phase. However, it is helpful plugin, so configured for manual execution. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-help-plugin</artifactId>
+      </plugin>
+
+      <!--
+        The Sonar plugin goals can only be executed if we have a sonar server configured in settings.xml.
+        Not sure if there is a free one available.
+      -->
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>5.1.0.4751</version>
       </plugin>
 
     </plugins>
-
-    <pluginManagement>
-      <plugins>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>echo</id>
-              <goals>
-                <goal>run</goal>
-              </goals>
-              <configuration>
-                <target>
-                  <echo message="${antrun.echo.property}"/>
-                </target>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>generate-javadocs</id>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
-        <!--
-          The Sonar plugin goals can only be executed if the host running this build has been configured and can
-          connect to the SONAR server. Also, in some organisations, the SONAR server is only accessible to the
-          build servers (like Jenkins nodes, etc.). In that case, the sonar:sonar goal should be configured in the
-          corresponding build server's script (for example, in case of Jenkins, a Jenkins pipeline file) so that it
-          is executed  only on the build server rather than through pom.xml
-        -->
-        <plugin>
-          <groupId>org.sonarsource.scanner.maven</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-        </plugin>
-
-        <!-- Configured for 'batch' (non-interactive) release support -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <autoVersionSubmodules>true</autoVersionSubmodules>
-            <!-- Commenting because the default value is the same. -->
-            <!-- <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat> -->
-            <useReleaseProfile>false</useReleaseProfile>
-          </configuration>
-          <executions>
-            <execution>
-              <id>major-release</id>
-              <goals>
-                <goal>prepare</goal>
-              </goals>
-              <configuration>
-                <developmentVersion>${parsedVersion.nextMajorVersion}.0.1${parsedVersion.qualifier?}
-                </developmentVersion>
-                <releaseVersion>${parsedVersion.nextMajorVersion}.0.0</releaseVersion>
-              </configuration>
-            </execution>
-            <execution>
-              <id>minor-release</id>
-              <goals>
-                <goal>prepare</goal>
-              </goals>
-              <configuration>
-                <developmentVersion>
-                  ${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.1${parsedVersion.qualifier?}
-                </developmentVersion>
-                <releaseVersion>${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0</releaseVersion>
-              </configuration>
-            </execution>
-            <execution>
-              <id>incremental-release</id>
-              <goals>
-                <goal>prepare</goal>
-              </goals>
-              <configuration>
-                <developmentVersion>
-                  ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}${parsedVersion.qualifier?}
-                </developmentVersion>
-                <releaseVersion>
-                  ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}
-                </releaseVersion>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
-      </plugins>
-    </pluginManagement>
-
-
   </build>
 
   <!-- The reporting plugins configure generation of the corresponding reports when the 'site' phase is executed. -->
@@ -1021,7 +1589,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.18.0</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -1035,7 +1602,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.5.3</version>
       </plugin>
 
       <plugin>
@@ -1056,7 +1623,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.6.0</version>
         <configuration>
           <configLocation>${builder-checkstyle-dir}/promptwise-sun_checks.xml</configLocation>
           <consoleOutput>false</consoleOutput>
@@ -1080,21 +1646,21 @@
         </reportSets>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.10.1</version>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
+      <!--      <plugin>-->
+      <!--        <groupId>org.apache.maven.plugins</groupId>-->
+      <!--        <artifactId>maven-javadoc-plugin</artifactId>-->
+      <!--        <version>3.10.1</version>-->
+      <!--        <configuration>-->
+      <!--          <skip>true</skip>-->
+      <!--        </configuration>-->
+      <!--      </plugin>-->
 
     </plugins>
   </reporting>
 
   <profiles>
     <profile>
-      <id>windows-exec-scripts</id>
+      <id>os_windows</id>
       <activation>
         <os>
           <family>windows</family>
@@ -1106,8 +1672,12 @@
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
+              <!--
+                Override the nix-specific executions defined in the profile independent build-plugins section
+                with windows-specific versions.
+              -->
               <execution>
-                <id>local-compose-start-services-bat</id>
+                <id>local-compose-start-services</id>
                 <phase>pre-integration-test</phase>
                 <goals>
                   <goal>exec</goal>
@@ -1116,14 +1686,25 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}\local-compose-start-services.bat</argument>
+                    <argument>${project.basedir}/local-compose-start-services.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
+                  <environmentVariables>
+                    <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>
+                    <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>
+                    <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
+                    <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>
+                    <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>
+                    <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>
+                    <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
+                    <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
+                    <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
+                  </environmentVariables>
                   <longRunning>true</longRunning>
                 </configuration>
               </execution>
               <execution>
-                <id>local-compose-stop-services-bat</id>
+                <id>local-compose-stop-services</id>
                 <phase>post-integration-test</phase>
                 <goals>
                   <goal>exec</goal>
@@ -1132,7 +1713,7 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}\local-compose-stop-services.bat</argument>
+                    <argument>${project.basedir}/local-compose-stop-services.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
                 </configuration>
@@ -1144,7 +1725,7 @@
     </profile>
 
     <profile>
-      <id>set-default-ghcrio-username</id>
+      <id>env_local</id>
       <activation>
         <property>
           <!--
@@ -1155,6 +1736,7 @@
         </property>
       </activation>
       <properties>
+        <!-- Override the value of the property to use the value that is configured in settings.xml -->
         <ghcrio.username>${GHCRIO_USERNAME}</ghcrio.username>
       </properties>
     </profile>
