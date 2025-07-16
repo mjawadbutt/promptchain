@@ -1,6 +1,6 @@
 package com.promptwise.promptchain.common.util.datetime;
 
-import com.promptwise.promptchain.common.exception.LuvCommonLibSystemException;
+import com.promptwise.promptchain.common.exception.CommonLibSystemException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.util.Assert;
 
@@ -32,7 +32,7 @@ public class DateTimeConversionsUtil {
       return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
     } catch (DatatypeConfigurationException var3) {
       DatatypeConfigurationException dce = var3;
-      throw LuvCommonLibSystemException.create("An exception occurred while converting GregorianCalendar to XMLGregorianCalendar\nduring ZonedDateTime to XMLGregorianCalendar conversion! Please see cause for details.\n", dce);
+      throw CommonLibSystemException.create("An exception occurred while converting GregorianCalendar to XMLGregorianCalendar\nduring ZonedDateTime to XMLGregorianCalendar conversion! Please see cause for details.\n", dce);
     }
   }
 

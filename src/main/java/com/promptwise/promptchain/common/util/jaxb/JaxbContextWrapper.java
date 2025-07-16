@@ -1,6 +1,6 @@
 package com.promptwise.promptchain.common.util.jaxb;
 
-import com.promptwise.promptchain.common.exception.LuvCommonLibSystemException;
+import com.promptwise.promptchain.common.exception.CommonLibSystemException;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -69,7 +69,7 @@ public class JaxbContextWrapper<T> {
     try {
       jaxbContext = JAXBContext.newInstance(this.clazz);
     } catch (JAXBException | RuntimeException e) {
-      throw LuvCommonLibSystemException.create("An exception occurred while " +
+      throw CommonLibSystemException.create("An exception occurred while " +
               " initializing the JAXB context for the class: '" + this.clazz.getName() + "'", e);
     }
 
@@ -102,7 +102,7 @@ public class JaxbContextWrapper<T> {
       marshaller.marshal(t, sw);
       return sw.toString();
     } catch (JAXBException | RuntimeException e) {
-      throw LuvCommonLibSystemException.create("An exception occurred while" +
+      throw CommonLibSystemException.create("An exception occurred while" +
               " marshalling an instance of '" + getClazz().getName() + "'", e);
     }
   }
@@ -119,7 +119,7 @@ public class JaxbContextWrapper<T> {
       T t = (T) unmarshaller.unmarshal(new StringReader(xml));
       return t;
     } catch (JAXBException | RuntimeException e) {
-      throw LuvCommonLibSystemException.create("An exception occurred while" +
+      throw CommonLibSystemException.create("An exception occurred while" +
               " unmarshalling an instance of '" + getClazz().getName() + "' from the given XML: '" + xml + "'", e);
     }
   }
@@ -142,7 +142,7 @@ public class JaxbContextWrapper<T> {
       });
       return sw.toString();
     } catch (IOException | RuntimeException e) {
-      throw LuvCommonLibSystemException.create("An exception occurred while" +
+      throw CommonLibSystemException.create("An exception occurred while" +
               " generating an XSD schema file for the class: '" + getClazz().getName() + "'", e);
     }
   }
@@ -157,7 +157,7 @@ public class JaxbContextWrapper<T> {
       marshaller.setSchema(getSchema());
       return marshaller;
     } catch (JAXBException | RuntimeException e) {
-      throw LuvCommonLibSystemException.create("An exception occurred while" +
+      throw CommonLibSystemException.create("An exception occurred while" +
               " creating a JAXB marshaller for the class: '" + getClazz().getName() + "'", e);
     }
   }
@@ -168,7 +168,7 @@ public class JaxbContextWrapper<T> {
       unmarshaller.setSchema(getSchema());
       return unmarshaller;
     } catch (JAXBException | RuntimeException e) {
-      throw LuvCommonLibSystemException.create("An exception occurred while" +
+      throw CommonLibSystemException.create("An exception occurred while" +
               " creating a JAXB unmarshaller for the class: '" + getClazz().getName() + "'", e);
     }
   }

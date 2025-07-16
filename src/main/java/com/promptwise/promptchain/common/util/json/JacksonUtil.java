@@ -1,7 +1,7 @@
 package com.promptwise.promptchain.common.util.json;
 
 
-import com.promptwise.promptchain.common.exception.LuvCommonLibSystemException;
+import com.promptwise.promptchain.common.exception.CommonLibSystemException;
 import com.promptwise.promptchain.common.util.ApplicationBuildInfo;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.Version;
@@ -37,7 +37,7 @@ public class JacksonUtil {
     try {
       return getObjectMapper().readValue(str, clazz);
     } catch (JacksonException je) {
-      throw LuvCommonLibSystemException.create(String.format("""
+      throw CommonLibSystemException.create(String.format("""
               Unable to deserialize the string '%s' object into the type '%s'. Please see root cause for further info.
               """, str, clazz.getName()), je);
     }
@@ -47,7 +47,7 @@ public class JacksonUtil {
     try {
       return getObjectMapper().readValue(str, typeReference);
     } catch (JacksonException je) {
-      throw LuvCommonLibSystemException.create(String.format("""
+      throw CommonLibSystemException.create(String.format("""
               Unable to deserialize the string '%s' object into the type '%s'. Please see root cause for further info.
               """, str, typeReference.getType().getTypeName()), je);
     }
@@ -57,7 +57,7 @@ public class JacksonUtil {
     try {
       return getObjectMapper().readValue(str, javaType);
     } catch (JacksonException je) {
-      throw LuvCommonLibSystemException.create(String.format("""
+      throw CommonLibSystemException.create(String.format("""
               Unable to deserialize the string '%s' object into the type '%s'. Please see root cause for further info.
               """, str, javaType.getTypeName()), je);
     }
@@ -67,7 +67,7 @@ public class JacksonUtil {
     try {
       return getObjectMapper().writeValueAsString(o);
     } catch (JacksonException je) {
-      throw LuvCommonLibSystemException.create(String.format("""
+      throw CommonLibSystemException.create(String.format("""
               Unable to serialize the given object '%s' to JSON string! Please see root cause for further info.
               """, o), je);
     }

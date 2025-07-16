@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.17.xsd">
+
+  <!-- contextFilter="local,dev,!prod" attribute can be used to conditionally execute. changeset elem also has it-->
+  <!-- labels are similar to contexts but by convention, context are used for filtering by environment and labels for all other cases-->
+  <changeSet id="v0.0.1-init_schema" author="jawad">
+    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_01_create-tables.sql"/>
+    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_02_reference-data.sql"/>
+    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_03_create-constraints.sql"/>
+  </changeSet>
+
+  <changeSet id="v0.0.1-tag" author="jawad">
+    <tagDatabase tag="0.0.1"/>
+  </changeSet>
+
+</databaseChangeLog>
