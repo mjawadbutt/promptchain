@@ -111,6 +111,10 @@
     <postgres.super_user_name_local>postgres</postgres.super_user_name_local>
     <postgres.super_user_password_local>postgres</postgres.super_user_password_local>
 
+    <postgres.db_name_prod>postgres</postgres.db_name_prod>
+    <postgres.super_user_name_prod>postgres</postgres.super_user_name_prod>
+    <postgres.super_user_password_prod>postgres</postgres.super_user_password_prod>
+
     <!--
       This cannot be changed because it must match the name of the service as defined in the services section of
       the docker compose files, unless the names are changed there as well.
@@ -120,6 +124,10 @@
     <app_db.db_name_local>${postgres.db_name_local}</app_db.db_name_local>
     <app_db.user_name_local>promptchain</app_db.user_name_local>
     <app_db.user_password_local>promptchain</app_db.user_password_local>
+
+    <app_db.db_name_prod>${postgres.db_name_local}</app_db.db_name_prod>
+    <app_db.user_name_prod>promptchain</app_db.user_name_prod>
+    <app_db.user_password_prod>promptchain</app_db.user_password_prod>
 
     <org.liquibase.version>4.33.0</org.liquibase.version>
     <org.jooq.version>3.20.5</org.jooq.version>
@@ -419,10 +427,10 @@
                 <include>local-compose-start-services.sh</include>
                 <include>local-compose-stop-services.bat</include>
                 <include>local-compose-stop-services.sh</include>
-                <include>local-swarm-start-services.bat</include>
-                <include>local-swarm-start-services.sh</include>
-                <include>local-swarm-stop-services.bat</include>
-                <include>local-swarm-stop-services.sh</include>
+                <include>local-swarm-deploy-services.bat</include>
+                <include>local-swarm-deploy-services.sh</include>
+                <include>local-swarm-remove-services.bat</include>
+                <include>local-swarm-remove-services.sh</include>
               </includes>
               <followSymlinks>false</followSymlinks>
               <useDefaultExcludes>true</useDefaultExcludes>
@@ -1316,6 +1324,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.1</version>
         <executions>
           <execution>
             <id>local-compose-start-services</id>
@@ -1340,7 +1349,7 @@
                 <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
                 <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
               </environmentVariables>
-              <longRunning>true</longRunning>
+              <async>true</async>
             </configuration>
           </execution>
           <execution>
@@ -1365,7 +1374,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <skip>true</skip>
+<!--          <skip>true</skip>-->
           <argLine>-Xmx1024m @{failsafeArgLine}</argLine>
           <!--<groups>Group:IntegrationTests</groups>-->
           <includes>
@@ -1713,7 +1722,7 @@
                     <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
                     <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
                   </environmentVariables>
-                  <longRunning>true</longRunning>
+                  <async>true</async>
                 </configuration>
               </execution>
               <execution>
@@ -1750,6 +1759,7 @@
       </activation>
       <properties>
         <!-- Override the value of the property to use the value that is configured in settings.xml -->
+        <!-- TODO: Fail build if this is not defined -->
         <ghcrio.username>${GHCRIO_USERNAME}</ghcrio.username>
       </properties>
     </profile>

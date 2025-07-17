@@ -1,23 +1,23 @@
-package com.promptchain.test.integrationtest;
+package com.promptwise.promptchain.test.unittest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.promptchain.test.client.PromptChainAdminRestControllerClient;
-import com.promptchain.test.client.PromptChainRestControllerClient;
+import com.promptwise.promptchain.test.client.PromptChainAdminRestControllerClient;
+import com.promptwise.promptchain.test.client.PromptChainRestControllerClient;
 import com.promptwise.promptchain.config.ApplicationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestClient;
 
-public class PromptChainIntegrationTestConfiguration {
+public class PromptChainUnitTestConfiguration {
 
   private final String baseUrl;
   private final ApplicationProperties applicationProperties;
   private final ObjectMapper objectMapper;
 
   @Autowired
-  public PromptChainIntegrationTestConfiguration(
-          @Value("${applicationTestIntegration.promptChainControllerClient.baseUrl}")
+  public PromptChainUnitTestConfiguration(
+          @Value("${applicationTest.promptChainControllerClient.baseUrl}")
           String baseUrl,
           ApplicationProperties applicationProperties,
           ObjectMapper objectMapper) {
@@ -42,6 +42,7 @@ public class PromptChainIntegrationTestConfiguration {
   }
 
   public String getBaseUrl() {
+    //return "http://localhost:" + getApplicationProperties().getServerPort();
     return baseUrl;
   }
 

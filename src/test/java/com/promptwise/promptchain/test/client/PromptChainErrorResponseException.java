@@ -1,4 +1,4 @@
-package com.promptchain.test.client;
+package com.promptwise.promptchain.test.client;
 
 import com.promptwise.promptchain.common.util.Rfc7807CompliantHttpRequestProcessingErrorResponse;
 

@@ -1,8 +1,8 @@
-package com.promptchain.test.integrationtest;
+package com.promptwise.promptchain.test.integrationtest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.promptchain.test.client.PromptChainAdminRestControllerClient;
-import com.promptchain.test.client.PromptChainRestControllerClient;
+import com.promptwise.promptchain.test.client.PromptChainAdminRestControllerClient;
+import com.promptwise.promptchain.test.client.PromptChainRestControllerClient;
 import com.promptwise.promptchain.config.ApplicationProperties;
 import com.promptwise.promptchain.controller.request.CreateOrUpdateAppUserRequest;
 import com.promptwise.promptchain.entity.AppUserEntity;

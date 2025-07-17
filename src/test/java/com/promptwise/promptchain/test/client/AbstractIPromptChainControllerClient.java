@@ -1,4 +1,4 @@
-package com.promptchain.test.client;
+package com.promptwise.promptchain.test.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;

@@ -1,4 +1,4 @@
-package com.promptchain.test.client;
+package com.promptwise.promptchain.test.client;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

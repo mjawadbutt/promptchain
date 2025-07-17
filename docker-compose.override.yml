@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   app:
     environment:
@@ -7,7 +5,6 @@ services:
       DEBUG_PORT: 5005
       JAVA_OPTS: -Xms256m -Xmx1g
     image: ghcr.io/${GHCRIO_USERNAME}/${PROJECT_ARTIFACT_ID}:${PROJECT_VERSION}
-    build: .
     ports:
       - "8080:8080"
       # Remote debug port for IntelliJ
@@ -32,12 +29,6 @@ services:
     image: postgres:15 # Use the same PostgreSQL image
     profiles:
       - db-setup # This profile will be used by your local `start-local-services.sh/.bat`
-    environment:
-      POSTGRES_DB: postgres # Hardcoding the default value for local.
-      POSTGRES_USER: postgres # Hardcoding the default value for local.
-      POSTGRES_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD_LOCAL}
-      APP_DB_USER_NAME: ${APP_DB_USER_NAME_LOCAL}
-      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD_LOCAL}
     # The command now simply executes the mounted script
     command: [ "bash", "/usr/local/bin/init-db.sh" ]
     volumes:

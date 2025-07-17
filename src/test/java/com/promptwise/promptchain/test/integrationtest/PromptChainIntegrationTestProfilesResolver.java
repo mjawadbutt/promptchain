@@ -1,4 +1,4 @@
-package com.promptchain.test.integrationtest;
+package com.promptwise.promptchain.test.integrationtest;
 
 import org.springframework.test.context.ActiveProfilesResolver;
 

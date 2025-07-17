@@ -39,3 +39,4 @@ if %errorlevel% neq 0 (
     exit /b %errorlevel%
 )
 echo Database initialization complete (or skipped if user/db already exist).
+pause

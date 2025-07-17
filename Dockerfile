@@ -14,19 +14,33 @@ RUN addgroup --system --gid 1001 promptchain && \
 WORKDIR /app
 
 # Copy Spring Boot JAR and optional config
-# Apply --chown to set ownership to the non-root user (appuser:appgroup)
+# Apply --chown to set ownership to the non-root user (promptchain:promptchain)
 # Permissions for the JAR are typically read-only for security (644)
 COPY --chown=promptchain:promptchain --chmod=644 \
      "${PROJECT_BUILD_DIRECTORY}/${PROJECT_BUILD_FINAL_NAME}" \
      "${PROJECT_BUILD_FINAL_NAME}"
 
-# Copy redisson.yaml with appropriate ownership and permissions
-COPY --chown=appuser:appgroup --chmod=644 redisson.yaml .
+# Copy redisson.yml with appropriate ownership and permissions
+# Corrected: Using 'promptchain' user and group
+COPY --chown=promptchain:promptchain --chmod=644 redisson.yml .
 
 # Copy and set permissions for init-db.sh
 # Make it executable for the owner, and readable+executable for group/others (755)
 # Also set ownership to the non-root user
-COPY --chown=appuser:appgroup --chmod=755 src/main/container-image-resources/init-db.sh /usr/local/bin/init-db.sh
+# Corrected: Using 'promptchain' user and group
+COPY --chown=promptchain:promptchain --chmod=755 src/main/container-image-resources/init-db.sh /usr/local/bin/init-db.sh
+
+# --- NEW: Create a dedicated entrypoint script ---
+# Copy the entrypoint script into the container
+# Make it executable and set ownership
+COPY --chown=promptchain:promptchain --chmod=755 src/main/container-image-resources/entrypoint.sh entrypoint.sh
+
+# --- NEW: Convert line endings if coming from a Windows host ---
+# Option 1: Using dos2unix (recommended for clarity)
+RUN apk add --no-cache dos2unix  \
+    && dos2unix redisson.yml \
+    && dos2unix /usr/local/bin/init-db.sh \
+    && dos2unix entrypoint.sh
 
 ENV APP_JAR_NAME=${PROJECT_BUILD_FINAL_NAME}
 
@@ -39,17 +53,9 @@ ENV APP_JAR_NAME=${PROJECT_BUILD_FINAL_NAME}
 
 # Switch to the non-root user before running the application
 # All subsequent RUN, CMD, and ENTRYPOINT commands will run as this user
-USER appuser
+# Corrected: Using 'promptchain' user
+USER promptchain
 
-# Entry point with conditional debug logic and proper signal handling
-ENTRYPOINT sh -c '
-  if [ "${DEBUG_ENABLED}" = "true" ]; then
-    echo "Debug mode enabled on port ${DEBUG_PORT}"
-    # JAVA_OPTS is left unquoted to allow shell word splitting for multiple options
-    # APP_JAR_NAME is quoted as it\'s a single filename argument
-    exec java ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT} -jar "${APP_JAR_NAME}"
-  else
-    echo "Starting app normally"
-    exec java ${JAVA_OPTS} -jar "${APP_JAR_NAME}"
-  fi
-'
+# --- NEW: Use the copied entrypoint script ---
+# Use the exec form of ENTRYPOINT for proper signal handling
+ENTRYPOINT ["/app/entrypoint.sh"]

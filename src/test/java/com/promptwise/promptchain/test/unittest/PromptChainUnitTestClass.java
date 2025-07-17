@@ -1,4 +1,4 @@
-package com.promptchain.test.unittest;
+package com.promptwise.promptchain.test.unittest;
 
 import com.promptwise.promptchain.PromptChainApplication;
 import org.junit.jupiter.api.TestInstance;
@@ -18,7 +18,6 @@ import java.lang.annotation.Target;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 //-- https://stackoverflow.com/questions/39690094/spring-boot-default-profile-for-integration-tests
 //-- It is better to user @ActiveProfiles rather than @TestPropertySource because then we can use Spring's
 //-- default property file naming conventions, and, also utilize autoconfiguration).

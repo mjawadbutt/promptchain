@@ -1,4 +1,4 @@
-package com.promptchain.test.integrationtest;
+package com.promptwise.promptchain.test.integrationtest;
 
 import com.promptwise.promptchain.PromptChainApplication;
 import org.junit.jupiter.api.TestInstance;

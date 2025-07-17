@@ -5,11 +5,10 @@ echo "Running idempotent database initialization..."
 
 # Set PGPASSWORD for psql command
 # This variable is expected to be passed into the container's environment
-export PGPASSWORD="${POSTGRES_PASSWORD}"
+export PGPASSWORD="${POSTGRES_SUPER_USER_PASSWORD}"
 
 # Execute idempotent SQL to create user and grant permissions
-# This assumes '${POSTGRES_DB}' is already created by POSTGRES_DB env variable for the main Postgres service.
-psql -h "${POSTGRES_HOST}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -v ON_ERROR_STOP=1 <<EOF
+psql -h "${POSTGRES_HOST}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" -v ON_ERROR_STOP=1 <<EOF
 DO \$\$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_user WHERE usename = '${APP_DB_USER_NAME}') THEN
@@ -22,11 +21,11 @@ END
 \$\$;
 
 -- Grant CONNECT privilege on the specific database
-GRANT CONNECT ON DATABASE "${POSTGRES_DB}" TO ${APP_DB_USER_NAME};
+GRANT CONNECT ON DATABASE "${POSTGRES_DB_NAME}" TO ${APP_DB_USER_NAME};
 
 -- Grant CREATE privilege on the database itself (needed to create schemas, extensions, etc.)
 -- This is important for Liquibase to create its internal tables (e.g., DATABASECHANGELOG)
-GRANT CREATE ON DATABASE "${POSTGRES_DB}" TO ${APP_DB_USER_NAME};
+GRANT CREATE ON DATABASE "${POSTGRES_DB_NAME}" TO ${APP_DB_USER_NAME};
 
 -- Grant USAGE and CREATE privileges on the public schema
 -- USAGE: Allows access to objects within the schema.
