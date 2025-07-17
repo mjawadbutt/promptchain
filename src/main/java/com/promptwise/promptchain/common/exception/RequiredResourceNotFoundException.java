@@ -1,5 +1,6 @@
 package com.promptwise.promptchain.common.exception;
 
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +21,11 @@ public class RequiredResourceNotFoundException extends Exception {
     super(message);
   }
 
-  public static RequiredResourceNotFoundException create(String resourceName, Integer resourceId) {
+  public static RequiredResourceNotFoundException create(@NotNull final String resourceName,
+                                                         @NotNull final String resourceIdKey,
+                                                         @NotNull final String resourceIdValue) {
     return new RequiredResourceNotFoundException(String.format(
-            "The '%s' having ID: '%d' does not exist!", resourceName, resourceId));
+            "The '%s' having '%s': '%s' does not exists!", resourceName, resourceIdKey, resourceIdValue));
   }
 
 }

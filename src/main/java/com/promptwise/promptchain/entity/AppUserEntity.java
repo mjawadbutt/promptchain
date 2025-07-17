@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.springframework.util.Assert;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -25,14 +26,14 @@ public class AppUserEntity implements Comparable<AppUserEntity> { // Implemented
   @Column(name = "user_id")
   private final Long userId; // Use Long for BIGSERIAL
 
-  @Column(name = "user_email", unique = true, nullable = false)
-  private final String userEmail;
+  @Column(name = "user_name", nullable = false)
+  private final String userName; // Renamed from 'name' to match table column
 
   @Column(name = "password", nullable = false)
   private final String password;
 
-  @Column(name = "user_name", nullable = false)
-  private final String userName; // Renamed from 'name' to match table column
+  @Column(name = "user_email", unique = true, nullable = false)
+  private final String userEmail;
 
   // Changed to Instant for UTC representation
   @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC") // ISO 8601 UTC format
@@ -47,25 +48,41 @@ public class AppUserEntity implements Comparable<AppUserEntity> { // Implemented
   private Instant lastUpdatedAt; // Changed type, not final as it can be updated
 
   // Private constructor for internal use by factory method
-  private AppUserEntity(final Long userId, final String userEmail, final String password,
-                        final String userName, final Instant createdAt, final Instant lastUpdatedAt) {
+  private AppUserEntity(final Long userId, final String userName, final String password,
+                        final String userEmail, final Instant createdAt, final Instant lastUpdatedAt) {
     this.userId = userId;
-    this.userEmail = userEmail;
-    this.password = password;
     this.userName = userName;
+    this.password = password;
+    this.userEmail = userEmail;
     this.createdAt = createdAt;
     this.lastUpdatedAt = lastUpdatedAt;
   }
 
   @JsonCreator
-  public static AppUserEntity create(
-          @JsonProperty("userId") final Long userId,
-          @JsonProperty("userEmail") final String userEmail,
-          @JsonProperty("password") final String password,
+  public static AppUserEntity createForInsertOrUpdate(
           @JsonProperty("userName") final String userName,
+          @JsonProperty("password") final String password,
+          @JsonProperty("userEmail") final String userEmail) {
+    Assert.notNull(userName, "The parameter 'userName' cannot be null!");
+    Assert.notNull(password, "The parameter 'password' cannot be null!");
+    Assert.notNull(userEmail, "The parameter 'userEmail' cannot be null!");
+    return new AppUserEntity(null, userName, password, userEmail, null, null);
+  }
+
+  public static AppUserEntity createForSelect(
+          @JsonProperty("userId") final Long userId,
+          @JsonProperty("userName") final String userName,
+          @JsonProperty("password") final String password,
+          @JsonProperty("userEmail") final String userEmail,
           @JsonProperty("createdAt") final Instant createdAt,
           @JsonProperty("lastUpdatedAt") final Instant lastUpdatedAt) {
-    return new AppUserEntity(userId, userEmail, password, userName, createdAt, lastUpdatedAt);
+    Assert.notNull(userId, "The parameter 'userId' cannot be null!");
+    Assert.notNull(userName, "The parameter 'userName' cannot be null!");
+    Assert.notNull(password, "The parameter 'password' cannot be null!");
+    Assert.notNull(userEmail, "The parameter 'userEmail' cannot be null!");
+    Assert.notNull(createdAt, "The parameter 'createdAt' cannot be null!");
+    Assert.notNull(lastUpdatedAt, "The parameter 'lastUpdatedAt' cannot be null!");
+    return new AppUserEntity(userId, userName, password, userEmail, createdAt, lastUpdatedAt);
   }
 
   // Getters
@@ -73,16 +90,16 @@ public class AppUserEntity implements Comparable<AppUserEntity> { // Implemented
     return userId;
   }
 
-  public String getUserEmail() {
-    return userEmail;
+  public String getUserName() {
+    return userName;
   }
 
   public String getPassword() {
     return password;
   }
 
-  public String getUserName() {
-    return userName;
+  public String getUserEmail() {
+    return userEmail;
   }
 
   public Instant getCreatedAt() {

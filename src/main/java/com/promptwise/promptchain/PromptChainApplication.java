@@ -1,6 +1,5 @@
 package com.promptwise.promptchain;
 
-import au.gov.vic.luv.docmaint.config.InvalidApplicationConfigurationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.promptwise.promptchain.common.util.ApplicationBuildInfo;
 import com.promptwise.promptchain.common.util.ApplicationRuntimeInfo;
@@ -47,7 +46,7 @@ public class PromptChainApplication {
   }
 
   public static void main(String[] args) {
-    ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
+    ConfigurableApplicationContext context = SpringApplication.run(PromptChainApplication.class, args);
   }
 
   @PostConstruct

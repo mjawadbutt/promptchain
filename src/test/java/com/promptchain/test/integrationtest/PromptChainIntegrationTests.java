@@ -3,7 +3,11 @@ package com.promptchain.test.integrationtest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.promptchain.test.client.PromptChainAdminRestControllerClient;
 import com.promptchain.test.client.PromptChainRestControllerClient;
+import com.promptwise.promptchain.config.ApplicationProperties;
+import com.promptwise.promptchain.controller.request.CreateOrUpdateAppUserRequest;
+import com.promptwise.promptchain.entity.AppUserEntity;
 import jakarta.validation.constraints.NotNull;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -22,16 +26,19 @@ class PromptChainIntegrationTests {
 
   private final PromptChainRestControllerClient promptChainRestControllerClient;
   private final PromptChainAdminRestControllerClient promptChainAdminRestControllerClient;
+  private final ApplicationProperties applicationProperties;
   private final ObjectMapper objectMapper;
   private final TestRestTemplate restTemplate;
 
   @Autowired
   public PromptChainIntegrationTests(@NotNull final PromptChainRestControllerClient promptChainRestControllerClient,
                                      @NotNull final PromptChainAdminRestControllerClient promptChainAdminRestControllerClient,
+                                     @NotNull final ApplicationProperties applicationProperties,
                                      @NotNull final ObjectMapper objectMapper,
                                      @NotNull final TestRestTemplate restTemplate) {
     this.promptChainRestControllerClient = promptChainRestControllerClient;
     this.promptChainAdminRestControllerClient = promptChainAdminRestControllerClient;
+    this.applicationProperties = applicationProperties;
     this.objectMapper = objectMapper;
     this.restTemplate = restTemplate;
   }
@@ -43,10 +50,19 @@ class PromptChainIntegrationTests {
   @Test
   @DisplayName("PromptChainRestControllerClient.getClient: Retrieves the basic details of the client having the given client-id.")
   @Tags({@Tag("Group:IntegrationTests")})
-  void testGetClient() {
-    int clientId = 1;
-    ClientEntity actualResult = getPromptChainRestControllerClient().getClient(clientId);
-    System.out.println();
+  void testGetAppUser() {
+    CreateOrUpdateAppUserRequest createOrUpdateAppUserRequest = new CreateOrUpdateAppUserRequest(
+            AppUserEntity.createForInsertOrUpdate("jawad", "abcd", "jawad@promptchain.com"));
+
+    AppUserEntity actualResult = getPromptChainAdminRestControllerClient().createAppUser(createOrUpdateAppUserRequest);
+
+    AppUserEntity expectedResult = AppUserEntity.createForSelect(actualResult.getUserId(),
+            createOrUpdateAppUserRequest.appUserEntity().getUserName(),
+            createOrUpdateAppUserRequest.appUserEntity().getPassword(),
+            createOrUpdateAppUserRequest.appUserEntity().getUserEmail(),
+            actualResult.getCreatedAt(), actualResult.getLastUpdatedAt());
+
+    Assertions.assertThat(actualResult).usingRecursiveComparison().isEqualTo(expectedResult);
   }
 
   @AfterAll
@@ -62,6 +78,10 @@ class PromptChainIntegrationTests {
 
   public PromptChainAdminRestControllerClient getPromptChainAdminRestControllerClient() {
     return promptChainAdminRestControllerClient;
+  }
+
+  public ApplicationProperties getApplicationProperties() {
+    return applicationProperties;
   }
 
   public ObjectMapper getObjectMapper() {

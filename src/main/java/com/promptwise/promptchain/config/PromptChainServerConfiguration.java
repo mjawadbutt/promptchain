@@ -10,9 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 import java.time.Clock;
 
-/**
- * Used by DateTimeUtil. Separated this so that we can override it in unit tests.
- */
 @Configuration
 public class PromptChainServerConfiguration {
 

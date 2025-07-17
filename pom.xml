@@ -457,6 +457,19 @@
               <propertyPrefix>parsedVersion</propertyPrefix>
             </configuration>
           </execution>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${jooq-generated-sources-dir}</source>
+                <source>${annotations-generated-sources-dir}</source>
+              </sources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -701,7 +714,7 @@
         <!-- Do not use version 4.32.0, it has bugs. Try upgrade to a later version whenever needed. -->
         <version>4.31.0</version>
         <configuration>
-          <changeLogFile>src/main/resources/liquibase/changelog-master.xml</changeLogFile>
+          <changeLogFile>src/main/resources/db/liquibase/db.changelog-master.xml</changeLogFile>
           <url>
             jdbc:hsqldb:file:${hsqldb.jooq.db-path};create=true;shutdown=true;${hsqldb.common-options}
           </url>

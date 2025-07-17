@@ -5,13 +5,13 @@ CREATE TABLE app_role (
 );
 
 CREATE TABLE user_group (
-    group_id BIGSERIAL PRIMARY KEY NOT NULL,
+    user_group_id BIGSERIAL PRIMARY KEY NOT NULL,
     group_name VARCHAR(31) UNIQUE NOT NULL,
     group_description VARCHAR(255)
 );
 
 CREATE TABLE app_user (
-    user_id BIGSERIAL PRIMARY KEY NOT NULL,
+    app_user_id BIGSERIAL PRIMARY KEY NOT NULL,
     user_email VARCHAR(127) UNIQUE NOT NULL,
     password VARCHAR(31) NOT NULL,
     user_name VARCHAR(31) NOT NULL,
@@ -21,10 +21,10 @@ CREATE TABLE app_user (
 
 CREATE TABLE role_group_mapping (
     role_id BIGINT NOT NULL,
-    group_id BIGINT NOT NULL
+    user_group_id BIGINT NOT NULL
 );
 
 CREATE TABLE user_group_mapping (
-    user_id BIGINT NOT NULL,
-    group_id BIGINT NOT NULL
+    app_user_id BIGINT NOT NULL,
+    user_group_id BIGINT NOT NULL
 );

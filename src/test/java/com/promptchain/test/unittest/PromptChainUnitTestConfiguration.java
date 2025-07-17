@@ -1,6 +1,7 @@
 package com.promptchain.test.unittest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.promptwise.promptchain.config.ApplicationProperties;
 import org.hsqldb.server.Servlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

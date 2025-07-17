@@ -7,6 +7,7 @@
 
   <!-- contextFilter="local,dev,!prod" attribute can be used to conditionally execute. changeset elem also has it-->
   <!-- labels are similar to contexts but by convention, context are used for filtering by environment and labels for all other cases-->
+  <!-- TODO: Add rollback for each chageset -->
   <changeSet id="v0.0.1-init_schema" author="jawad">
     <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_01_create-tables.sql"/>
     <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_02_reference-data.sql"/>

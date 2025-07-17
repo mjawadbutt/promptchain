@@ -11,19 +11,19 @@ import org.springframework.web.client.RestClient;
 
 public class PromptChainIntegrationTestConfiguration {
 
+  private final String baseUrl;
   private final ApplicationProperties applicationProperties;
   private final ObjectMapper objectMapper;
-  private final String baseUrl;
 
   @Autowired
   public PromptChainIntegrationTestConfiguration(
+          @Value("${applicationTestIntegration.promptChainControllerClient.baseUrl}")
+          String baseUrl,
           ApplicationProperties applicationProperties,
-          ObjectMapper objectMapper,
-          @Value("${applicationTestIntegration.iflowControllerClient.baseUrl}")
-          String baseUrl) {
+          ObjectMapper objectMapper) {
+    this.baseUrl = baseUrl;
     this.applicationProperties = applicationProperties;
     this.objectMapper = objectMapper;
-    this.baseUrl = baseUrl;
   }
 
   @Bean

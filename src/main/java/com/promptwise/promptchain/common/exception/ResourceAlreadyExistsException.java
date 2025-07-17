@@ -17,10 +17,10 @@ public class ResourceAlreadyExistsException extends Exception {
   }
 
   public static ResourceAlreadyExistsException create(@NotNull final String resourceName,
-                                                      @NotNull final String idKey,
-                                                      @NotNull final String idValue) {
+                                                      @NotNull final String resourceIdKey,
+                                                      @NotNull final String resourceIdValue) {
     return new ResourceAlreadyExistsException(String.format(
-            "The '%s' having '%s': '%s' already exists!", resourceName, idKey, idValue));
+            "The '%s' having '%s': '%s' already exists!", resourceName, resourceIdKey, resourceIdValue));
   }
 
 }

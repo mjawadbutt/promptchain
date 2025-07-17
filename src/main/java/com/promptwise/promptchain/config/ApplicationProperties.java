@@ -1,6 +1,8 @@
 package com.promptwise.promptchain.config;
 
 import com.promptwise.promptchain.PromptChainApplication;
+import com.promptwise.promptchain.common.util.ApplicationBuildInfo;
+import com.promptwise.promptchain.common.util.ApplicationRuntimeInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -24,56 +26,59 @@ import java.util.stream.Collectors;
 @Validated
 public class ApplicationProperties {
 
-  private final String applicationName;
   private final String environmentId;
+  private final String applicationName;
   private final Integer serverPort;
+  private final Path dataDir;
+  private final Path tempDir;
   private final String servletContextPath;
   private final Integer sessionTimeoutInSeconds;
-  private final Integer actuatorPort;
-  private final UUID instanceId;
-  private final Path rootDir;
-  private final Path tempDir;
-  private final MicroMeterProperties microMeterProperties;
   private final DatabaseProperties databaseProperties;
   private final LoggingProperties loggingProperties;
+  private final LiquibaseProperties liquibaseProperties;
+  private final Integer actuatorPort;
+  private final UUID instanceId;
+  private final MicroMeterProperties microMeterProperties;
 
   public ApplicationProperties(
-          @NotBlank final String applicationName,
           @Pattern(regexp = "^(winLocal|linuxLocal|prod)$",
                   message = "This is an invalid value! Valid values are winLocal, linuxLocal, OR, prod")
           @NotBlank final String environmentId,
+          @NotBlank final String applicationName,
           @NotNull final Integer serverPort,
+          @NotNull final Path dataDir,
+          final String tempDirPrefix,
           final String servletContextPath,
           @NotNull final Integer sessionTimeoutInSeconds,
-          @NotNull final Integer actuatorPort,
-          @NotNull final Path rootDir,
-          final String tempDirPrefix,
-          @NotNull final MicroMeterProperties microMeterProperties,
           @NotNull final DatabaseProperties databaseProperties,
-          @NotNull final LoggingProperties loggingProperties) {
+          @NotNull final LoggingProperties loggingProperties,
+          @NotNull final LiquibaseProperties liquibaseProperties,
+          @NotNull final Integer actuatorPort,
+          @NotNull final MicroMeterProperties microMeterProperties) {
     this.applicationName = applicationName;
     this.environmentId = environmentId;
     this.serverPort = serverPort;
+    this.dataDir = dataDir;
     this.servletContextPath = servletContextPath;
     this.sessionTimeoutInSeconds = sessionTimeoutInSeconds;
+    this.databaseProperties = databaseProperties;
+    this.loggingProperties = loggingProperties;
+    this.liquibaseProperties = liquibaseProperties;
     this.actuatorPort = actuatorPort;
-    this.rootDir = rootDir;
     this.instanceId = UUID.randomUUID();
     //-- We are appending the instance ID to address the edge case where more than one LRV-View instance are running
     //-- and the tempDir is a shared storage location which each instance shares. In this case, we each instance
     //-- to have it own tempDir not shared between instances. One reason is that the os-level file-locks acquired (as
     //-- per the imageMagickProperties.maxParallelProcesses property value) should be per LRV-View instance.
     String tempDirPrefixToUse = tempDirPrefix == null ? "tmp" : tempDirPrefix;
-    this.tempDir = rootDir.resolve(tempDirPrefixToUse + "-" + instanceId);
+    this.tempDir = dataDir.resolve(tempDirPrefixToUse + "-" + instanceId);
     this.microMeterProperties = microMeterProperties;
-    this.databaseProperties = databaseProperties;
-    this.loggingProperties = loggingProperties;
   }
 
   @Bean
   public ApplicationBuildInfo applicationBuildInfo() {
     return ApplicationBuildInfo.load(
-            "classpath:/net/fbdms/iflow/iflowservice/project-info.properties", null);
+            "classpath:/com/promptwise/promptchain/project-info.properties", null);
   }
 
   @Bean
@@ -82,32 +87,20 @@ public class ApplicationProperties {
     return ApplicationRuntimeInfo.create(activeProfiles);
   }
 
-  public String getApplicationName() {
-    return applicationName;
-  }
-
   public String getEnvironmentId() {
     return environmentId;
+  }
+
+  public String getApplicationName() {
+    return applicationName;
   }
 
   public Integer getServerPort() {
     return serverPort;
   }
 
-  public String getServletContextPath() {
-    return servletContextPath;
-  }
-
-  public Integer getSessionTimeoutInSeconds() {
-    return sessionTimeoutInSeconds;
-  }
-
-  public Integer getActuatorPort() {
-    return actuatorPort;
-  }
-
-  public Path getRootDir() {
-    return rootDir;
+  public Path getDataDir() {
+    return dataDir;
   }
 
   public UUID getInstanceId() {
@@ -118,8 +111,12 @@ public class ApplicationProperties {
     return tempDir;
   }
 
-  public MicroMeterProperties getMicroMeterProperties() {
-    return microMeterProperties;
+  public String getServletContextPath() {
+    return servletContextPath;
+  }
+
+  public Integer getSessionTimeoutInSeconds() {
+    return sessionTimeoutInSeconds;
   }
 
   public DatabaseProperties getDatabaseProperties() {
@@ -128,6 +125,18 @@ public class ApplicationProperties {
 
   public LoggingProperties getLoggingProperties() {
     return loggingProperties;
+  }
+
+  public LiquibaseProperties getLiquibaseProperties() {
+    return liquibaseProperties;
+  }
+
+  public Integer getActuatorPort() {
+    return actuatorPort;
+  }
+
+  public MicroMeterProperties getMicroMeterProperties() {
+    return microMeterProperties;
   }
 
   @Override
@@ -210,6 +219,18 @@ public class ApplicationProperties {
 
     public Path getStacktraceLogFilePath() {
       return stacktraceLogFilePath;
+    }
+  }
+
+  public static class LiquibaseProperties {
+    private final boolean enabled;
+
+    public LiquibaseProperties(@NotBlank final boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public boolean isEnabled() {
+      return enabled;
     }
   }
 
