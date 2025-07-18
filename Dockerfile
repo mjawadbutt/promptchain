@@ -1,8 +1,10 @@
 # Dockerfile
+FROM eclipse-temurin:21-jdk-alpine AS base
+
 ARG PROJECT_BUILD_DIRECTORY
 ARG PROJECT_BUILD_FINAL_NAME
 
-FROM eclipse-temurin:21-jdk-alpine
+RUN apk add --no-cache postgresql-client
 
 # Define a non-root user and group
 # Using --system creates a system user, suitable for service accounts
@@ -18,11 +20,11 @@ WORKDIR /app
 # Permissions for the JAR are typically read-only for security (644)
 COPY --chown=promptchain:promptchain --chmod=644 \
      "${PROJECT_BUILD_DIRECTORY}/${PROJECT_BUILD_FINAL_NAME}" \
-     "${PROJECT_BUILD_FINAL_NAME}"
+     /app/"${PROJECT_BUILD_FINAL_NAME}"
 
 # Copy redisson.yml with appropriate ownership and permissions
 # Corrected: Using 'promptchain' user and group
-COPY --chown=promptchain:promptchain --chmod=644 redisson.yml .
+COPY --chown=promptchain:promptchain --chmod=644 redisson.yml /app/redisson.yml
 
 # Copy and set permissions for init-db.sh
 # Make it executable for the owner, and readable+executable for group/others (755)
@@ -33,14 +35,14 @@ COPY --chown=promptchain:promptchain --chmod=755 src/main/container-image-resour
 # --- NEW: Create a dedicated entrypoint script ---
 # Copy the entrypoint script into the container
 # Make it executable and set ownership
-COPY --chown=promptchain:promptchain --chmod=755 src/main/container-image-resources/entrypoint.sh entrypoint.sh
+COPY --chown=promptchain:promptchain --chmod=755 src/main/container-image-resources/entrypoint.sh /app/entrypoint.sh
 
 # --- NEW: Convert line endings if coming from a Windows host ---
 # Option 1: Using dos2unix (recommended for clarity)
 RUN apk add --no-cache dos2unix  \
-    && dos2unix redisson.yml \
+    && dos2unix /app/redisson.yml \
     && dos2unix /usr/local/bin/init-db.sh \
-    && dos2unix entrypoint.sh
+    && dos2unix /app/entrypoint.sh
 
 ENV APP_JAR_NAME=${PROJECT_BUILD_FINAL_NAME}
 

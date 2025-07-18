@@ -1,8 +1,6 @@
 package com.promptwise.promptchain.common.util.json;
 
 
-import com.promptwise.promptchain.common.exception.CommonLibSystemException;
-import com.promptwise.promptchain.common.util.ApplicationBuildInfo;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,6 +13,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.promptwise.promptchain.common.exception.CommonLibSystemException;
+import com.promptwise.promptchain.common.util.ApplicationBuildInfo;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +75,8 @@ public class JacksonUtil {
 
   public static synchronized JacksonUtil getInstance() {
     if (jacksonUtil == null) {
-
       ApplicationBuildInfo applicationBuildInfo = ApplicationBuildInfo.load(
-              "classpath:/au/gov/vic/luv/luvcommonlib/project-info.properties", null);
+              "classpath:/com/promptwise/promptchain/project-info.properties", null);
       String objectMapperModuleName = applicationBuildInfo == null ? null : applicationBuildInfo.getApplicationName();
       Version version = applicationBuildInfo == null ? null : applicationBuildInfo.getArtifactVersion();
 

@@ -4,7 +4,7 @@ services:
     environment:
       REDIS_HOST: redis
       POSTGRES_HOST: postgres  # Should match the name of the 'postgres' service as defined under 'services'
-      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
+      APP_DB_NAME: ${POSTGRES_DB_NAME}
       APP_DB_USER_NAME: ${APP_DB_USER_NAME}
       APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
     restart: unless-stopped
@@ -67,7 +67,7 @@ services:
     restart: unless-stopped
     healthcheck:
       # Standard practice is to use the default 'postgres' super-user for health check.
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d mydb" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,7 +85,7 @@ services:
   # Its command will be overridden in docker-compose.override.yml
   db-init:
     profiles: [ "db-setup" ] # Only run this service explicitly using --profile db-setup
-    image: postgres:15
+    image: ${PROJECT_ARTIFACT_ID}:${PROJECT_VERSION}
     environment:
       POSTGRES_HOST: postgres # Should match the name of the 'postgres' service as defined under 'services'
       POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}

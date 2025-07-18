@@ -2,12 +2,10 @@ package com.promptwise.promptchain.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;
-import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
 import java.time.Clock;
 
 @Configuration
@@ -24,13 +22,13 @@ public class PromptChainServerConfiguration {
     this.objectMapper = objectMapper;
   }
 
-  @Bean
-  public SpringLiquibase liquibase(DataSource dataSource) {
-    SpringLiquibase liquibase = new SpringLiquibase();
-    liquibase.setChangeLog("classpath:liquibase/changelog-master.xml");
-    liquibase.setDataSource(dataSource);
-    return liquibase;
-  }
+//  @Bean
+//  public SpringLiquibase liquibase(DataSource dataSource) {
+//    SpringLiquibase liquibase = new SpringLiquibase();
+//    liquibase.setChangeLog("classpath:liquibase/changelog-master.xml");
+//    liquibase.setDataSource(dataSource);
+//    return liquibase;
+//  }
 
   @Bean
   public Clock clock() {

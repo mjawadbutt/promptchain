@@ -3,6 +3,7 @@ set -e # Exit immediately if a command exits with a non-zero status
 
 echo "Deploying Docker Swarm stack to production..."
 
+export DOCKER_BUILDKIT=1
 export GHCRIO_USERNAME=@ghcrio.username@
 export PROJECT_ARTIFACT_ID=@project.artifactId@
 export PROJECT_VERSION=@project.version@

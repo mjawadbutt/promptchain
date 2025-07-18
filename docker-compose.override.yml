@@ -9,9 +9,10 @@ services:
       - "8080:8080"
       # Remote debug port for IntelliJ
       - "5005:5005"
+    # TODO: dont hardcode
     volumes:
-      # Optional: for live code reload
-      - .:/app
+      - ./target/logs:/app/logs
+      - ./target/data:/app/data
 
   redis:
     ports:
@@ -31,12 +32,13 @@ services:
       - db-setup # This profile will be used by your local `start-local-services.sh/.bat`
     # The command now simply executes the mounted script
     command: [ "bash", "/usr/local/bin/init-db.sh" ]
-    volumes:
-      # Mount the shared initialization script into the container
-      - ./mounted-scripts/init-db.sh:/usr/local/bin/init-db.sh:ro
+#    volumes:
+#      # Mount the shared initialization script into the container
+#      - ./mounted-scripts/init-db.sh:/usr/local/bin/init-db.sh:ro
     networks:
       - app-net # Connects to the same local network as your other services
-    # Ensure Postgres is healthy before trying to run the init script
+    # Even though depends_on is ignored when service is executed via run.
+    # Also note that "compose run" runs a one-shot short running task (as opposed to compose up)
     depends_on:
       postgres:
         condition: service_healthy

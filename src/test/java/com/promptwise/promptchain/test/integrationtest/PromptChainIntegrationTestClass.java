@@ -40,6 +40,6 @@ import java.lang.annotation.Target;
 //-- It is very important that the test-configuration is AFTER the application-configuration so that the
 //-- test-configuration can properly utilize the bean overriding feature to override any bean(s) (as needed) in the
 //-- application-configuration
-@Import({PromptChainApplication.class, PromptChainIntegrationTestConfiguration.class})
+@Import({PromptChainIntegrationTestConfiguration.class})
 public @interface PromptChainIntegrationTestClass {
 }

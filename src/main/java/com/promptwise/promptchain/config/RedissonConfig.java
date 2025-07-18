@@ -12,7 +12,6 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 
 @Configuration
-@Profile("dev")
 public class RedissonConfig {
 
   @Value("${spring.redis.config-path:redisson.yaml}")

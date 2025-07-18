@@ -146,7 +146,7 @@
     <!--    <dependency>-->
     <!--      <groupId>org.redisson</groupId>-->
     <!--      <artifactId>redisson-spring-boot-starter</artifactId>-->
-    <!--      <version>3.45.1</version>-->
+    <!--      <version>3.50.0</version> -->
     <!--    </dependency>-->
 
     <!-- Redisson JCache (JSR-107) integration -->
@@ -161,7 +161,7 @@
     <dependency>
       <groupId>org.redisson</groupId>
       <artifactId>redisson</artifactId>
-      <version>3.45.1</version>
+      <version>3.50.0</version>
     </dependency>
 
     <dependency>
@@ -1187,6 +1187,19 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
+            <id>make-local-dirs</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <mkdir dir="target/logs"/>
+                <mkdir dir="target/data"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
             <id>set-permissions-for-generated-scripts</id>
             <phase>process-resources</phase>
             <goals>
@@ -1271,6 +1284,12 @@
           <includes>
             <include>com/promptwise/promptchain/test/unittest/**/*UnitTests.java</include>
           </includes>
+          <environmentVariables>
+            <REDIS_HOST>redis</REDIS_HOST>
+            <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
+          </environmentVariables>
           <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
                a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
           <!-- <test> -->
@@ -1321,66 +1340,25 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.5.1</version>
-        <executions>
-          <execution>
-            <id>local-compose-start-services</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/local-compose-start-services.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-              <environmentVariables>
-                <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>
-                <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>
-                <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
-                <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>
-                <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>
-                <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>
-                <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
-                <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
-                <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
-              </environmentVariables>
-              <async>true</async>
-            </configuration>
-          </execution>
-          <execution>
-            <id>local-compose-stop-services</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/stop-local-services.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Enable and configure execution of integration tests via the failsafe plugin. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-<!--          <skip>true</skip>-->
+          <!-- <skip>true</skip>-->
           <argLine>-Xmx1024m @{failsafeArgLine}</argLine>
-          <!--<groups>Group:IntegrationTests</groups>-->
+          <!-- <groups>Group:IntegrationTests</groups>-->
           <includes>
             <include>com/promptwise/promptchain/test/integrationtest/**/*IntegrationTests.java</include>
           </includes>
-          <reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
+          <!-- Optional: Pass environment variables to your integration tests if needed -->
+          <environmentVariables>
+            <REDIS_HOST>redis</REDIS_HOST>
+            <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
+          </environmentVariables>
+          <reportsDirectory>target/failsafe-reports</reportsDirectory>
         </configuration>
         <executions>
           <execution>
@@ -1404,6 +1382,19 @@
             <phase>integration-test</phase>
             <goals>
               <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>
@@ -1439,9 +1430,127 @@
         </configuration>
         <executions>
           <execution>
+            <id>repackage</id>
+            <phase>prepare-package</phase> <!-- Bind to pre-package -->
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+          <execution>
             <goals>
               <goal>build-info</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <!-- NEW: Build Docker Image using exec-maven-plugin -->
+          <execution>
+            <id>build-docker-image</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>docker</executable>
+              <arguments>
+                <argument>build</argument>
+                <argument>-t</argument>
+                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
+                <argument>-t</argument>
+                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
+                <argument>--build-arg</argument>
+                <argument>PROJECT_BUILD_DIRECTORY=target</argument>
+                <argument>--build-arg</argument>
+                <argument>PROJECT_BUILD_FINAL_NAME=${project.build.finalName}.jar</argument>
+                <argument>-f</argument>
+                <argument>${project.basedir}/Dockerfile</argument>
+                <argument>${project.basedir}</argument> <!-- Build context -->
+              </arguments>
+              <!--              <environmentVariables>-->
+              <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT> &lt;!&ndash; Ensure BuildKit is enabled &ndash;&gt;-->
+              <!--              </environmentVariables>-->
+            </configuration>
+          </execution>
+          <execution>
+            <id>local-compose-start-services</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>bash</executable>
+              <arguments>
+                <argument>${project.basedir}/local-compose-start-services.sh</argument>
+              </arguments>
+              <workingDirectory>${project.basedir}</workingDirectory>
+              <!--              <environmentVariables>-->
+              <!--                <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>-->
+              <!--                <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>-->
+              <!--                <PROJECT_VERSION>${project.version}</PROJECT_VERSION>-->
+              <!--                <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>-->
+              <!--                <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>-->
+              <!--                <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>-->
+              <!--                <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>-->
+              <!--                <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>-->
+              <!--                <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>-->
+              <!--              </environmentVariables>-->
+              <async>true</async>
+            </configuration>
+          </execution>
+          <execution>
+            <id>local-compose-stop-services</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>bash</executable>
+              <arguments>
+                <argument>${project.basedir}/stop-local-services.sh</argument>
+              </arguments>
+              <workingDirectory>${project.basedir}</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>push-docker-image-version</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>docker</executable>
+              <arguments>
+                <argument>push</argument>
+                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
+              </arguments>
+              <environmentVariables>
+                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>
+              </environmentVariables>
+            </configuration>
+          </execution>
+          <!-- NEW: Push Docker Image using exec-maven-plugin (latest tag) -->
+          <execution>
+            <id>push-docker-image-latest</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>docker</executable>
+              <arguments>
+                <argument>push</argument>
+                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
+              </arguments>
+              <environmentVariables>
+                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>
+              </environmentVariables>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -1493,55 +1602,6 @@
                 ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}
               </releaseVersion>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>0.41.0</version>
-        <configuration>
-          <images>
-            <image>
-              <!--
-                Even though here we could specify the version also, but we are not doing that because we want
-                the version to be appended based on the <tag> entries. So if we want to deploy two copies of the
-                image (one with the 'latest' tag and one with the actual version-number) then we cannot specify
-                the version directly over here and have to use the <tags> element.
-              -->
-              <name>ghcr.io/${ghcrio.username}/${project.artifactId}</name>
-              <build>
-                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
-                <!-- One image will be published for each tag entry. -->
-                <tags>
-                  <tag>${project.version}</tag>
-                  <tag>latest</tag>
-                </tags>
-                <buildArgs>
-                  <PROJECT_BUILD_DIRECTORY>${project.build.directory}</PROJECT_BUILD_DIRECTORY>
-                  <PROJECT_BUILD_FINAL_NAME>${project.build.finalName}</PROJECT_BUILD_FINAL_NAME>
-                </buildArgs>
-              </build>
-              <push>true</push>
-            </image>
-          </images>
-        </configuration>
-        <executions>
-          <execution>
-            <id>build-image</id>
-            <phase>install</phase>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>build-and-push</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>build</goal>
-              <goal>push</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
@@ -1624,7 +1684,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>3.5.3</version>
+        <version>3.5.2</version>
       </plugin>
 
       <plugin>
@@ -1657,7 +1717,7 @@
           <logViolationCountToConsole>false</logViolationCountToConsole>
           <suppressionsLocation>${builder-checkstyle-dir}/checkstyle-suppressions.xml</suppressionsLocation>
           <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
-          <useFile>${project.build.directory}/checkstyle-console-log.txt</useFile>
+          <useFile>target/checkstyle-console-log.txt</useFile>
         </configuration>
         <reportSets>
           <reportSet>
@@ -1690,6 +1750,7 @@
       </activation>
       <build>
         <plugins>
+
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
@@ -1711,17 +1772,17 @@
                     <argument>${project.basedir}/local-compose-start-services.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
-                  <environmentVariables>
-                    <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>
-                    <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>
-                    <PROJECT_VERSION>${project.version}</PROJECT_VERSION>
-                    <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>
-                    <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>
-                    <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>
-                    <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
-                    <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
-                    <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
-                  </environmentVariables>
+                  <!--                  <environmentVariables>-->
+                  <!--                    <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>-->
+                  <!--                    <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>-->
+                  <!--                    <PROJECT_VERSION>${project.version}</PROJECT_VERSION>-->
+                  <!--                    <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>-->
+                  <!--                    <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>-->
+                  <!--                    <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>-->
+                  <!--                    <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>-->
+                  <!--                    <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>-->
+                  <!--                    <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>-->
+                  <!--                  </environmentVariables>-->
                   <async>true</async>
                 </configuration>
               </execution>
@@ -1742,6 +1803,7 @@
               </execution>
             </executions>
           </plugin>
+
         </plugins>
       </build>
     </profile>
