@@ -3,6 +3,8 @@ FROM eclipse-temurin:21-jdk-alpine AS base
 
 ARG PROJECT_BUILD_DIRECTORY
 ARG PROJECT_BUILD_FINAL_NAME
+ARG APP_DATA_DIR_NAME
+ARG APP_LOGS_DIR_NAME
 
 RUN apk add --no-cache postgresql-client
 
@@ -15,6 +17,10 @@ RUN addgroup --system --gid 1001 promptchain && \
 
 WORKDIR /app
 
+RUN mkdir -p /${APP_LOGS_DIR_NAME} /${APP_DATA_DIR_NAME} && \
+    chown -R promptchain:promptchain /${APP_LOGS_DIR_NAME} /${APP_DATA_DIR_NAME} && \
+    chmod -R 755 /${APP_LOGS_DIR_NAME} /${APP_DATA_DIR_NAME}
+
 # Copy Spring Boot JAR and optional config
 # Apply --chown to set ownership to the non-root user (promptchain:promptchain)
 # Permissions for the JAR are typically read-only for security (644)
@@ -22,26 +28,13 @@ COPY --chown=promptchain:promptchain --chmod=644 \
      "${PROJECT_BUILD_DIRECTORY}/${PROJECT_BUILD_FINAL_NAME}" \
      /app/"${PROJECT_BUILD_FINAL_NAME}"
 
-# Copy redisson.yml with appropriate ownership and permissions
-# Corrected: Using 'promptchain' user and group
-COPY --chown=promptchain:promptchain --chmod=644 redisson.yml /app/redisson.yml
-
-# Copy and set permissions for init-db.sh
-# Make it executable for the owner, and readable+executable for group/others (755)
-# Also set ownership to the non-root user
-# Corrected: Using 'promptchain' user and group
-COPY --chown=promptchain:promptchain --chmod=755 src/main/container-image-resources/init-db.sh /usr/local/bin/init-db.sh
-
-# --- NEW: Create a dedicated entrypoint script ---
 # Copy the entrypoint script into the container
 # Make it executable and set ownership
-COPY --chown=promptchain:promptchain --chmod=755 src/main/container-image-resources/entrypoint.sh /app/entrypoint.sh
+COPY --chown=promptchain:promptchain --chmod=755 src/main/container-resources/entrypoint.sh /app/entrypoint.sh
 
 # --- NEW: Convert line endings if coming from a Windows host ---
 # Option 1: Using dos2unix (recommended for clarity)
 RUN apk add --no-cache dos2unix  \
-    && dos2unix /app/redisson.yml \
-    && dos2unix /usr/local/bin/init-db.sh \
     && dos2unix /app/entrypoint.sh
 
 ENV APP_JAR_NAME=${PROJECT_BUILD_FINAL_NAME}
@@ -55,7 +48,6 @@ ENV APP_JAR_NAME=${PROJECT_BUILD_FINAL_NAME}
 
 # Switch to the non-root user before running the application
 # All subsequent RUN, CMD, and ENTRYPOINT commands will run as this user
-# Corrected: Using 'promptchain' user
 USER promptchain
 
 # --- NEW: Use the copied entrypoint script ---

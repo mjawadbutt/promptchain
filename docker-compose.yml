@@ -1,107 +1,84 @@
-# docker-compose.yml
+#TODO: Make it a template if u want to remove port hardcoding in any of the compose files.
+# my-app-stack.yml
 services:
   app:
+    image: ghcr.io/${GHCRIO_USERNAME}/${APP_ARTIFACT_ID}:${APP_VERSION}
     environment:
-      REDIS_HOST: redis
-      POSTGRES_HOST: postgres  # Should match the name of the 'postgres' service as defined under 'services'
-      APP_DB_NAME: ${POSTGRES_DB_NAME}
+      # The default value for the host, as per builder.properties (localhost), is for running promptchain locally.
+      # In that case, Docker will expose the hosts at localhost:<postgres_port> (the postgres compose
+      # file must configure the port as a published port, which we have already done).
+      # However, in this case, since we are running inside docker swarm, the Docker will expose the postgres host
+      # at <postgres-stack-name>_<postgres-service-name>. So we need to override the default here.
+      # Also note that this is the right place for overriding because here we know that promptchain is being
+      # started inside a container and not locally.
+      POSTGRES_HOST: postgres-stack_postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      # See above for overriding reason.
+      REDIS_HOST: redis-stack_redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      APP_DATA_PARENT_DIR: /
+      APP_DATA_DIR_NAME: ${APP_DATA_DIR_NAME}
+      APP_LOGS_PARENT_DIR: /
+      APP_LOGS_DIR_NAME: ${APP_LOGS_DIR_NAME}
+      APP_DB_NAME: ${APP_DB_NAME}
       APP_DB_USER_NAME: ${APP_DB_USER_NAME}
       APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
+      RUN_IN_DEBUG_MODE: ${RUN_IN_DEBUG_MODE}
+      JAVA_OPTS: ${JAVA_OPTS}
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 2s
-      retries: 5
       start_period: 20s
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - app-net
-
-  redis:
-    image: redis:8
-    command:
-      [
-        "redis-server",
-        "--save", "",
-        "--appendonly", "no",
-        "--maxmemory", "64mb",
-        "--maxmemory-policy", "allkeys-lru"
-      ]
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 2s
       retries: 5
-    networks:
-      - app-net
-    # Even though the 'deploy' section is only applicable to swarm mode, but only the 'resources' section is
-    # applicable to both compose and swarm.
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: ingress
     deploy:
+      replicas: 2
       resources:
         limits:
-          memory: 68m
-
-  # Note that the POSTGRES_XXX env vars (defined in override and prod yamls) are not used by the POSTGRES server,
-  # they are used by POSTGRES docker images. When a docker-based POSTGRES is started for the VERY FIRST TIME, it
-  # executes a bundled shell script that runs the POSTGRES 'initdb' process. This script actually uses the
-  # env vars such as POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB to initialize and configure the default db
-  # and the superuser account. Only the POSTGRES_PASSWORD needs to be specified. The other two, if not specified,
-  #  default to 'postgres'.
-  postgres:
-    image: postgres:15
-    environment:
-      # Do not change the names of these env-vars because the POSTGRES container image looks for these names only.
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
-      POSTGRES_USER: ${POSTGRES_SUPER_USER_NAME}
-      POSTGRES_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data # Persist data
-    networks:
-      - app-net
-    restart: unless-stopped
-    healthcheck:
-      # Standard practice is to use the default 'postgres' super-user for health check.
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    deploy: # Added deploy section for resource limits
-      resources:
-        limits:
-          cpus: '2'      # Limit to 2 CPU cores
-          memory: 4GB    # Limit to 4GB of RAM
+          cpus: '1'
+          memory: 2GB
         reservations:
-          cpus: '0.5'    # Reserve 0.5 CPU cores
-          memory: 1GB    # Reserve 1GB of RAM
-
-  # Service to initialize the database (e.g., create app user)
-  # This service is designed to run once and exit successfully
-  # Its command will be overridden in docker-compose.override.yml
-  db-init:
-    profiles: [ "db-setup" ] # Only run this service explicitly using --profile db-setup
-    image: ${PROJECT_ARTIFACT_ID}:${PROJECT_VERSION}
-    environment:
-      POSTGRES_HOST: postgres # Should match the name of the 'postgres' service as defined under 'services'
-      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
-      POSTGRES_SUPER_USER_NAME: ${POSTGRES_SUPER_USER_NAME}
-      POSTGRES_SUPER_USER_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD}
-      APP_DB_USER_NAME: ${APP_DB_USER_NAME}
-      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
+          cpus: '0.25'
+          memory: 512MB
+      restart_policy:
+        # Always try to restart if it fails
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 10s
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: stop-first
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        order: stop-first
+    # Mount volumes
+    volumes:
+      - logs_dir:/${APP_LOGS_DIR_NAME}
+      - data_dir:/${APP_DATA_DIR_NAME}
     networks:
-      - app-net
-    depends_on:
-      postgres:
-        condition: service_healthy # Ensure Postgres is healthy before running init commands
+      - redis-network
+      - postgres-network
 
-# Add this top-level 'volumes' section
+# Define volumes
 volumes:
-  postgres_data:
+  logs_dir:
+    driver: local
+  data_dir:
+    driver: local
 
 networks:
-  app-net:
+  redis-network:
+    name: redis-stack_network
+    external: true
+  postgres-network:
+    name: postgres-stack_network
+    external: true

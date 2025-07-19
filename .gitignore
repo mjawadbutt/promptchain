@@ -11,13 +11,13 @@ src/main/resources/static/client/
 !.editorconfig
 !.gitignore
 !.mvn
-!docker-compose.override.yml
-!docker-compose.prod.db-init.yml
-!docker-compose.prod.yml
+!deploy-dependency-stacks.*
 !docker-compose.yml
+!docker-compose-postgres.yml
+!docker-compose-redis.yml
 !Dockerfile
 !GIT-GITHUB-GPG-SETUP.md
 !LICENSE
 !pom.xml
 !README.md
-!redisson.yml
+!remove-dependency-stacks.*

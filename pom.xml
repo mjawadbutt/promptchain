@@ -102,32 +102,40 @@
       GitHub Container Registry (GHCR) Username. This is used to authenticate to GHCR whenever needed (such as
       when publishing a container image or downloading it from the registry)
       Here we are setting it to the GITHUB_ACTOR env-var value, assuming we are running via the GITHUB-Workflow script.
-      However, the value will fall back to the value defined in settings.xml (see the profile
-      'set-default-ghcrio-username') if env.GITHUB_ACTOR is not defined (which is the case when we are running locally)
+      However, if env.GITHUB_ACTOR is not defined (which is the case when we are running locally), the value will
+      fall back (see the profile'set-default-ghcrio-username') to the value defined by the corresponding OS level
+      env var (which is also used by settings.xml).
     -->
     <ghcrio.username>${env.GITHUB_ACTOR}</ghcrio.username>
 
-    <postgres.db_name_local>postgres</postgres.db_name_local>
-    <postgres.super_user_name_local>postgres</postgres.super_user_name_local>
-    <postgres.super_user_password_local>postgres</postgres.super_user_password_local>
+    <postgres_host>localhost</postgres_host>
+    <!-- Changing values not supported for now -->
+    <postgres_port>5432</postgres_port>
 
-    <postgres.db_name_prod>postgres</postgres.db_name_prod>
-    <postgres.super_user_name_prod>postgres</postgres.super_user_name_prod>
-    <postgres.super_user_password_prod>postgres</postgres.super_user_password_prod>
+    <!-- Hardcoded to default value of POSTGRES installation -->
+    <postgres_db_name>postgres</postgres_db_name>
+    <!-- Hardcoded to default value of POSTGRES installation -->
+    <postgres_super_user_name>postgres</postgres_super_user_name>
+    <!-- Will be initialized by builder.properties -->
+    <postgres_super_user_password>BUILD_PROPERTY</postgres_super_user_password>
+
+    <redis_host>localhost</redis_host>
+    <!-- Changing values not supported for now -->
+    <redis_port>6379</redis_port>
+    <redis_password>BUILD_PROPERTY</redis_password>
+
+    <app_data_parent_dir>target</app_data_parent_dir>
+    <app_data_dir_name>BUILD_PROPERTY</app_data_dir_name>
+    <app_logs_parent_dir>target</app_logs_parent_dir>
+    <app_logs_dir_name>BUILD_PROPERTY</app_logs_dir_name>
 
     <!--
-      This cannot be changed because it must match the name of the service as defined in the services section of
-      the docker compose files, unless the names are changed there as well.
+      Bound to the default db-name because we are not creating different db for our app,
+      and for now we do not need to.
     -->
-    <app_db.host_name>postgres</app_db.host_name>
-
-    <app_db.db_name_local>${postgres.db_name_local}</app_db.db_name_local>
-    <app_db.user_name_local>promptchain</app_db.user_name_local>
-    <app_db.user_password_local>promptchain</app_db.user_password_local>
-
-    <app_db.db_name_prod>${postgres.db_name_local}</app_db.db_name_prod>
-    <app_db.user_name_prod>promptchain</app_db.user_name_prod>
-    <app_db.user_password_prod>promptchain</app_db.user_password_prod>
+    <app_db_name>${postgres_db_name}</app_db_name>
+    <app_db_user_name>BUILD_PROPERTY</app_db_user_name>
+    <app_db_user_password>BUILD_PROPERTY</app_db_user_password>
 
     <org.liquibase.version>4.33.0</org.liquibase.version>
     <org.jooq.version>3.20.5</org.jooq.version>
@@ -137,32 +145,27 @@
 
   <dependencies>
 
-    <!--
-      Commenting out because we do not want autoconfiguration of redisson and will instead do manual configuration.
-      This is because we are using it inside a container so even if auto-config is done we
-      would have to manually override some aspects (eg: ip, which won't be static, etc.) anyway.
-    -->
-    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
+    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter-->
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-spring-boot-starter</artifactId>
+      <version>3.50.0</version>
+    </dependency>
+
+    <!--    &lt;!&ndash; Redisson JCache (JSR-107) integration &ndash;&gt;-->
+    <!--    &lt;!&ndash; https://mvnrepository.com/artifact/org.redisson/redisson-spring-data-35 &ndash;&gt;-->
     <!--    <dependency>-->
     <!--      <groupId>org.redisson</groupId>-->
-    <!--      <artifactId>redisson-spring-boot-starter</artifactId>-->
-    <!--      <version>3.50.0</version> -->
+    <!--      <artifactId>redisson-spring-data-35</artifactId>-->
+    <!--      <version>3.50.0</version>-->
     <!--    </dependency>-->
 
-    <!-- Redisson JCache (JSR-107) integration -->
-    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-data-35 -->
-    <dependency>
-      <groupId>org.redisson</groupId>
-      <artifactId>redisson-spring-data-35</artifactId>
-      <version>3.50.0</version>
-    </dependency>
-
-    <!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
-    <dependency>
-      <groupId>org.redisson</groupId>
-      <artifactId>redisson</artifactId>
-      <version>3.50.0</version>
-    </dependency>
+    <!--    &lt;!&ndash; https://mvnrepository.com/artifact/org.redisson/redisson &ndash;&gt;-->
+    <!--    <dependency>-->
+    <!--      <groupId>org.redisson</groupId>-->
+    <!--      <artifactId>redisson</artifactId>-->
+    <!--      <version>3.50.0</version>-->
+    <!--    </dependency>-->
 
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
@@ -187,7 +190,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.14.0</version>
+      <version>3.18.0</version>
     </dependency>
 
     <dependency>
@@ -394,6 +397,9 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
+          <exclude>local-compose.env</exclude>
+          <exclude>local-compose-postgres.env</exclude>
+          <exclude>local-compose-redis.env</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -414,7 +420,6 @@
     </testResources>
     <plugins>
 
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
@@ -423,14 +428,9 @@
             <fileset>
               <directory>${project.basedir}</directory>
               <includes>
-                <include>local-compose-start-services.bat</include>
-                <include>local-compose-start-services.sh</include>
-                <include>local-compose-stop-services.bat</include>
-                <include>local-compose-stop-services.sh</include>
-                <include>local-swarm-deploy-services.bat</include>
-                <include>local-swarm-deploy-services.sh</include>
-                <include>local-swarm-remove-services.bat</include>
-                <include>local-swarm-remove-services.sh</include>
+                <include>local-compose.env</include>
+                <include>local-compose-postgres.env</include>
+                <include>local-compose-redis.env</include>
               </includes>
               <followSymlinks>false</followSymlinks>
               <useDefaultExcludes>true</useDefaultExcludes>
@@ -438,6 +438,44 @@
           </filesets>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>${builder-resources-dir}/builder.properties</file>
+              </files>
+              <override>true</override>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--      <plugin>-->
+      <!--        <groupId>io.github.mjourard</groupId>-->
+      <!--        <artifactId>env-file-maven-plugin</artifactId>-->
+      <!--        <version>2.1.0</version>-->
+      <!--        <executions>-->
+      <!--          <execution>-->
+      <!--            <phase>initialize</phase>-->
+      <!--            <goals>-->
+      <!--              <goal>loadenv</goal>-->
+      <!--            </goals>-->
+      <!--            <configuration>-->
+      <!--              <envFileDirectory>.</envFileDirectory>-->
+      <!--              <envFileName>local-compose.env</envFileName>-->
+      <!--            </configuration>-->
+      <!--          </execution>-->
+      <!--        </executions>-->
+      <!--      </plugin>-->
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -478,6 +516,35 @@
               </sources>
             </configuration>
           </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <!--
+              This execution defines the meta-data (artifact id, version, classpath, etc) all dependencies as properties.
+            -->
+            <id>init-dependency-properties</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+          <!--          <execution>-->
+          <!--            <id>copy-hsqldb-jar</id>-->
+          <!--            <goals>-->
+          <!--              <goal>copy-dependencies</goal>-->
+          <!--            </goals>-->
+          <!--            <phase>process-test-sources</phase>-->
+          <!--            <configuration>-->
+          <!--              <includeArtifactIds>hsqldb</includeArtifactIds>-->
+          <!--              <outputDirectory>${hsqldb.home-dir}</outputDirectory>-->
+          <!--              <overWriteIfNewer>true</overWriteIfNewer>-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
         </executions>
       </plugin>
 
@@ -737,7 +804,7 @@
               AND, since it executes in the same phase as the jooq-codegen-maven plugin, it HAS TO BE DEFINED before
               the jooq-codegen-maven plugin in order to make sure it executes before the jooq-codegen-maven plugin.
               Alternatively, we could bind it to the initialize phase and then the order would no longer matter,
-              however the generate-sources phase seems more appropriate for this goal.
+              however, the generate-sources phase seems more appropriate for this goal.
             -->
             <phase>generate-sources</phase>
             <goals>
@@ -747,7 +814,6 @@
         </executions>
       </plugin>
 
-      <!-- Enable and configure execution of jooq generation of sql mapping classes using Liquibase. -->
       <plugin>
         <groupId>org.jooq</groupId>
         <artifactId>jooq-codegen-maven</artifactId>
@@ -922,8 +988,8 @@
               <jdbc>
                 <driver>oracle.jdbc.OracleDriver</driver>
                 <url>jdbc:oracle:thin:@//localhost:1521/xe</url>
-                <user>${app_db.user_name_local}</user>
-                <password>${app_db.user_password_local}</password>
+                <user>${app_db_user_name}</user>
+                <password>${app_db_user_password}</password>
               </jdbc>
             </configuration>
           </execution>
@@ -956,9 +1022,9 @@
               </generator>
               <jdbc>
                 <driver>org.postgresql.Driver</driver>
-                <url>jdbc:postgresql://${app_db.host_name}:5432/${app_db.db_name_local}</url>
-                <user>${app_db.user_name_local}</user>
-                <password>${app_db.user_password_local}</password>
+                <url>jdbc:postgresql://${postgres_host}:${postgres_port}/${app_db_name}</url>
+                <user>${app_db_user_name}</user>
+                <password>${app_db_user_password}</password>
               </jdbc>
             </configuration>
           </execution>
@@ -1092,35 +1158,6 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <!--
-              This execution defines the meta-data (artifact id, version, classpath, etc) all dependencies as properties.
-            -->
-            <id>init-dependency-properties</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>properties</goal>
-            </goals>
-          </execution>
-          <!--          <execution>-->
-          <!--            <id>copy-hsqldb-jar</id>-->
-          <!--            <goals>-->
-          <!--              <goal>copy-dependencies</goal>-->
-          <!--            </goals>-->
-          <!--            <phase>process-test-sources</phase>-->
-          <!--            <configuration>-->
-          <!--              <includeArtifactIds>hsqldb</includeArtifactIds>-->
-          <!--              <outputDirectory>${hsqldb.home-dir}</outputDirectory>-->
-          <!--              <overWriteIfNewer>true</overWriteIfNewer>-->
-          <!--            </configuration>-->
-          <!--          </execution>-->
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <configuration>
           <!-- add this so that image files used for unit test don't get corrupted -->
@@ -1141,7 +1178,7 @@
         </configuration>
         <executions>
           <execution>
-            <id>copy-project-info-properties</id>
+            <id>copy-project-info-properties-file</id>
             <phase>process-resources</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -1160,7 +1197,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>generate-startup-scripts</id>
+            <id>generate-local-compose-env-files</id>
             <phase>process-resources</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -1168,10 +1205,11 @@
             <configuration>
               <resources>
                 <resource>
-                  <directory>${builder-resources-dir}/startup-script-templates</directory>
+                  <directory>${main-resources-dir}</directory>
                   <includes>
-                    <include>*.sh</include>
-                    <include>*.bat</include>
+                    <include>local-compose.env</include>
+                    <include>local-compose-postgres.env</include>
+                    <include>local-compose-redis.env</include>
                   </includes>
                   <filtering>true</filtering>
                 </resource>
@@ -1186,31 +1224,32 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
-          <execution>
-            <id>make-local-dirs</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <mkdir dir="target/logs"/>
-                <mkdir dir="target/data"/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>set-permissions-for-generated-scripts</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <chmod file="${project.basedir}/*.sh" perm="755"/>
-              </target>
-            </configuration>
-          </execution>
+          <!-- TODO: when running locally in linux or mac, is this needed? -->
+          <!--          <execution>-->
+          <!--            <id>make-local-dirs</id>-->
+          <!--            <phase>initialize</phase>-->
+          <!--            <goals>-->
+          <!--              <goal>run</goal>-->
+          <!--            </goals>-->
+          <!--            <configuration>-->
+          <!--              <target>-->
+          <!--                <mkdir dir="target/logs"/>-->
+          <!--                <mkdir dir="target/data"/>-->
+          <!--              </target>-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
+          <!--          <execution>-->
+          <!--            <id>set-permissions-for-generated-scripts</id>-->
+          <!--            <phase>process-resources</phase>-->
+          <!--            <goals>-->
+          <!--              <goal>run</goal>-->
+          <!--            </goals>-->
+          <!--            <configuration>-->
+          <!--              <target>-->
+          <!--                <chmod file="${project.basedir}/*.sh" perm="755"/>-->
+          <!--              </target>-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
           <execution>
             <id>echo</id>
             <goals>
@@ -1237,7 +1276,7 @@
             </path>
             <!-- Other annotation processors can be added here -->
           </annotationProcessorPaths>
-          <!-- due to problem in maven-compiler-plugin, for verbose mode add showWarnings -->
+          <!-- Due to a problem in maven-compiler-plugin, for verbose mode add showWarnings -->
           <!--              <showWarnings>true</showWarnings>-->
           <!-- Processor options can be configured as follows: -->
           <!--              <compilerArgs>-->
@@ -1285,10 +1324,18 @@
             <include>com/promptwise/promptchain/test/unittest/**/*UnitTests.java</include>
           </includes>
           <environmentVariables>
-            <REDIS_HOST>redis</REDIS_HOST>
-            <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
-            <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
-            <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
+            <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
+            <POSTGRES_HOST>${postgres_port}</POSTGRES_HOST>
+            <REDIS_HOST>${redis_host}</REDIS_HOST>
+            <REDIS_PORT>${redis_port}</REDIS_PORT>
+            <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
+            <APP_DATA_PARENT_DIR>${app_data_parent_dir}</APP_DATA_PARENT_DIR>
+            <APP_DATA_DIR_NAME>${app_data_dir_name}</APP_DATA_DIR_NAME>
+            <APP_LOGS_PARENT_DIR>${app_logs_parent_dir}</APP_LOGS_PARENT_DIR>
+            <APP_LOGS_DIR_NAME>${app_logs_dir_name}</APP_LOGS_DIR_NAME>
+            <APP_DB_NAME>${app_db_name}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${app_db_user_name}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${app_db_user_password}</APP_DB_USER_PASSWORD>
           </environmentVariables>
           <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
                a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
@@ -1351,12 +1398,19 @@
           <includes>
             <include>com/promptwise/promptchain/test/integrationtest/**/*IntegrationTests.java</include>
           </includes>
-          <!-- Optional: Pass environment variables to your integration tests if needed -->
           <environmentVariables>
-            <REDIS_HOST>redis</REDIS_HOST>
-            <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>
-            <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>
-            <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>
+            <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
+            <POSTGRES_HOST>${postgres_port}</POSTGRES_HOST>
+            <REDIS_HOST>${redis_host}</REDIS_HOST>
+            <REDIS_PORT>${redis_port}</REDIS_PORT>
+            <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
+            <APP_DATA_PARENT_DIR>${app_data_parent_dir}</APP_DATA_PARENT_DIR>
+            <APP_DATA_DIR_NAME>${app_data_dir_name}</APP_DATA_DIR_NAME>
+            <APP_LOGS_PARENT_DIR>${app_logs_parent_dir}</APP_LOGS_PARENT_DIR>
+            <APP_LOGS_DIR_NAME>${app_logs_dir_name}</APP_LOGS_DIR_NAME>
+            <APP_DB_NAME>${app_db_name}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${app_db_user_name}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${app_db_user_password}</APP_DB_USER_PASSWORD>
           </environmentVariables>
           <reportsDirectory>target/failsafe-reports</reportsDirectory>
         </configuration>
@@ -1387,18 +1441,18 @@
         </executions>
       </plugin>
 
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+      <!--      <plugin>-->
+      <!--        <artifactId>maven-jar-plugin</artifactId>-->
+      <!--        <executions>-->
+      <!--          <execution>-->
+      <!--            <id>default-jar</id>-->
+      <!--            <phase>prepare-package</phase>-->
+      <!--            <goals>-->
+      <!--              <goal>jar</goal>-->
+      <!--            </goals>-->
+      <!--          </execution>-->
+      <!--        </executions>-->
+      <!--      </plugin>-->
 
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -1429,13 +1483,13 @@
           </additionalProperties>
         </configuration>
         <executions>
-          <execution>
-            <id>repackage</id>
-            <phase>prepare-package</phase> <!-- Bind to pre-package -->
-            <goals>
-              <goal>repackage</goal>
-            </goals>
-          </execution>
+          <!--          <execution>-->
+          <!--            <id>repackage</id>-->
+          <!--            <phase>prepare-package</phase> &lt;!&ndash; Bind to pre-package &ndash;&gt;-->
+          <!--            <goals>-->
+          <!--              <goal>repackage</goal>-->
+          <!--            </goals>-->
+          <!--          </execution>-->
           <execution>
             <goals>
               <goal>build-info</goal>
@@ -1467,6 +1521,10 @@
                 <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_DIRECTORY=target</argument>
                 <argument>--build-arg</argument>
+                <argument>APP_DATA_DIR_NAME=${app_data_dir_name}</argument>
+                <argument>--build-arg</argument>
+                <argument>APP_LOGS_DIR_NAME=${app_logs_dir_name}</argument>
+                <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_FINAL_NAME=${project.build.finalName}.jar</argument>
                 <argument>-f</argument>
                 <argument>${project.basedir}/Dockerfile</argument>
@@ -1486,20 +1544,9 @@
             <configuration>
               <executable>bash</executable>
               <arguments>
-                <argument>${project.basedir}/local-compose-start-services.sh</argument>
+                <argument>${project.basedir}/deploy-dependency-stacks.sh</argument>
               </arguments>
               <workingDirectory>${project.basedir}</workingDirectory>
-              <!--              <environmentVariables>-->
-              <!--                <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>-->
-              <!--                <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>-->
-              <!--                <PROJECT_VERSION>${project.version}</PROJECT_VERSION>-->
-              <!--                <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>-->
-              <!--                <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>-->
-              <!--                <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>-->
-              <!--                <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>-->
-              <!--                <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>-->
-              <!--                <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>-->
-              <!--              </environmentVariables>-->
               <async>true</async>
             </configuration>
           </execution>
@@ -1512,7 +1559,7 @@
             <configuration>
               <executable>bash</executable>
               <arguments>
-                <argument>${project.basedir}/stop-local-services.sh</argument>
+                <argument>${project.basedir}/remove-dependency-stacks.sh</argument>
               </arguments>
               <workingDirectory>${project.basedir}</workingDirectory>
             </configuration>
@@ -1529,12 +1576,8 @@
                 <argument>push</argument>
                 <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
               </arguments>
-              <environmentVariables>
-                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>
-              </environmentVariables>
             </configuration>
           </execution>
-          <!-- NEW: Push Docker Image using exec-maven-plugin (latest tag) -->
           <execution>
             <id>push-docker-image-latest</id>
             <phase>deploy</phase>
@@ -1547,9 +1590,9 @@
                 <argument>push</argument>
                 <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
               </arguments>
-              <environmentVariables>
-                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>
-              </environmentVariables>
+<!--              <environmentVariables>-->
+<!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>-->
+<!--              </environmentVariables>-->
             </configuration>
           </execution>
         </executions>
@@ -1605,33 +1648,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- If io.fabric8.docker-maven-plugin does not work properly, then we can do plain exec as follows:  -->
-      <!--      <plugin>-->
-      <!--        <groupId>org.codehaus.mojo</groupId>-->
-      <!--        <artifactId>exec-maven-plugin</artifactId>-->
-      <!--        <version>3.1.0</version>-->
-      <!--        <executions>-->
-      <!--          <execution>-->
-      <!--            <id>docker-push</id>-->
-      <!--            <phase>deploy</phase>-->
-      <!--            <goals>-->
-      <!--              <goal>exec</goal>-->
-      <!--            </goals>-->
-      <!--            <configuration>-->
-      <!--              <executable>sh</executable>-->
-      <!--              <arguments>-->
-      <!--                <argument>-c</argument>-->
-      <!--                <argument>-->
-      <!--                  docker login ghcr.io -u ${env.GITHUB_ACTOR} -p ${env.GITHUB_TOKEN} &amp;&amp;-->
-      <!--                  docker build -t ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest . &amp;&amp;-->
-      <!--                  docker push ghcr.io/${env.GITHUB_ACTOR}/${project.artifactId}:latest-->
-      <!--                </argument>-->
-      <!--              </arguments>-->
-      <!--            </configuration>-->
-      <!--          </execution>-->
-      <!--        </executions>-->
-      <!--      </plugin>-->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -1769,20 +1785,9 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}/local-compose-start-services.bat</argument>
+                    <argument>${project.basedir}/deploy-dependency-stacks.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
-                  <!--                  <environmentVariables>-->
-                  <!--                    <GHCRIO_USERNAME>${ghcrio.username}</GHCRIO_USERNAME>-->
-                  <!--                    <PROJECT_ARTIFACT_ID>${project.artifactId}</PROJECT_ARTIFACT_ID>-->
-                  <!--                    <PROJECT_VERSION>${project.version}</PROJECT_VERSION>-->
-                  <!--                    <POSTGRES_DB_NAME>${postgres.db_name_local}</POSTGRES_DB_NAME>-->
-                  <!--                    <POSTGRES_SUPER_USER_NAME>${postgres.super_user_name_local}</POSTGRES_SUPER_USER_NAME>-->
-                  <!--                    <POSTGRES_SUPER_USER_PASSWORD>${postgres.super_user_password_local}</POSTGRES_SUPER_USER_PASSWORD>-->
-                  <!--                    <APP_DB_NAME>${app_db.db_name_local}</APP_DB_NAME>-->
-                  <!--                    <APP_DB_USER_NAME>${app_db.user_name_local}</APP_DB_USER_NAME>-->
-                  <!--                    <APP_DB_USER_PASSWORD>${app_db.user_password_local}</APP_DB_USER_PASSWORD>-->
-                  <!--                  </environmentVariables>-->
                   <async>true</async>
                 </configuration>
               </execution>
@@ -1796,7 +1801,7 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}/local-compose-stop-services.bat</argument>
+                    <argument>${project.basedir}/remove-dependency-stacks.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
                 </configuration>
