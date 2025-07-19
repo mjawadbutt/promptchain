@@ -71,7 +71,7 @@ services:
       APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
     volumes:
       - ./src/main/container-resources/postgres/create-promptchain-db-user.sh:/usr/local/bin/create-promptchain-db-user.sh:ro
-      - ./logs/postgres-init:/var/log/postgres-init:rw # Keep this for persistent logs
+      - ./target/container-logs/postgres-init:/var/log/postgres-init:rw
     networks:
       - network
     depends_on:

@@ -6,20 +6,16 @@ services:
     hostname: redis-master
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-    command:
-      [
-        "redis-server",
-        "--save", "",
-        "--appendonly", "no",
-        "--maxmemory", "64mb",
-        "--maxmemory-policy", "allkeys-lru",
-        "--requirepass", "${REDIS_PASSWORD}"
-      ]
+    # The order of --save and --appendonly might matter to some Redis versions or entrypoints.
+    # Let's try putting persistence options at the end or ensuring they are correctly interpreted.
+    # A common pattern is to just list the config parameters.
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru", "--appendonly", "no", "--save", "" ]
     healthcheck:
-      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping --raw | grep PONG" ]
-      interval: 3s
-      timeout: 3s
-      retries: 5
+      test: [ "CMD-SHELL", "echo 'auth ${REDIS_PASSWORD}\nping' | redis-cli | grep PONG" ]
+      interval: 5s         # Check every 5 seconds
+      timeout: 3s          # Wait up to 3 seconds for the check to complete
+      retries: 3           # Allow 3 consecutive failures before marking unhealthy
+      start_period: 15s    # Wait 15 seconds before starting health checks (gives Redis time to initialize)
     ports:
       # Optional: Publish port to a host if you need to access Redis from outside the Swarm (e.g., for redis-cli)
       # - "6379:6379" # This makes it accessible on the Swarm manager/worker where it runs
@@ -43,11 +39,11 @@ services:
         limits:
           memory: 68m
       restart_policy:
-        # Always try to restart if it fails
-        condition: on-failure
-        delay: 3s
-        max_attempts: 3
-        window: 10s
+        condition: on-failure # Only restart if the container exits with a non-zero code
+        delay: 5s             # Wait 5 seconds before attempting a restart
+        max_attempts: 5       # Try to restart up to 5 times
+        window: 60s           # Consider failures within a 60-second window for max_attempts
+        # (i.e., if it fails 5 times within 60s, Swarm will stop trying)
 
 # Define a dedicated overlay network for your shared services
 networks:

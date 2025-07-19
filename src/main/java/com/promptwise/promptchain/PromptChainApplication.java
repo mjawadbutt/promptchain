@@ -17,19 +17,21 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.retry.annotation.EnableRetry;
 
 import java.nio.file.Path;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
 @EnableCaching
+@EnableRetry
 public class PromptChainApplication {
 
   public static final String WEB_CONTEXT = "/promptchain";
   private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainApplication.class);
 
   //-- Even though there is no real need for storing these three in this class other than for ease of debugging,
-  //-- however let's not remove them since it is not causing any issues.
+  //-- however, let's not remove them since it is not causing any issues.
   private final ApplicationProperties applicationProperties;
   private final ApplicationRuntimeInfo applicationRuntimeInfo;
   private final ApplicationBuildInfo applicationBuildInfo;

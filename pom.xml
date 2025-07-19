@@ -205,6 +205,16 @@
       <artifactId>jackson-module-afterburner</artifactId> <!-- Optional, for performance -->
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.retry</groupId>
+      <artifactId>spring-retry</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
+
     <!--    <dependency>-->
     <!--      <groupId>org.testcontainers</groupId>-->
     <!--      <artifactId>postgresql</artifactId>-->
@@ -807,7 +817,7 @@
         <!-- Do not use version 4.32.0, it has bugs. Try upgrade to a later version whenever needed. -->
         <version>4.31.0</version>
         <configuration>
-          <changeLogFile>${main-resources-dir}/db/liquibase/db.changelog-master.xml</changeLogFile>
+          <changeLogFile>src/main/resources/db/liquibase/db.changelog-master.xml</changeLogFile>
           <url>
             jdbc:hsqldb:file:${hsqldb.jooq.db-path};create=true;shutdown=true;${hsqldb.common-options}
           </url>
@@ -1287,8 +1297,9 @@
               <target>
                 <echo message="Converting line endings for Linux container scripts to Unix format..."/>
                 <fixcrlf
-                        srcdir="${project.basedir}/src/main/container-resources/**"
-                        includes="*.sh"
+                        srcdir="${project.basedir}/src/main/container-resources"
+                        includes="**/*.sh"
+                        excludes="entrypoint.sh"
                         eol="lf"
                         encoding="UTF-8"
                         preserveLastModified="true"
@@ -1857,7 +1868,9 @@
               </execution>
               <execution>
                 <id>local-compose-stop-services</id>
-                <phase>post-integration-test</phase>
+                <!-- TODO-Jawad-now: temp change-->
+<!--                <phase>post-integration-test</phase>-->
+                                <phase>none</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
