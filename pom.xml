@@ -138,6 +138,7 @@
     <app_db_user_password>BUILD_PROPERTY</app_db_user_password>
 
     <org.liquibase.version>4.33.0</org.liquibase.version>
+    <!--TODO-Jawad-now: upgrade to 4x version -->
     <org.jooq.version>3.20.5</org.jooq.version>
     <org.mapstruct.version>1.6.3</org.mapstruct.version>
     <org.hsqldb.version>2.7.4</org.hsqldb.version>
