@@ -79,3 +79,5 @@ Copy
 Edit
 docker exec -it $(docker ps --filter name=redis -q) redis-cli DEBUG SEGFAULT
 
+
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser

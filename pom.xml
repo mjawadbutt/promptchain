@@ -1504,38 +1504,6 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.1</version>
         <executions>
-          <!-- NEW: Build Docker Image using exec-maven-plugin -->
-          <execution>
-            <id>build-docker-image</id>
-            <phase>package</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>docker</executable>
-              <arguments>
-                <argument>build</argument>
-                <argument>-t</argument>
-                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
-                <argument>-t</argument>
-                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
-                <argument>--build-arg</argument>
-                <argument>PROJECT_BUILD_DIRECTORY=target</argument>
-                <argument>--build-arg</argument>
-                <argument>APP_DATA_DIR_NAME=${app_data_dir_name}</argument>
-                <argument>--build-arg</argument>
-                <argument>APP_LOGS_DIR_NAME=${app_logs_dir_name}</argument>
-                <argument>--build-arg</argument>
-                <argument>PROJECT_BUILD_FINAL_NAME=${project.build.finalName}.jar</argument>
-                <argument>-f</argument>
-                <argument>${project.basedir}/Dockerfile</argument>
-                <argument>${project.basedir}</argument> <!-- Build context -->
-              </arguments>
-              <!--              <environmentVariables>-->
-              <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT> &lt;!&ndash; Ensure BuildKit is enabled &ndash;&gt;-->
-              <!--              </environmentVariables>-->
-            </configuration>
-          </execution>
           <execution>
             <id>local-compose-start-services</id>
             <phase>pre-integration-test</phase>
@@ -1563,6 +1531,37 @@
                 <argument>${project.basedir}/remove-dependency-stacks.sh</argument>
               </arguments>
               <workingDirectory>${project.basedir}</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>build-docker-image</id>
+            <phase>install</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>docker</executable>
+              <arguments>
+                <argument>build</argument>
+                <argument>-t</argument>
+                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
+                <argument>-t</argument>
+                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
+                <argument>--build-arg</argument>
+                <argument>PROJECT_BUILD_DIRECTORY=target</argument>
+                <argument>--build-arg</argument>
+                <argument>APP_DATA_DIR_NAME=${app_data_dir_name}</argument>
+                <argument>--build-arg</argument>
+                <argument>APP_LOGS_DIR_NAME=${app_logs_dir_name}</argument>
+                <argument>--build-arg</argument>
+                <argument>PROJECT_BUILD_FINAL_NAME=${project.build.finalName}.jar</argument>
+                <argument>-f</argument>
+                <argument>${project.basedir}/Dockerfile</argument>
+                <argument>${project.basedir}</argument> <!-- Build context -->
+              </arguments>
+              <!--              <environmentVariables>-->
+              <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT> &lt;!&ndash; Ensure BuildKit is enabled &ndash;&gt;-->
+              <!--              </environmentVariables>-->
             </configuration>
           </execution>
           <execution>

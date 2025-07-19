@@ -47,9 +47,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 30s
-      placement:
-        constraints:
-          - node.labels.type == database
+#      placement:
+#        constraints:
+#          - node.labels.type == database
       update_config: # Control how service updates are performed
         parallelism: 1 # Update one container at a time
         delay: 10s     # Wait 10 seconds between updating containers
@@ -87,9 +87,9 @@ services:
           cpus: '0.2'
           memory: 128MB
       # Ensure it runs on a node where Postgres might also run or access it.
-      placement:
-        constraints:
-          - node.labels.type == database # Run where the DB can be reached efficiently.
+#      placement:
+#        constraints:
+#          - node.labels.type == database # Run where the DB can be reached efficiently.
 
 volumes:
   postgres_data:
