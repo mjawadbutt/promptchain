@@ -14,7 +14,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_NAME}
       POSTGRES_USER: ${POSTGRES_SUPER_USER_NAME}
       POSTGRES_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD}
-    restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_SUPER_USER_NAME} -d ${POSTGRES_DB_NAME}" ]
       start_period: 10s
@@ -47,9 +46,9 @@ services:
         delay: 5s
         max_attempts: 3
         window: 30s
-#      placement:
-#        constraints:
-#          - node.labels.type == database
+      #      placement:
+      #        constraints:
+      #          - node.labels.type == database
       update_config: # Control how service updates are performed
         parallelism: 1 # Update one container at a time
         delay: 10s     # Wait 10 seconds between updating containers
@@ -71,25 +70,22 @@ services:
       APP_DB_USER_NAME: ${APP_DB_USER_NAME}
       APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
     volumes:
-      - .src/main/container-resources/postgres/create-promptchain-db-user.sh:/usr/local/bin/create-promptchain-db-user.sh:ro
+      - ./src/main/container-resources/postgres/create-promptchain-db-user.sh:/usr/local/bin/create-promptchain-db-user.sh:ro
+      - ./logs/postgres-init:/var/log/postgres-init:rw # Keep this for persistent logs
     networks:
-      - network # Connect to the same network as the database.
+      - network
     depends_on:
       - postgres
-    command: ["sh", "/usr/local/bin/create-promptchain-db-user.sh"]
-    restart: "no" # Important: This container should run once and then exit.
+    command: [ "bash", "-c", "/usr/local/bin/create-promptchain-db-user.sh > /var/log/postgres-init/create-promptchain-db-user.log 2>&1" ]
+    restart: "no"
     deploy:
-      replicas: 1 # Only one instance of the init script is needed.
-      # Resources can be minimal as it's a short-lived task.
+      replicas: 1
       resources:
         limits:
           cpus: '0.2'
           memory: 128MB
-      # Ensure it runs on a node where Postgres might also run or access it.
-#      placement:
-#        constraints:
-#          - node.labels.type == database # Run where the DB can be reached efficiently.
-
+      restart_policy:
+        condition: none # <-- THIS IS THE CRUCIAL LINE for one-shot services
 volumes:
   postgres_data:
     driver: local

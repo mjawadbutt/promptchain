@@ -37,7 +37,7 @@
     <!-- The dir where angular.json is placed -->
     <client-root-dir>${project.basedir}/src/main/client</client-root-dir>
     <!-- The output dir of the npm build command -->
-    <client-dist-dir>${project.basedir}/src/main/resources/static/client</client-dist-dir>
+    <client-dist-dir>${main-resources-dir}/static/client</client-dist-dir>
 
     <antrun.echo.property>Usage mvn antrun:run@echo -Dantrun.echo.property=&lt;property-name&gt;</antrun.echo.property>
 
@@ -117,25 +117,25 @@
     <!-- Hardcoded to default value of POSTGRES installation -->
     <postgres_super_user_name>postgres</postgres_super_user_name>
     <!-- Will be initialized by builder.properties -->
-<!--    <postgres_super_user_password>BUILD_PROPERTY</postgres_super_user_password>-->
+    <!--    <postgres_super_user_password>BUILD_PROPERTY</postgres_super_user_password>-->
 
     <redis_host>localhost</redis_host>
     <!-- Changing values not supported for now -->
     <redis_port>6379</redis_port>
-<!--    <redis_password>BUILD_PROPERTY</redis_password>-->
+    <!--    <redis_password>BUILD_PROPERTY</redis_password>-->
 
     <app_data_parent_dir>target</app_data_parent_dir>
-<!--    <app_data_dir_name>BUILD_PROPERTY</app_data_dir_name>-->
+    <!--    <app_data_dir_name>BUILD_PROPERTY</app_data_dir_name>-->
     <app_logs_parent_dir>target</app_logs_parent_dir>
-<!--    <app_logs_dir_name>BUILD_PROPERTY</app_logs_dir_name>-->
+    <!--    <app_logs_dir_name>BUILD_PROPERTY</app_logs_dir_name>-->
 
     <!--
       Bound to the default db-name because we are not creating different db for our app,
       and for now we do not need to.
     -->
     <app_db_name>${postgres_db_name}</app_db_name>
-<!--    <app_db_user_name>BUILD_PROPERTY</app_db_user_name>-->
-<!--    <app_db_user_password>BUILD_PROPERTY</app_db_user_password>-->
+    <!--    <app_db_user_name>BUILD_PROPERTY</app_db_user_name>-->
+    <!--    <app_db_user_password>BUILD_PROPERTY</app_db_user_password>-->
 
     <org.liquibase.version>4.33.0</org.liquibase.version>
     <!--TODO-Jawad-now: upgrade to 4x version -->
@@ -807,7 +807,7 @@
         <!-- Do not use version 4.32.0, it has bugs. Try upgrade to a later version whenever needed. -->
         <version>4.31.0</version>
         <configuration>
-          <changeLogFile>src/main/resources/db/liquibase/db.changelog-master.xml</changeLogFile>
+          <changeLogFile>${main-resources-dir}/db/liquibase/db.changelog-master.xml</changeLogFile>
           <url>
             jdbc:hsqldb:file:${hsqldb.jooq.db-path};create=true;shutdown=true;${hsqldb.common-options}
           </url>
@@ -1076,7 +1076,7 @@
                          - ? matches a single character in a directory / file name -->
                     <property>
                       <key>scripts</key>
-                      <value>src/main/resources/sql/create-*.sql</value>
+                      <value>${main-resources-dir}/sql/create-*.sql</value>
                     </property>
                     <!-- Default is semantic and we are using it. Commented out and left here just for reference. -->
                     <!--                <property>-->
@@ -1276,6 +1276,48 @@
           <!--              </target>-->
           <!--            </configuration>-->
           <!--          </execution>-->
+          <execution>
+            <id>convert-line-endings-for-container-text-files</id>
+            <!-- Running in 'compile' phase to ensure the process-resource phase has completed -->
+            <phase>compile</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo message="Converting line endings for Linux container scripts to Unix format..."/>
+                <fixcrlf
+                        srcdir="${project.basedir}/src/main/container-resources/**"
+                        includes="*.sh"
+                        eol="lf"
+                        encoding="UTF-8"
+                        preserveLastModified="true"
+                />
+                <echo message="Line ending conversion for Linux container text files complete."/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>convert-line-endings-for-generated-local-nix-text-files</id>
+            <!-- Running in 'compile' phase to ensure the process-resource phase has completed -->
+            <phase>compile</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo message="Converting line endings for generated local Linux scripts to Unix format..."/>
+                <fixcrlf
+                        srcdir="${project.basedir}"
+                        includes="*.sh,*.env"
+                        eol="lf"
+                        encoding="UTF-8"
+                        preserveLastModified="true"
+                />
+                <echo message="Line ending conversion complete."/>
+              </target>
+            </configuration>
+          </execution>
           <execution>
             <id>echo</id>
             <goals>
@@ -1614,9 +1656,9 @@
                 <argument>push</argument>
                 <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
               </arguments>
-<!--              <environmentVariables>-->
-<!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>-->
-<!--              </environmentVariables>-->
+              <!--              <environmentVariables>-->
+              <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>-->
+              <!--              </environmentVariables>-->
             </configuration>
           </execution>
         </executions>
@@ -1790,7 +1832,6 @@
       </activation>
       <build>
         <plugins>
-
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
@@ -1831,11 +1872,75 @@
               </execution>
             </executions>
           </plugin>
-
         </plugins>
       </build>
     </profile>
-
+    <profile>
+      <id>env_mac></id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <!-- TODO: we could have just set an 'eol' property instead of defining a whole plugin -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <!-- TODO: when running locally in mac, is this needed? -->
+              <!--          <execution>-->
+              <!--            <id>make-local-dirs</id>-->
+              <!--            <phase>initialize</phase>-->
+              <!--            <goals>-->
+              <!--              <goal>run</goal>-->
+              <!--            </goals>-->
+              <!--            <configuration>-->
+              <!--              <target>-->
+              <!--                <mkdir dir="target/logs"/>-->
+              <!--                <mkdir dir="target/data"/>-->
+              <!--              </target>-->
+              <!--            </configuration>-->
+              <!--          </execution>-->
+              <!--          <execution>-->
+              <!--            <id>set-permissions-for-generated-scripts</id>-->
+              <!--            <phase>process-resources</phase>-->
+              <!--            <goals>-->
+              <!--              <goal>run</goal>-->
+              <!--            </goals>-->
+              <!--            <configuration>-->
+              <!--              <target>-->
+              <!--                <chmod file="${project.basedir}/*.sh" perm="755"/>-->
+              <!--              </target>-->
+              <!--            </configuration>-->
+              <!--          </execution>-->
+              <execution>
+                <id>convert-line-endings-for-generated-local-nix-text-files</id>
+                <!-- Running in 'compile' phase to ensure the process-resource phase has completed -->
+                <phase>compile</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo message="Converting line endings for generated local Linux scripts to Unix format..."/>
+                    <fixcrlf
+                            srcdir="${project.basedir}"
+                            includes="*.sh,*.env"
+                            eol="cr"
+                            encoding="UTF-8"
+                            preserveLastModified="true"
+                    />
+                    <echo message="Line ending conversion complete."/>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>env_local</id>
       <activation>

@@ -1,64 +1,112 @@
-#!/bin/sh
-set -e
+#!/bin/bash
+# create-promptchain-db-user.sh
+# This script waits for PostgreSQL to be ready, then creates a new application database user
+# and grants privileges. Designed to be idempotent and short-lived.
 
-echo "Running idempotent database initialization..."
+# Exit immediately if a command exits with a non-zero status (-e)
+# Print commands and their arguments as they are executed (-x)
+set -ex
 
-# Set PGPASSWORD for psql command. This will be consumed from the environment.
+echo "--- Starting create-promptchain-db-user script ---"
+
+# Ensure all required environment variables are set
+REQUIRED_VARS="POSTGRES_HOST_INTERNAL POSTGRES_DB_NAME POSTGRES_SUPER_USER_NAME POSTGRES_SUPER_USER_PASSWORD APP_DB_NAME APP_DB_USER_NAME APP_DB_USER_PASSWORD"
+for var in $REQUIRED_VARS; do
+  # --- USING BASH-SPECIFIC INDIRECT PARAMETER EXPANSION ---
+  if [ -z "${!var}" ]; then
+    echo "ERROR: Required environment variable $var is not set." >&2
+    exit 1
+  fi
+done
+
+# Set PGPASSWORD for pg_isready and psql to authenticate as superuser
 export PGPASSWORD="${POSTGRES_SUPER_USER_PASSWORD}"
 
-echo "Waiting for PostgreSQL to be ready at ${POSTGRES_HOST_INTERNAL}:${POSTGRES_PORT:-5432}..."
-# Loop until pg_isready reports success (exit code 0)
-# -h: host
-# -p: port (default 5432, you might need to pass it if different)
-# -U: username for the check
-# -d: database name for the check (can be 'postgres' or your actual DB)
-until pg_isready -h "${POSTGRES_HOST_INTERNAL}" -p "5432" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" > /dev/null 2>&1; do
-  echo "PostgreSQL is still unavailable - sleeping (check will retry every 2 seconds)"
-  sleep 2
+POSTGRES_PORT=${POSTGRES_PORT:-5432} # Default to 5432 if not set
+
+echo "Attempting to connect to PostgreSQL at ${POSTGRES_HOST_INTERNAL}:${POSTGRES_PORT} as superuser ${POSTGRES_SUPER_USER_NAME}..."
+
+# Wait for PostgreSQL to be ready
+MAX_RETRIES=10
+RETRY_INTERVAL=3
+CURRENT_RETRY=0
+
+until pg_isready -h "${POSTGRES_HOST_INTERNAL}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" > /dev/null 2>&1; do
+  CURRENT_RETRY=$((CURRENT_RETRY + 1))
+  if [ "$CURRENT_RETRY" -gt "$MAX_RETRIES" ]; then
+    echo "ERROR: PostgreSQL not ready after $MAX_RETRIES retries. Aborting." >&2
+    unset PGPASSWORD # Unset password before exiting
+    exit 1
+  fi
+  echo "PostgreSQL is still unavailable (${POSTGRES_HOST_INTERNAL}:${POSTGRES_PORT}) - retrying in ${RETRY_INTERVAL}s (attempt ${CURRENT_RETRY}/${MAX_RETRIES})"
+  sleep "$RETRY_INTERVAL"
 done
-echo "PostgreSQL is up and running! Proceeding with user creation."
+echo "PostgreSQL is up and running! Proceeding with user and database creation."
 
-# Execute idempotent SQL to create user and grant permissions
-psql -h "${POSTGRES_HOST_INTERNAL}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" -v ON_ERROR_STOP=1 <<EOF
-DO \$\$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_user WHERE usename = '${APP_DB_USER_NAME}') THEN
-    CREATE USER ${APP_DB_USER_NAME} WITH PASSWORD '${APP_DB_USER_PASSWORD}';
-    RAISE NOTICE 'User ${APP_DB_USER_NAME} created.';
-  ELSE
-    RAISE NOTICE 'User ${APP_DB_USER_NAME} already exists, skipping creation.';
-  END IF;
-END
-\$\$;
+# Create the application database if it doesn't exist (idempotent)
+echo "Checking if database '${APP_DB_NAME}' exists..."
+if psql -h "${POSTGRES_HOST_INTERNAL}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "postgres" -tc "SELECT 1 FROM pg_database WHERE datname = '${APP_DB_NAME}'" | grep -q 1; then
+  echo "Database '${APP_DB_NAME}' already exists. Skipping creation."
+else
+  echo "Creating database '${APP_DB_NAME}'..."
+  psql -h "${POSTGRES_HOST_INTERNAL}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "postgres" -c "CREATE DATABASE ${APP_DB_NAME};"
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to create database '${APP_DB_NAME}'." >&2
+    unset PGPASSWORD
+    exit 1
+  fi
+  echo "Database '${APP_DB_NAME}' created."
+fi
 
--- Grant CONNECT privilege on the specific database
-GRANT CONNECT ON DATABASE "${APP_DB_NAME}" TO ${APP_DB_USER_NAME};
+# Create the application user if it doesn't exist (idempotent)
+echo "Checking if user '${APP_DB_USER_NAME}' exists..."
+if psql -h "${POSTGRES_HOST_INTERNAL}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${APP_DB_NAME}" -tc "SELECT 1 FROM pg_user WHERE usename = '${APP_DB_USER_NAME}'" | grep -q 1; then
+  echo "User '${APP_DB_USER_NAME}' already exists. Skipping creation."
+else
+  echo "Creating user '${APP_DB_USER_NAME}'..."
+  psql -h "${POSTGRES_HOST_INTERNAL}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${APP_DB_NAME}" -c "CREATE USER ${APP_DB_USER_NAME} WITH PASSWORD '${APP_DB_USER_PASSWORD}';"
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to create user '${APP_DB_USER_NAME}'." >&2
+    unset PGPASSWORD
+    exit 1
+  fi
+  echo "User '${APP_DB_USER_NAME}' created."
+fi
 
--- Grant CREATE privilege on the database itself (needed to create schemas, extensions, etc.)
-GRANT CREATE ON DATABASE "${APP_DB_NAME}" TO ${APP_DB_USER_NAME};
+# --- START: Grant specific privileges on the application database to the new user ---
+echo "Granting specific privileges on database '${APP_DB_NAME}' to user '${APP_DB_USER_NAME}'..."
 
--- Grant USAGE and CREATE privileges on the public schema
+# Combine all SQL commands into a single string, separated by semicolons
+# Use double quotes for database names that might contain special characters (like hyphens)
+# Use single quotes for string literals where needed
+SQL_COMMANDS="
+GRANT CONNECT ON DATABASE \"${APP_DB_NAME}\" TO ${APP_DB_USER_NAME};
+GRANT CREATE ON DATABASE \"${APP_DB_NAME}\" TO ${APP_DB_USER_NAME};
 GRANT USAGE, CREATE ON SCHEMA public TO ${APP_DB_USER_NAME};
-
--- Set default privileges for objects created by APP_DB_USER_NAME in the public schema.
 ALTER DEFAULT PRIVILEGES FOR USER ${APP_DB_USER_NAME} IN SCHEMA public
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES ON TABLES TO ${APP_DB_USER_NAME};
-
 ALTER DEFAULT PRIVILEGES FOR USER ${APP_DB_USER_NAME} IN SCHEMA public
 GRANT SELECT, USAGE ON SEQUENCES TO ${APP_DB_USER_NAME};
-
 ALTER DEFAULT PRIVILEGES FOR USER ${APP_DB_USER_NAME} IN SCHEMA public
 GRANT EXECUTE ON FUNCTIONS TO ${APP_DB_USER_NAME};
-
--- Explicitly grant ALL PRIVILEGES on existing tables, sequences, and views in the public schema.
--- This ensures objects created BEFORE this script runs get necessary permissions if needed.
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${APP_DB_USER_NAME};
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${APP_DB_USER_NAME};
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO ${APP_DB_USER_NAME};
+"
 
-EOF
+# Execute the combined SQL commands
+psql -h "${POSTGRES_HOST_INTERNAL}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${APP_DB_NAME}" -c "${SQL_COMMANDS}"
 
-echo "Database initialization script finished successfully."
+if [ $? -ne 0 ]; then
+  echo "ERROR: Failed to grant specific privileges on database '${APP_DB_NAME}' to user '${APP_DB_USER_NAME}'." >&2
+  unset PGPASSWORD
+  exit 1
+fi
+echo "Specific privileges granted."
+# --- END: Grant specific privileges ---
+
+echo "--- create-promptchain-db-user script completed successfully ---"
 
 # Unset PGPASSWORD for security
 unset PGPASSWORD
+exit 0 # Explicitly exit with success

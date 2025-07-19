@@ -19,5 +19,6 @@ src/main/resources/static/client/
 !GIT-GITHUB-GPG-SETUP.md
 !LICENSE
 !pom.xml
+!prune-all-images.*
 !README.md
 !remove-infrastructure-stacks.*
