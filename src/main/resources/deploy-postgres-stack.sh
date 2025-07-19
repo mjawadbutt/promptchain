@@ -2,11 +2,17 @@
 
 # start_postgres_stack.sh
 # This script starts the Docker Swarm Postgres stack.
-# Ensure this script is in the same directory as docker-compose-postgres.yml and your postgres.env file.
+# Ensure this script is in the same directory as docker-compose-postgres.yml file.
 
 STACK_NAME="postgres-stack"
 COMPOSE_FILE="docker-compose-postgres.yml"
-ENV_FILE="local-compose-postgres.env"
+
+POSTGRES_DB_NAME=@postgres_db_name@
+POSTGRES_SUPER_USER_NAME=@postgres_super_user_name@
+POSTGRES_SUPER_USER_PASSWORD=@postgres_super_user_password@
+APP_DB_NAME=@app_db_name@
+APP_DB_USER_NAME=@app_db_user_name@
+APP_DB_USER_PASSWORD=@app_db_user_password@
 
 echo "--- Starting Docker Postgres Stack: ${STACK_NAME} ---"
 
@@ -36,21 +42,8 @@ fi
 # 3. Deploy the stack
 echo "Preparing to deploy Docker stack '${STACK_NAME}'..."
 
-# Ensure the .env file exists
-if [ ! -f "${ENV_FILE}" ]; then
-    echo "ERROR: Environment file '${ENV_FILE}' not found. Please create it with necessary variables."
-    echo "Example content for '${ENV_FILE}':"
-    echo POSTGRES_DB_NAME=postgres
-    echo POSTGRES_SUPER_USER_NAME=postgres
-    echo POSTGRES_SUPER_USER_PASSWORD=postgres
-    echo APP_DB_NAME=postgres
-    echo APP_DB_USER_NAME=promptchain
-    echo APP_DB_USER_PASSWORD=promptchain
-    exit 1
-fi
-
-echo "Deploying Docker stack '${STACK_NAME}' from '${COMPOSE_FILE}' using environment file '${ENV_FILE}'..."
-if ! docker stack deploy -c "${COMPOSE_FILE}" --env-file "${ENV_FILE}" "${STACK_NAME}"; then
+echo "Deploying Docker stack '${STACK_NAME}' from '${COMPOSE_FILE}'..."
+if ! docker stack deploy -c "${COMPOSE_FILE}" "${STACK_NAME}"; then
     echo "ERROR: Failed to deploy stack '${STACK_NAME}'."
     exit 1
 fi

@@ -12,8 +12,6 @@ src/main/resources/static/client/
 !.gitignore
 !.mvn
 !deploy-infrastructure-stacks.*
-!deploy-postgres-stack.*
-!deploy-redis-stack.*
 !docker-compose.yml
 !docker-compose-postgres.yml
 !docker-compose-redis.yml
@@ -23,5 +21,3 @@ src/main/resources/static/client/
 !pom.xml
 !README.md
 !remove-infrastructure-stacks.*
-!remove-postgres-stack.*
-!remove-redis-stack.*

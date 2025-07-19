@@ -117,25 +117,25 @@
     <!-- Hardcoded to default value of POSTGRES installation -->
     <postgres_super_user_name>postgres</postgres_super_user_name>
     <!-- Will be initialized by builder.properties -->
-    <postgres_super_user_password>BUILD_PROPERTY</postgres_super_user_password>
+<!--    <postgres_super_user_password>BUILD_PROPERTY</postgres_super_user_password>-->
 
     <redis_host>localhost</redis_host>
     <!-- Changing values not supported for now -->
     <redis_port>6379</redis_port>
-    <redis_password>BUILD_PROPERTY</redis_password>
+<!--    <redis_password>BUILD_PROPERTY</redis_password>-->
 
     <app_data_parent_dir>target</app_data_parent_dir>
-    <app_data_dir_name>BUILD_PROPERTY</app_data_dir_name>
+<!--    <app_data_dir_name>BUILD_PROPERTY</app_data_dir_name>-->
     <app_logs_parent_dir>target</app_logs_parent_dir>
-    <app_logs_dir_name>BUILD_PROPERTY</app_logs_dir_name>
+<!--    <app_logs_dir_name>BUILD_PROPERTY</app_logs_dir_name>-->
 
     <!--
       Bound to the default db-name because we are not creating different db for our app,
       and for now we do not need to.
     -->
     <app_db_name>${postgres_db_name}</app_db_name>
-    <app_db_user_name>BUILD_PROPERTY</app_db_user_name>
-    <app_db_user_password>BUILD_PROPERTY</app_db_user_password>
+<!--    <app_db_user_name>BUILD_PROPERTY</app_db_user_name>-->
+<!--    <app_db_user_password>BUILD_PROPERTY</app_db_user_password>-->
 
     <org.liquibase.version>4.33.0</org.liquibase.version>
     <!--TODO-Jawad-now: upgrade to 4x version -->
@@ -398,9 +398,18 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
+          <exclude>deploy-postgres-stack.bat</exclude>
+          <exclude>deploy-postgres-stack.sh</exclude>
+          <exclude>deploy-redis-stack.bat</exclude>
+          <exclude>deploy-redis-stack.sh</exclude>
           <exclude>local-compose.env</exclude>
           <exclude>local-compose-postgres.env</exclude>
           <exclude>local-compose-redis.env</exclude>
+          <exclude>deploy-postgres-stack.bat</exclude>
+          <exclude>deploy-postgres-stack.sh</exclude>
+          <exclude>deploy-redis-stack.bat</exclude>
+          <exclude>deploy-redis-stack.sh</exclude>
+
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -429,9 +438,17 @@
             <fileset>
               <directory>${project.basedir}</directory>
               <includes>
+                <include>deploy-postgres-stack.bat</include>
+                <include>deploy-postgres-stack.sh</include>
+                <include>deploy-redis-stack.bat</include>
+                <include>deploy-redis-stack.sh</include>
                 <include>local-compose.env</include>
                 <include>local-compose-postgres.env</include>
                 <include>local-compose-redis.env</include>
+                <include>remove-postgres-stack.bat</include>
+                <include>remove-postgres-stack.sh</include>
+                <include>remove-redis-stack.bat</include>
+                <include>remove-redis-stack.sh</include>
               </includes>
               <followSymlinks>false</followSymlinks>
               <useDefaultExcludes>true</useDefaultExcludes>
@@ -1208,9 +1225,17 @@
                 <resource>
                   <directory>${main-resources-dir}</directory>
                   <includes>
+                    <include>deploy-postgres-stack.bat</include>
+                    <include>deploy-postgres-stack.sh</include>
+                    <include>deploy-redis-stack.bat</include>
+                    <include>deploy-redis-stack.sh</include>
                     <include>local-compose.env</include>
                     <include>local-compose-postgres.env</include>
                     <include>local-compose-redis.env</include>
+                    <include>remove-postgres-stack.bat</include>
+                    <include>remove-postgres-stack.sh</include>
+                    <include>remove-redis-stack.bat</include>
+                    <include>remove-redis-stack.sh</include>
                   </includes>
                   <filtering>true</filtering>
                 </resource>
@@ -1326,7 +1351,7 @@
           </includes>
           <environmentVariables>
             <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
-            <POSTGRES_HOST>${postgres_port}</POSTGRES_HOST>
+            <POSTGRES_PORT>${postgres_port}</POSTGRES_PORT>
             <REDIS_HOST>${redis_host}</REDIS_HOST>
             <REDIS_PORT>${redis_port}</REDIS_PORT>
             <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
@@ -1401,7 +1426,7 @@
           </includes>
           <environmentVariables>
             <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
-            <POSTGRES_HOST>${postgres_port}</POSTGRES_HOST>
+            <POSTGRES_PORT>${postgres_port}</POSTGRES_PORT>
             <REDIS_HOST>${redis_host}</REDIS_HOST>
             <REDIS_PORT>${redis_port}</REDIS_PORT>
             <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
@@ -1513,10 +1538,9 @@
             <configuration>
               <executable>bash</executable>
               <arguments>
-                <argument>${project.basedir}/deploy-dependency-stacks.sh</argument>
+                <argument>${project.basedir}/deploy-infrastructure-stacks.sh</argument>
               </arguments>
               <workingDirectory>${project.basedir}</workingDirectory>
-              <async>true</async>
             </configuration>
           </execution>
           <execution>
@@ -1528,7 +1552,7 @@
             <configuration>
               <executable>bash</executable>
               <arguments>
-                <argument>${project.basedir}/remove-dependency-stacks.sh</argument>
+                <argument>${project.basedir}/remove-infrastructure-stacks.sh</argument>
               </arguments>
               <workingDirectory>${project.basedir}</workingDirectory>
             </configuration>
@@ -1785,10 +1809,9 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}/deploy-dependency-stacks.bat</argument>
+                    <argument>${project.basedir}/deploy-infrastructure-stacks.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
-                  <async>true</async>
                 </configuration>
               </execution>
               <execution>
@@ -1801,7 +1824,7 @@
                   <executable>cmd.exe</executable>
                   <arguments>
                     <argument>/c</argument>
-                    <argument>${project.basedir}/remove-dependency-stacks.bat</argument>
+                    <argument>${project.basedir}/remove-infrastructure-stacks.bat</argument>
                   </arguments>
                   <workingDirectory>${project.basedir}</workingDirectory>
                 </configuration>

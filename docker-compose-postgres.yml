@@ -75,9 +75,8 @@ services:
     networks:
       - network # Connect to the same network as the database.
     depends_on:
-      postgres:
-        condition: service_healthy # Crucial: This ensures 'init-db' waits for 'postgres' healthcheck to pass.
-    command: ["/usr/local/bin/create-promptchain-db-user.sh"]
+      - postgres
+    command: ["sh", "/usr/local/bin/create-promptchain-db-user.sh"]
     restart: "no" # Important: This container should run once and then exit.
     deploy:
       replicas: 1 # Only one instance of the init script is needed.

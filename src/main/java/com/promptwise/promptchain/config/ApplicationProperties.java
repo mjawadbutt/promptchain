@@ -6,6 +6,8 @@ import com.promptwise.promptchain.common.util.ApplicationRuntimeInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 @ConfigurationProperties(prefix = "application")
 @Validated
 public class ApplicationProperties {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationProperties.class);
 
   private final String environmentId;
   private final String applicationName;

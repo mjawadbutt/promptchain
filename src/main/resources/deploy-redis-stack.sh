@@ -2,11 +2,12 @@
 
 # start_redis_stack.sh
 # This script starts the Docker Swarm Redis stack.
-# Ensure this script is in the same directory as redis-infrastructure.yml and your redis.env file.
+# Ensure this script is in the same directory as redis-infrastructure.yml file.
 
 STACK_NAME="redis-stack"
 COMPOSE_FILE="docker-compose-redis.yml"
-ENV_FILE="local-compose-redis.env"
+
+REDIS_PASSWORD=@redis_password@
 
 echo "--- Starting Docker Redis Stack: ${STACK_NAME} ---"
 
@@ -36,17 +37,8 @@ fi
 # 3. Deploy the stack
 echo "Preparing to deploy Docker stack '${STACK_NAME}'..."
 
-# Ensure the .env file exists
-if [ ! -f "${ENV_FILE}" ]; then
-    echo "ERROR: Environment file '${ENV_FILE}' not found. Please create it with necessary variables."
-    echo "Example content for '${ENV_FILE}':"
-    echo "REDIS_PASSWORD=your_redis_password_here"
-    echo "REDIS_HOST=redis-db-local"
-    exit 1
-fi
-
-echo "Deploying Docker stack '${STACK_NAME}' from '${COMPOSE_FILE}' using environment file '${ENV_FILE}'..."
-if ! docker stack deploy -c "${COMPOSE_FILE}" --env-file "${ENV_FILE}" "${STACK_NAME}"; then
+echo "Deploying Docker stack '${STACK_NAME}' from '${COMPOSE_FILE}'..."
+if ! docker stack deploy -c "${COMPOSE_FILE}" "${STACK_NAME}"; then
     echo "ERROR: Failed to deploy stack '${STACK_NAME}'."
     exit 1
 fi

@@ -15,7 +15,6 @@ services:
         "--maxmemory-policy", "allkeys-lru",
         "--requirepass", "${REDIS_PASSWORD}"
       ]
-    restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping --raw | grep PONG" ]
       interval: 3s

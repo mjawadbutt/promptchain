@@ -1,15 +1,21 @@
-:: start_redis_stack.bat
-:: This script starts the Docker Swarm Redis stack.
-:: Ensure this script is in the same directory as redis-infrastructure.yml and your redis.env file.
+:: start_postgres_stack.bat
+:: This script starts the Docker Swarm Postgres stack.
+:: Ensure this script is in the same directory as docker-compose-postgres.yml file.
 
 @echo off
 setlocal
 
-set STACK_NAME=redis-stack
-set COMPOSE_FILE=docker-compose-redis.yml
-set ENV_FILE=local-compose-redis.env
+set STACK_NAME=postgres-stack
+set COMPOSE_FILE=docker-compose-postgres.yml
 
-echo --- Starting Docker Redis Stack: %STACK_NAME% ---
+set POSTGRES_DB_NAME=@postgres_db_name@
+set POSTGRES_SUPER_USER_NAME=@postgres_super_user_name@
+set POSTGRES_SUPER_USER_PASSWORD=@postgres_super_user_password@
+set APP_DB_NAME=@app_db_name@
+set APP_DB_USER_NAME=@app_db_user_name@
+set APP_DB_USER_PASSWORD=@app_db_user_password@
+
+echo --- Starting Docker Postgres Stack: %STACK_NAME% ---
 
 :: 1. Check if Docker daemon is running
 echo Checking Docker daemon status...
@@ -41,22 +47,13 @@ if "%SWARM_STATUS%" neq "active" (
 :: 3. Deploy the stack
 echo Preparing to deploy Docker stack '%STACK_NAME%'...
 
-:: Ensure the .env file exists
-if not exist %ENV_FILE% (
-    echo ERROR: Environment file '%ENV_FILE%' not found. Please create it with necessary variables.
-    echo Example content for '%ENV_FILE%':
-    echo REDIS_PASSWORD=redis
-    echo REDIS_HOST=localhost
-    exit /b 1
-)
-
-echo Deploying Docker stack '%STACK_NAME%' from '%COMPOSE_FILE%' using environment file '%ENV_FILE%'...
-docker stack deploy -c %COMPOSE_FILE% --env-file %ENV_FILE% %STACK_NAME%
+echo Deploying Docker stack '%STACK_NAME%' from '%COMPOSE_FILE%'...
+docker stack deploy -c %COMPOSE_FILE% %STACK_NAME%
 if %errorlevel% neq 0 (
     echo ERROR: Failed to deploy stack '%STACK_NAME%'.
     exit /b 1
 )
 echo Stack '%STACK_NAME%' deployment initiated. Use 'docker stack ps %STACK_NAME%' to check status.
 
-echo --- Docker Redis Stack Deployment Complete ---
+echo --- Docker Postgres Stack Deployment Complete ---
 endlocal

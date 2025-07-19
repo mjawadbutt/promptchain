@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 echo "Running idempotent database initialization..."
@@ -6,15 +6,17 @@ echo "Running idempotent database initialization..."
 # Set PGPASSWORD for psql command. This will be consumed from the environment.
 export PGPASSWORD="${POSTGRES_SUPER_USER_PASSWORD}"
 
-# --- Wait for PostgreSQL to be ready ---
-# Use the superuser to check connection to the "${POSTGRES_DB_NAME}" (default value is 'postgres') database
-# until the server is fully up and accepting connections.
-echo "Waiting for PostgreSQL service at ${POSTGRES_HOST_INTERNAL} to become available..."
-until psql -h "${POSTGRES_HOST_INTERNAL}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" -c '\q'; do
-  >&2 echo "PostgreSQL is unavailable - sleeping for 2 seconds..."
+echo "Waiting for PostgreSQL to be ready at ${POSTGRES_HOST_INTERNAL}:${POSTGRES_PORT:-5432}..."
+# Loop until pg_isready reports success (exit code 0)
+# -h: host
+# -p: port (default 5432, you might need to pass it if different)
+# -U: username for the check
+# -d: database name for the check (can be 'postgres' or your actual DB)
+until pg_isready -h "${POSTGRES_HOST_INTERNAL}" -p "5432" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" > /dev/null 2>&1; do
+  echo "PostgreSQL is still unavailable - sleeping (check will retry every 2 seconds)"
   sleep 2
 done
->&2 echo "PostgreSQL is up - executing initialization script."
+echo "PostgreSQL is up and running! Proceeding with user creation."
 
 # Execute idempotent SQL to create user and grant permissions
 psql -h "${POSTGRES_HOST_INTERNAL}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" -v ON_ERROR_STOP=1 <<EOF
@@ -57,3 +59,6 @@ GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO ${APP_DB_USER_NAME};
 EOF
 
 echo "Database initialization script finished successfully."
+
+# Unset PGPASSWORD for security
+unset PGPASSWORD

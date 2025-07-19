@@ -8,7 +8,7 @@ echo --- Starting All Infrastructure Stacks ---
 
 :: Call the Redis stack start script
 echo Calling Redis stack start script...
-deploy-redis-stack.bat
+call deploy-redis-stack.bat
 if %errorlevel% neq 0 (
     echo ERROR: Redis stack failed to start. Aborting.
     exit /b 1
