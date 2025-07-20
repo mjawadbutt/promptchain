@@ -1640,23 +1640,23 @@
               </arguments>
             </configuration>
           </execution>
-          <execution>
-            <id>push-docker-image-latest</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>docker</executable>
-              <arguments>
-                <argument>push</argument>
-                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
-              </arguments>
-              <!--              <environmentVariables>-->
-              <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>-->
-              <!--              </environmentVariables>-->
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>push-docker-image-latest</id>-->
+<!--            <phase>deploy</phase>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <executable>docker</executable>-->
+<!--              <arguments>-->
+<!--                <argument>push</argument>-->
+<!--                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>-->
+<!--              </arguments>-->
+<!--              &lt;!&ndash;              <environmentVariables>&ndash;&gt;-->
+<!--              &lt;!&ndash;                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>&ndash;&gt;-->
+<!--              &lt;!&ndash;              </environmentVariables>&ndash;&gt;-->
+<!--            </configuration>-->
+<!--          </execution>-->
         </executions>
       </plugin>
 

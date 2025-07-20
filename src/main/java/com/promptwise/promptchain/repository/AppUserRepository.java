@@ -54,11 +54,8 @@ public class AppUserRepository {
                 .set(APP_USER.USER_EMAIL, appUserEntity.getUserEmail())
                 .returning(APP_USER.APP_USER_ID) // Ask DB to return the generated ID
                 .fetchSingle();
-        LOGGER.debug("Inserting {}", appUserEntity);
-        // Fetch the complete entity with generated ID and database-computed timestamps
-        AppUserEntity inserted = selectOneRequired(r.getAppUserId());
-        LOGGER.debug("Inserted {}", inserted);
-        return inserted;
+        //-- Fetch the complete entity with generated ID and database-computed timestamps
+        return selectOneRequired(r.getAppUserId());
       } catch (RequiredResourceNotFoundException | RuntimeException e) {
         // Wrap specific exceptions or general runtime exceptions
         throw DatabaseAccessException.create(e);
