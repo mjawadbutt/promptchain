@@ -55,13 +55,14 @@ class PromptChainIntegrationTests {
             AppUserEntity.createForInsertOrUpdate("jawad", "abcd", "jawad@promptchain.com"));
     AppUserEntity actualResult = getPromptChainAdminRestControllerClient().createAppUser(createOrUpdateAppUserRequest);
 
-    AppUserEntity expectedResult = AppUserEntity.createForSelect(actualResult.getUserId(),
+    AppUserEntity expectedResult = AppUserEntity.createForSelect(actualResult.getAppUserId(),
             createOrUpdateAppUserRequest.appUserEntity().getUserName(),
             createOrUpdateAppUserRequest.appUserEntity().getPassword(),
             createOrUpdateAppUserRequest.appUserEntity().getUserEmail(),
             actualResult.getCreatedAt(), actualResult.getLastUpdatedAt());
-
-    getPromptChainAdminRestControllerClient().deleteAppUser(actualResult.getUserId());
+LOGGER.info(expectedResult.toString());
+LOGGER.info(actualResult.toString());
+    getPromptChainAdminRestControllerClient().deleteAppUser(actualResult.getAppUserId());
     Assertions.assertThat(actualResult).usingRecursiveComparison().isEqualTo(expectedResult);
   }
 

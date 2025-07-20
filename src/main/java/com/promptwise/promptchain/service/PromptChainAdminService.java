@@ -14,7 +14,7 @@ import org.springframework.util.Assert;
 import java.util.Set;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class PromptChainAdminService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainAdminService.class);
@@ -25,8 +25,9 @@ public class PromptChainAdminService {
     this.appUserRepository = appUserRepository;
   }
 
+  @Transactional
   public AppUserEntity createAppUser(@NotNull final AppUserEntity appUserEntity)
-          throws RequiredResourceNotFoundException, ResourceAlreadyExistsException {
+          throws ResourceAlreadyExistsException {
     Assert.notNull(appUserEntity, "The parameter 'appUserEntity' cannot be 'null'");
     return getAppUserRepository().insertOne(appUserEntity);
   }
@@ -35,12 +36,14 @@ public class PromptChainAdminService {
     return getAppUserRepository().selectAll();
   }
 
+  @Transactional
   public void updateAppUser(@NotNull AppUserEntity appUserEntity) throws RequiredResourceNotFoundException {
     Assert.notNull(appUserEntity, "The parameter 'appUserEntity' cannot be 'null'");
-    getAppUserRepository().updateOne(appUserEntity.getUserId(), appUserEntity.getUserName(),
+    getAppUserRepository().updateOne(appUserEntity.getAppUserId(), appUserEntity.getUserName(),
             appUserEntity.getPassword(), appUserEntity.getUserEmail());
   }
 
+  @Transactional
   public boolean deleteAppUser(@NotNull Long appUserId) {
     Assert.notNull(appUserId, "The parameter 'appUserId' cannot be 'null'");
     return getAppUserRepository().deleteOne(appUserId);

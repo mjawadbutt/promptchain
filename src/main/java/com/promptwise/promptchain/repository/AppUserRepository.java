@@ -8,6 +8,8 @@ import com.promptwise.promptchain.generated.jooq.tables.records.AppUserRecord;
 import jakarta.validation.constraints.NotNull;
 import org.jooq.DSLContext;
 import org.jooq.TableField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,8 @@ import static com.promptwise.promptchain.generated.jooq.tables.AppUser.*;
 @Repository
 @Transactional(readOnly = true)
 public class AppUserRepository {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AppUserRepository.class);
 
   private final DSLContext dslContext;
 
@@ -45,13 +49,16 @@ public class AppUserRepository {
       try {
         // Use the jOOQ generated table object APP_USER
         AppUserRecord r = getDslContext().insertInto(APP_USER)
-                .set(APP_USER.USER_EMAIL, appUserEntity.getUserEmail())
-                .set(APP_USER.PASSWORD, appUserEntity.getPassword())
                 .set(APP_USER.USER_NAME, appUserEntity.getUserName())
+                .set(APP_USER.PASSWORD, appUserEntity.getPassword())
+                .set(APP_USER.USER_EMAIL, appUserEntity.getUserEmail())
                 .returning(APP_USER.APP_USER_ID) // Ask DB to return the generated ID
                 .fetchSingle();
+        LOGGER.debug("Inserting {}", appUserEntity);
         // Fetch the complete entity with generated ID and database-computed timestamps
-        return selectOneRequired(r.getAppUserId());
+        AppUserEntity inserted = selectOneRequired(r.getAppUserId());
+        LOGGER.debug("Inserted {}", inserted);
+        return inserted;
       } catch (RequiredResourceNotFoundException | RuntimeException e) {
         // Wrap specific exceptions or general runtime exceptions
         throw DatabaseAccessException.create(e);
@@ -115,7 +122,7 @@ public class AppUserRepository {
 
     Optional<AppUserEntity> optionalAppUserEntity = selectOneByUserEmail(userEmail);
     if (optionalAppUserEntity.isPresent()) {
-      throw RequiredResourceNotFoundException.create("APP_USER", "USER_ID", appUserId.toString());
+      throw RequiredResourceNotFoundException.create("APP_USER", "APP_USER_ID", appUserId.toString());
     } else {
 
       try {

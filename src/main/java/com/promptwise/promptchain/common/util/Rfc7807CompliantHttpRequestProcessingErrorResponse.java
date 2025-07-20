@@ -1,7 +1,7 @@
 package com.promptwise.promptchain.common.util;
 
-import com.promptwise.promptchain.common.util.json.JacksonUtil;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.promptwise.promptchain.common.util.json.JacksonUtil;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -37,7 +37,7 @@ public class Rfc7807CompliantHttpRequestProcessingErrorResponse {
   }
 
   public static Rfc7807CompliantHttpRequestProcessingErrorResponse create(
-          @NotNull final String errorCode, final HttpStatus httpStatus, final String errorTitle,
+          @NotNull final String errorCode, @NotNull final HttpStatus httpStatus, final String errorTitle,
           final String errorMessage, final URI errorInstanceUri,
           final Map<String, Object> problemDetailCustomPropertyMap,
           final Rfc7807CompliantHttpRequestProcessingErrorResponse cause) {

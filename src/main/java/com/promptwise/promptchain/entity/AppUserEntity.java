@@ -18,21 +18,21 @@ import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = "app_user") // Explicitly map to the app_user table
+@Table(name = "APP_USER") // Explicitly map to the app_user table
 public class AppUserEntity implements Comparable<AppUserEntity> { // Implemented Comparable
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY) // For BIGSERIAL in PostgreSQL
-  @Column(name = "user_id")
-  private final Long userId; // Use Long for BIGSERIAL
+  @Column(name = "APP_USER_ID")
+  private final Long appUserId; // Use Long for BIGSERIAL
 
-  @Column(name = "user_name", nullable = false)
+  @Column(name = "USER_NAME", nullable = false)
   private final String userName; // Renamed from 'name' to match table column
 
-  @Column(name = "password", nullable = false)
+  @Column(name = "PASSWORD", nullable = false)
   private final String password;
 
-  @Column(name = "user_email", unique = true, nullable = false)
+  @Column(name = "USER_EMAIL", unique = true, nullable = false)
   private final String userEmail;
 
   // Changed to Instant for UTC representation
@@ -48,9 +48,9 @@ public class AppUserEntity implements Comparable<AppUserEntity> { // Implemented
   private Instant lastUpdatedAt; // Changed type, not final as it can be updated
 
   // Private constructor for internal use by factory method
-  private AppUserEntity(final Long userId, final String userName, final String password,
+  private AppUserEntity(final Long appUserId, final String userName, final String password,
                         final String userEmail, final Instant createdAt, final Instant lastUpdatedAt) {
-    this.userId = userId;
+    this.appUserId = appUserId;
     this.userName = userName;
     this.password = password;
     this.userEmail = userEmail;
@@ -70,24 +70,24 @@ public class AppUserEntity implements Comparable<AppUserEntity> { // Implemented
   }
 
   public static AppUserEntity createForSelect(
-          @JsonProperty("userId") final Long userId,
+          @JsonProperty("appUserId") final Long appUserId,
           @JsonProperty("userName") final String userName,
           @JsonProperty("password") final String password,
           @JsonProperty("userEmail") final String userEmail,
           @JsonProperty("createdAt") final Instant createdAt,
           @JsonProperty("lastUpdatedAt") final Instant lastUpdatedAt) {
-    Assert.notNull(userId, "The parameter 'userId' cannot be null!");
+    Assert.notNull(appUserId, "The parameter 'appUserId' cannot be null!");
     Assert.notNull(userName, "The parameter 'userName' cannot be null!");
     Assert.notNull(password, "The parameter 'password' cannot be null!");
     Assert.notNull(userEmail, "The parameter 'userEmail' cannot be null!");
     Assert.notNull(createdAt, "The parameter 'createdAt' cannot be null!");
     Assert.notNull(lastUpdatedAt, "The parameter 'lastUpdatedAt' cannot be null!");
-    return new AppUserEntity(userId, userName, password, userEmail, createdAt, lastUpdatedAt);
+    return new AppUserEntity(appUserId, userName, password, userEmail, createdAt, lastUpdatedAt);
   }
 
   // Getters
-  public Long getUserId() {
-    return userId;
+  public Long getAppUserId() {
+    return appUserId;
   }
 
   public String getUserName() {

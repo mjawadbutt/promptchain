@@ -44,7 +44,7 @@ public class PromptChainAdminRestController {
           consumes = {MediaType.APPLICATION_JSON_VALUE},
           produces = MediaType.APPLICATION_JSON_VALUE)
   public AppUserEntity createAppUser(@Valid @RequestBody final CreateOrUpdateAppUserRequest request)
-          throws RequiredResourceNotFoundException, ResourceAlreadyExistsException {
+          throws ResourceAlreadyExistsException {
     AppUserEntity saved = getPromptChainAdminService().createAppUser(request.appUserEntity());
     return saved;
   }

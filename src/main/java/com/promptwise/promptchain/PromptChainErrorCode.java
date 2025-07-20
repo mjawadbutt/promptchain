@@ -29,7 +29,9 @@ public enum PromptChainErrorCode {
   //-- (i.e. the issue is with the client/caller of the endpoint and not the server.
   CLIENT_ERROR("An exception occurred while processing the request because because the request is not valid!"),
 
-  SERVER_ERROR("An exception occurred while processing the request due to a server error!");
+  SERVER_ERROR("An exception occurred while processing the request due to a server error!"),
+
+  UNKNOWN_ERROR("TODO");
 
   /**
    * The error's generic 'title' as per RFC-7807.

@@ -56,6 +56,8 @@ abstract class AbstractPromptChainControllerClient {
                         getBaseUrl(), e.getMessage()), httpMethod, HttpStatus.BAD_REQUEST, e);
       }
       RestClient.RequestBodySpec bodySpec = uriSpec.uri(uri);
+      //TODO-Jawad: Probably this line is throwing some exception that is causing errocode cannot be null iussue
+      //TODO-Jawad: try by calling an endpoint with a missing required param
       bodySpec.accept(acceptedMediaType);
       try {
         //-- The below call invokes Spring's RestClient, which can cause two basic types of errors/exceptions. First
