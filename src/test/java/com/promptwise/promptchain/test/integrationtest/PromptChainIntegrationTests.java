@@ -1,11 +1,11 @@
 package com.promptwise.promptchain.test.integrationtest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.promptwise.promptchain.test.client.PromptChainAdminRestControllerClient;
-import com.promptwise.promptchain.test.client.PromptChainRestControllerClient;
 import com.promptwise.promptchain.config.ApplicationProperties;
 import com.promptwise.promptchain.controller.request.CreateOrUpdateAppUserRequest;
 import com.promptwise.promptchain.entity.AppUserEntity;
+import com.promptwise.promptchain.test.client.PromptChainAdminRestControllerClient;
+import com.promptwise.promptchain.test.client.PromptChainRestControllerClient;
 import jakarta.validation.constraints.NotNull;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
@@ -53,7 +53,6 @@ class PromptChainIntegrationTests {
   void testGetAppUser() {
     CreateOrUpdateAppUserRequest createOrUpdateAppUserRequest = new CreateOrUpdateAppUserRequest(
             AppUserEntity.createForInsertOrUpdate("jawad", "abcd", "jawad@promptchain.com"));
-
     AppUserEntity actualResult = getPromptChainAdminRestControllerClient().createAppUser(createOrUpdateAppUserRequest);
 
     AppUserEntity expectedResult = AppUserEntity.createForSelect(actualResult.getUserId(),
@@ -62,6 +61,7 @@ class PromptChainIntegrationTests {
             createOrUpdateAppUserRequest.appUserEntity().getUserEmail(),
             actualResult.getCreatedAt(), actualResult.getLastUpdatedAt());
 
+    getPromptChainAdminRestControllerClient().deleteAppUser(actualResult.getUserId());
     Assertions.assertThat(actualResult).usingRecursiveComparison().isEqualTo(expectedResult);
   }
 

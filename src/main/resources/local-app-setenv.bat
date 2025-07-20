@@ -1,0 +1,12 @@
+set POSTGRES_HOST=@postgres_host@
+set POSTGRES_PORT=@postgres_port@
+set REDIS_HOST=@redis_host@
+set REDIS_PORT=@redis_port@
+set REDIS_PASSWORD=@redis_password@
+set APP_DATA_PARENT_DIR=@app_data_parent_dir@
+set APP_DATA_DIR_NAME=@app_data_dir_name@
+set APP_LOGS_PARENT_DIR=@app_logs_parent_dir@
+set APP_LOGS_DIR_NAME=@app_logs_dir_name@
+set APP_DB_NAME=@app_db_name@
+set APP_DB_USER_NAME=@app_db_user_name@
+set APP_DB_USER_PASSWORD=@app_db_user_password@

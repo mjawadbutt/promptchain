@@ -18,13 +18,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.function.Function;
 
-abstract class AbstractIPromptChainControllerClient {
+abstract class AbstractPromptChainControllerClient {
 
   private final String baseUrl;
   private final ObjectMapper objectMapper;
   private final RestClient restClient;
 
-  protected AbstractIPromptChainControllerClient(@NotNull final String baseUrl, @NotNull final ObjectMapper objectMapper) {
+  protected AbstractPromptChainControllerClient(@NotNull final String baseUrl, @NotNull final ObjectMapper objectMapper) {
     Assert.notNull(objectMapper, "The objectMapper 'clientId' cannot be 'null'!");
     this.baseUrl = baseUrl;
     this.objectMapper = objectMapper;

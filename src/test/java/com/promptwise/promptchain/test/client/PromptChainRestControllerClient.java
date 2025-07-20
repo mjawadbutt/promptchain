@@ -14,7 +14,7 @@ import org.springframework.util.LinkedMultiValueMap;
 
 import java.util.Collections;
 
-public class PromptChainRestControllerClient extends AbstractIPromptChainControllerClient {
+public class PromptChainRestControllerClient extends AbstractPromptChainControllerClient {
 
   public PromptChainRestControllerClient(@NotNull final String baseUrl, @NotNull final ObjectMapper objectMapper) {
     super(baseUrl, objectMapper);

@@ -1,4 +1,4 @@
-package com.promptwise.promptchain.exception;
+package com.promptwise.promptchain;
 
 public enum PromptChainErrorCode {
 

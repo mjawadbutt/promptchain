@@ -146,28 +146,6 @@
 
   <dependencies>
 
-    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter-->
-    <dependency>
-      <groupId>org.redisson</groupId>
-      <artifactId>redisson-spring-boot-starter</artifactId>
-      <version>3.50.0</version>
-    </dependency>
-
-    <!--    &lt;!&ndash; Redisson JCache (JSR-107) integration &ndash;&gt;-->
-    <!--    &lt;!&ndash; https://mvnrepository.com/artifact/org.redisson/redisson-spring-data-35 &ndash;&gt;-->
-    <!--    <dependency>-->
-    <!--      <groupId>org.redisson</groupId>-->
-    <!--      <artifactId>redisson-spring-data-35</artifactId>-->
-    <!--      <version>3.50.0</version>-->
-    <!--    </dependency>-->
-
-    <!--    &lt;!&ndash; https://mvnrepository.com/artifact/org.redisson/redisson &ndash;&gt;-->
-    <!--    <dependency>-->
-    <!--      <groupId>org.redisson</groupId>-->
-    <!--      <artifactId>redisson</artifactId>-->
-    <!--      <version>3.50.0</version>-->
-    <!--    </dependency>-->
-
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
       <artifactId>httpclient5</artifactId>
@@ -341,6 +319,12 @@
     <!-- END: Dependencies related to JAXB and JAX-WS support in Java 11 and onwards. -->
     <!---->
 
+    <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter-->
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-spring-boot-starter</artifactId>
+      <version>3.50.0</version>
+    </dependency>
     <!--
       To be able to use Spring's caching annotations with the configured JSR-107 compliant jcache-manager
       (no matter what underlying caching impl it is connected to, like radisson in our case)
@@ -412,9 +396,10 @@
           <exclude>deploy-postgres-stack.sh</exclude>
           <exclude>deploy-redis-stack.bat</exclude>
           <exclude>deploy-redis-stack.sh</exclude>
-          <exclude>local-compose.env</exclude>
-          <exclude>local-compose-postgres.env</exclude>
-          <exclude>local-compose-redis.env</exclude>
+          <exclude>local-app.env</exclude>
+          <!-- TODO: The setenvs to be deleted, not used -->
+          <exclude>local-app-setenv.bat</exclude>
+          <exclude>local-app-setenv.sh</exclude>
           <exclude>deploy-postgres-stack.bat</exclude>
           <exclude>deploy-postgres-stack.sh</exclude>
           <exclude>deploy-redis-stack.bat</exclude>
@@ -452,9 +437,9 @@
                 <include>deploy-postgres-stack.sh</include>
                 <include>deploy-redis-stack.bat</include>
                 <include>deploy-redis-stack.sh</include>
-                <include>local-compose.env</include>
-                <include>local-compose-postgres.env</include>
-                <include>local-compose-redis.env</include>
+                <include>local-app.env</include>
+                <include>local-app-setenv.bat</include>
+                <include>local-app-setenv.sh</include>
                 <include>remove-postgres-stack.bat</include>
                 <include>remove-postgres-stack.sh</include>
                 <include>remove-redis-stack.bat</include>
@@ -499,7 +484,7 @@
       <!--            </goals>-->
       <!--            <configuration>-->
       <!--              <envFileDirectory>.</envFileDirectory>-->
-      <!--              <envFileName>local-compose.env</envFileName>-->
+      <!--              <envFileName>local-app.env</envFileName>-->
       <!--            </configuration>-->
       <!--          </execution>-->
       <!--        </executions>-->
@@ -1239,9 +1224,9 @@
                     <include>deploy-postgres-stack.sh</include>
                     <include>deploy-redis-stack.bat</include>
                     <include>deploy-redis-stack.sh</include>
-                    <include>local-compose.env</include>
-                    <include>local-compose-postgres.env</include>
-                    <include>local-compose-redis.env</include>
+                    <include>local-app.env</include>
+                    <include>local-app-setenv.bat</include>
+                    <include>local-app-setenv.sh</include>
                     <include>remove-postgres-stack.bat</include>
                     <include>remove-postgres-stack.sh</include>
                     <include>remove-redis-stack.bat</include>
@@ -1868,9 +1853,7 @@
               </execution>
               <execution>
                 <id>local-compose-stop-services</id>
-                <!-- TODO-Jawad-now: temp change-->
-<!--                <phase>post-integration-test</phase>-->
-                                <phase>none</phase>
+                <phase>post-integration-test</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>

@@ -28,12 +28,6 @@ public class PromptChainAdminService {
   public AppUserEntity createAppUser(@NotNull final AppUserEntity appUserEntity)
           throws RequiredResourceNotFoundException, ResourceAlreadyExistsException {
     Assert.notNull(appUserEntity, "The parameter 'appUserEntity' cannot be 'null'");
-
-    //-- Assert that the ApplicationEntity of the workflow exists so that we can handle it as a user-level (i.e.
-    //-- checked) exception. Otherwise, if we skip this step, then it will fail as a database-level foreign-key
-    //-- violation (i.e. runtime) exception during 'insert'.
-    AppUserEntity clientEntity = getAppUserRepository().selectOneRequired(appUserEntity.getUserId());
-
     return getAppUserRepository().insertOne(appUserEntity);
   }
 

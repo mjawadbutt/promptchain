@@ -1,5 +1,7 @@
-package com.promptwise.promptchain.exception;
+package com.promptwise.promptchain.config;
 
+import com.promptwise.promptchain.PromptChainErrorCode;
+import com.promptwise.promptchain.PromptChainSystemException;
 import com.promptwise.promptchain.common.exception.DatabaseAccessException;
 import com.promptwise.promptchain.common.exception.RequiredResourceNotFoundException;
 import com.promptwise.promptchain.common.exception.ResourceAlreadyExistsException;
@@ -72,7 +74,7 @@ public class PromptChainExceptionHandler extends ResponseEntityExceptionHandler 
 
   //TODO-Exceptions: Handle Exception.class also?
   @ExceptionHandler({PromptChainSystemException.class, Exception.class})
-  public ResponseEntity<Rfc7807CompliantHttpRequestProcessingErrorResponse> handleIFlowSystemException(
+  public ResponseEntity<Rfc7807CompliantHttpRequestProcessingErrorResponse> handleSystemException(
           PromptChainSystemException ex, HttpMethod httpMethod, HttpServletRequest httpServletRequest) {
     LOGGER.error(ex.getMessage(), ex);
     Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = createErrorResponse(

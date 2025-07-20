@@ -11,12 +11,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 
+import java.util.Collections;
 import java.util.Set;
 
 import static com.promptwise.promptchain.PromptChainApplication.*;
 
-public class PromptChainAdminRestControllerClient extends AbstractIPromptChainControllerClient {
+public class PromptChainAdminRestControllerClient extends AbstractPromptChainControllerClient {
 
   public PromptChainAdminRestControllerClient(@NotNull final String baseUrl, @NotNull final ObjectMapper objectMapper) {
     super(baseUrl, objectMapper);
@@ -25,7 +27,7 @@ public class PromptChainAdminRestControllerClient extends AbstractIPromptChainCo
   public AppUserEntity createAppUser(@NotNull final CreateOrUpdateAppUserRequest createOrUpdateAppUserRequest) {
     Assert.notNull(createOrUpdateAppUserRequest, "The parameter 'createOrUpdateAppUserRequest' cannot be 'null'");
     AppUserEntity appUserEntity = invokeRequest(HttpMethod.POST,
-            PromptChainAdminRestController.WEB_CONTEXT + "/createClient", MediaType.APPLICATION_JSON,
+            PromptChainAdminRestController.WEB_CONTEXT + "/createAppUser", MediaType.APPLICATION_JSON,
             null, null, MediaType.APPLICATION_JSON,
             (bodySpec) -> {
               return bodySpec
@@ -42,8 +44,8 @@ public class PromptChainAdminRestControllerClient extends AbstractIPromptChainCo
 
   public Set<AppUserEntity> getAllAppUsers() {
     Set<AppUserEntity> appUserEntitySet = invokeRequest(HttpMethod.GET,
-            WEB_CONTEXT + "/getAllAppUsers", MediaType.APPLICATION_JSON, null,
-            null, MediaType.APPLICATION_JSON,
+            WEB_CONTEXT + "/getAllAppUsers", MediaType.APPLICATION_JSON,
+            null, null, MediaType.APPLICATION_JSON,
             (bodySpec) -> {
               return bodySpec
                       .retrieve()
@@ -57,4 +59,22 @@ public class PromptChainAdminRestControllerClient extends AbstractIPromptChainCo
     return appUserEntitySet;
   }
 
+  public void deleteAppUser(Long appUserId) {
+    Assert.notNull(appUserId, "The parameter 'appUserId' cannot be 'null'!");
+
+    LinkedMultiValueMap<String, String> paramMultiMap = new LinkedMultiValueMap<>();
+    paramMultiMap.put("appUserId", Collections.singletonList(String.valueOf(appUserId)));
+
+    invokeRequest(HttpMethod.DELETE, WEB_CONTEXT + "/deleteAppUser", MediaType.APPLICATION_JSON,
+            null, paramMultiMap, MediaType.APPLICATION_JSON,
+            (bodySpec) -> {
+              return bodySpec
+                      .retrieve()
+                      .onStatus(httpStatusCode -> httpStatusCode != HttpStatus.OK, (request, response) -> {
+                        Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = getObjectMapper().readValue(
+                                response.getBody(), Rfc7807CompliantHttpRequestProcessingErrorResponse.class);
+                        throw new PromptChainErrorResponseException(errorResponse);
+                      }).body(Void.class);
+            });
+  }
 }

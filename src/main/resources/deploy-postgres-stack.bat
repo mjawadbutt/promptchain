@@ -55,5 +55,6 @@ if %errorlevel% neq 0 (
 )
 echo Stack '%STACK_NAME%' deployment initiated. Use 'docker stack ps %STACK_NAME%' to check status.
 
+REM TODO-Jawad: may add logic to wait until the create user container shutsdown
 echo --- Docker Postgres Stack Deployment Complete ---
 endlocal

@@ -1,28 +1,28 @@
-ALTER TABLE role_group_mapping
-ADD CONSTRAINT pk_role_group_mapping PRIMARY KEY (role_id, user_group_id);
+ALTER TABLE "ROLE_GROUP_MAPPING"
+ADD CONSTRAINT "PK_ROLE_GROUP_MAPPING" PRIMARY KEY ("ROLE_ID", "USER_GROUP_ID");
 
 -- Add foreign key constraints to role_group_mapping table
-ALTER TABLE role_group_mapping
-ADD CONSTRAINT fk_rgm_app_role FOREIGN KEY (role_id) REFERENCES app_role (role_id)
+ALTER TABLE "ROLE_GROUP_MAPPING"
+ADD CONSTRAINT "FK_RGM_APP_ROLE" FOREIGN KEY ("ROLE_ID") REFERENCES "APP_ROLE" ("ROLE_ID")
 ON UPDATE RESTRICT
 ON DELETE CASCADE;
 
-ALTER TABLE role_group_mapping
-ADD CONSTRAINT fk_rgm_user_group FOREIGN KEY (user_group_id) REFERENCES user_group (user_group_id)
+ALTER TABLE "ROLE_GROUP_MAPPING"
+ADD CONSTRAINT "FK_RGM_USER_GROUP" FOREIGN KEY ("USER_GROUP_ID") REFERENCES "USER_GROUP" ("USER_GROUP_ID")
 ON UPDATE RESTRICT
 ON DELETE CASCADE;
 
--- Add primary key to user_group_mapping table (from Liquibase changeSet id: v0.0.1-create-user-group-mapping-table)
-ALTER TABLE user_group_mapping
-ADD CONSTRAINT pk_user_group_mapping PRIMARY KEY (app_user_id, user_group_id);
+-- Add primary key to user_group_mapping table
+ALTER TABLE "USER_GROUP_MAPPING"
+ADD CONSTRAINT "PK_USER_GROUP_MAPPING" PRIMARY KEY ("APP_USER_ID", "USER_GROUP_ID");
 
 -- Add foreign key constraints to user_group_mapping table
-ALTER TABLE user_group_mapping
-ADD CONSTRAINT fk_ugm_app_user FOREIGN KEY (app_user_id) REFERENCES app_user (app_user_id)
+ALTER TABLE "USER_GROUP_MAPPING"
+ADD CONSTRAINT "FK_UGM_APP_USER" FOREIGN KEY ("APP_USER_ID") REFERENCES "APP_USER" ("APP_USER_ID")
 ON UPDATE RESTRICT
 ON DELETE CASCADE;
 
-ALTER TABLE user_group_mapping
-ADD CONSTRAINT fk_ugm_user_group FOREIGN KEY (user_group_id) REFERENCES user_group (user_group_id)
+ALTER TABLE "USER_GROUP_MAPPING"
+ADD CONSTRAINT "FK_UGM_USER_GROUP" FOREIGN KEY ("USER_GROUP_ID") REFERENCES "USER_GROUP" ("USER_GROUP_ID")
 ON UPDATE RESTRICT
 ON DELETE CASCADE;

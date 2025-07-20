@@ -1,4 +1,4 @@
-package com.promptwise.promptchain.exception;
+package com.promptwise.promptchain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,9 +7,9 @@ import java.io.Serial;
 
 public class PromptChainSystemException extends RuntimeException {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainSystemException.class);
   @Serial
   private static final long serialVersionUID = 1L;
+  private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainSystemException.class);
 
   public static PromptChainSystemException create(String message) {
     return create(message, null);
