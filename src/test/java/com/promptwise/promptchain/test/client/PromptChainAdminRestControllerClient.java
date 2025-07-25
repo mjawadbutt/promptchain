@@ -1,8 +1,6 @@
 package com.promptwise.promptchain.test.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.promptwise.promptchain.PromptChainErrorCode;
-import com.promptwise.promptchain.common.util.Rfc7807CompliantHttpRequestProcessingErrorResponse;
 import com.promptwise.promptchain.controller.PromptChainAdminRestController;
 import com.promptwise.promptchain.controller.request.CreateOrUpdateAppUserRequest;
 import com.promptwise.promptchain.entity.AppUserEntity;
@@ -13,11 +11,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
 
@@ -38,11 +34,8 @@ public class PromptChainAdminRestControllerClient extends AbstractPromptChainCon
               return bodySpec
                       .body(createOrUpdateAppUserRequest)
                       .retrieve()
-                      .onStatus(httpStatusCode -> httpStatusCode != HttpStatus.OK, (request, response) -> {
-                        Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = getObjectMapper().readValue(
-                                response.getBody(), Rfc7807CompliantHttpRequestProcessingErrorResponse.class);
-                        throw new PromptChainErrorResponseException(errorResponse);
-                      }).body(AppUserEntity.class);
+                      .onStatus(httpStatusCode -> httpStatusCode != HttpStatus.OK,
+                              this::handleErrorResponse).body(AppUserEntity.class);
             });
     return appUserEntity;
   }
@@ -54,11 +47,8 @@ public class PromptChainAdminRestControllerClient extends AbstractPromptChainCon
             (bodySpec) -> {
               return bodySpec
                       .retrieve()
-                      .onStatus(httpStatusCode -> httpStatusCode != HttpStatus.OK, (request, response) -> {
-                        Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = getObjectMapper().readValue(
-                                response.getBody(), Rfc7807CompliantHttpRequestProcessingErrorResponse.class);
-                        throw new PromptChainErrorResponseException(errorResponse);
-                      }).body(new ParameterizedTypeReference<>() {
+                      .onStatus(httpStatusCode -> httpStatusCode != HttpStatus.OK,
+                              this::handleErrorResponse).body(new ParameterizedTypeReference<>() {
                       });
             });
     return appUserEntitySet;
@@ -75,27 +65,8 @@ public class PromptChainAdminRestControllerClient extends AbstractPromptChainCon
             (bodySpec) -> {
               return bodySpec
                       .retrieve()
-                      .onStatus(httpStatusCode -> httpStatusCode != HttpStatus.OK, (request, response) -> {
-                        String responseBody = null;
-                        try {
-                          byte[] bytes = response.getBody().readAllBytes();
-                          responseBody = new String(bytes, StandardCharsets.UTF_8);
-                          Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = getObjectMapper().readValue(
-                                  responseBody, Rfc7807CompliantHttpRequestProcessingErrorResponse.class);
-                          throw new PromptChainErrorResponseException(errorResponse);
-                        } catch (RuntimeException re) {
-                          //TODO-Jawad: Fix this later
-                          LOGGER.warn("Unable to convert response body: {} to Rfc7807CompliantHttpRequestProcessingErrorResponse",
-                                  responseBody);
-                          ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(response.getStatusCode(),
-                                  responseBody);
-                          Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse =
-                                  Rfc7807CompliantHttpRequestProcessingErrorResponse.create(
-                                          PromptChainErrorCode.UNKNOWN_ERROR.name(),
-                                          problemDetail, null);
-                          throw new PromptChainErrorResponseException(errorResponse);
-                        }
-                      }).body(Void.class);
+                      .onStatus(httpStatusCode -> httpStatusCode != HttpStatus.OK,
+                              this::handleErrorResponse).body(Void.class);
             });
   }
 }

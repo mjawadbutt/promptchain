@@ -1,11 +1,17 @@
 package com.promptwise.promptchain.test.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.promptwise.promptchain.common.util.Rfc7807CompliantHttpRequestProcessingErrorResponse;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
@@ -14,11 +20,15 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 abstract class AbstractPromptChainControllerClient {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPromptChainControllerClient.class);
 
   private final String baseUrl;
   private final ObjectMapper objectMapper;
@@ -96,6 +106,27 @@ abstract class AbstractPromptChainControllerClient {
 
   public RestClient getRestClient() {
     return restClient;
+  }
+
+  void handleErrorResponse(HttpRequest request, ClientHttpResponse response) {
+    String responseBody;
+    try {
+      byte[] bytes = response.getBody().readAllBytes();
+      responseBody = new String(bytes, StandardCharsets.UTF_8);
+      Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = getObjectMapper().readValue(
+              responseBody, Rfc7807CompliantHttpRequestProcessingErrorResponse.class);
+      throw new PromptChainErrorResponseException(errorResponse);
+    } catch (IOException | RuntimeException e) {
+      ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, """
+              Unbale to parse error response body: {} to Rfc7807CompliantHttpRequestProcessingErrorResponse!
+              Please check the exception and enhance the Controller Advice accordingly!
+              See logs for details.""");
+      LOGGER.error("{}. Please see root cause for details.", problemDetail.getDetail(), e);
+      Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse =
+              Rfc7807CompliantHttpRequestProcessingErrorResponse.create(
+                      com.promptwise.promptchain.PromptChainErrorCode.UNKNOWN_ERROR.name(), problemDetail, null);
+      throw new PromptChainErrorResponseException(errorResponse);
+    }
   }
 
 }

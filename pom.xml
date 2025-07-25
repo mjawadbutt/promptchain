@@ -1607,8 +1607,6 @@
                 <argument>build</argument>
                 <argument>-t</argument>
                 <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
-                <argument>-t</argument>
-                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>
                 <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_DIRECTORY=target</argument>
                 <argument>--build-arg</argument>
@@ -1626,6 +1624,47 @@
               <!--              </environmentVariables>-->
             </configuration>
           </execution>
+          <!--          <execution>-->
+          <!--            <id>docker-login-ghcr</id>-->
+          <!--            <phase>install</phase> &lt;!&ndash; Run before package/deploy &ndash;&gt;-->
+          <!--            <goals>-->
+          <!--              <goal>exec</goal>-->
+          <!--            </goals>-->
+          <!--            <configuration>-->
+          <!--              <executable>docker</executable>-->
+          <!--              <arguments>-->
+          <!--                <argument>login</argument>-->
+          <!--                <argument>ghcr.io</argument>-->
+          <!--                <argument>-u</argument>-->
+          <!--                &lt;!&ndash; Retrieve username from settings.xml server with id 'github' &ndash;&gt;-->
+          <!--                <argument>${ghcrio.username}</argument>-->
+          <!--              </arguments>-->
+          <!--              &lt;!&ndash; Pass password via standard input &ndash;&gt;-->
+          <!--              <inputString>${settings.servers[0].password}</inputString>-->
+          <!--&lt;!&ndash;              <environmentVariables>&ndash;&gt;-->
+          <!--&lt;!&ndash;                &lt;!&ndash; Optional: Set DOCKER_BUILDKIT=1 if you want to use BuildKit features &ndash;&gt;&ndash;&gt;-->
+          <!--&lt;!&ndash;                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>&ndash;&gt;-->
+          <!--&lt;!&ndash;              </environmentVariables>&ndash;&gt;-->
+          <!--              <longClasspath>false</longClasspath> &lt;!&ndash; Not needed for external executable &ndash;&gt;-->
+          <!--              <longModulepath>false</longModulepath> &lt;!&ndash; Not needed for external executable &ndash;&gt;-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
+          <execution>
+            <id>docker-login-ghcr</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>sh</executable>
+              <arguments>
+                <argument>-c</argument>
+                <argument>
+                  echo <TODO pick pwd from env> | docker login ghcr.io -u ${ghcrio.username} --password-stdin
+                </argument>
+              </arguments>
+            </configuration>
+          </execution>
           <execution>
             <id>push-docker-image-version</id>
             <phase>deploy</phase>
@@ -1640,23 +1679,23 @@
               </arguments>
             </configuration>
           </execution>
-<!--          <execution>-->
-<!--            <id>push-docker-image-latest</id>-->
-<!--            <phase>deploy</phase>-->
-<!--            <goals>-->
-<!--              <goal>exec</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <executable>docker</executable>-->
-<!--              <arguments>-->
-<!--                <argument>push</argument>-->
-<!--                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>-->
-<!--              </arguments>-->
-<!--              &lt;!&ndash;              <environmentVariables>&ndash;&gt;-->
-<!--              &lt;!&ndash;                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>&ndash;&gt;-->
-<!--              &lt;!&ndash;              </environmentVariables>&ndash;&gt;-->
-<!--            </configuration>-->
-<!--          </execution>-->
+          <!--          <execution>-->
+          <!--            <id>push-docker-image-latest</id>-->
+          <!--            <phase>deploy</phase>-->
+          <!--            <goals>-->
+          <!--              <goal>exec</goal>-->
+          <!--            </goals>-->
+          <!--            <configuration>-->
+          <!--              <executable>docker</executable>-->
+          <!--              <arguments>-->
+          <!--                <argument>push</argument>-->
+          <!--                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>-->
+          <!--              </arguments>-->
+          <!--              &lt;!&ndash;              <environmentVariables>&ndash;&gt;-->
+          <!--              &lt;!&ndash;                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>&ndash;&gt;-->
+          <!--              &lt;!&ndash;              </environmentVariables>&ndash;&gt;-->
+          <!--            </configuration>-->
+          <!--          </execution>-->
         </executions>
       </plugin>
 
@@ -1866,6 +1905,22 @@
                   <workingDirectory>${project.basedir}</workingDirectory>
                 </configuration>
               </execution>
+              <execution>
+                <id>docker-login-ghcr</id>
+                <phase>deploy</phase> <!-- Or use 'deploy' or 'install' -->
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>cmd</executable>
+                  <arguments>
+                    <argument>/c</argument>
+                    <argument>
+                      echo <TODO pick pwd from env> | docker login ghcr.io -u ${ghcrio.username} --password-stdin
+                    </argument>
+                  </arguments>
+                </configuration>
+              </execution>
             </executions>
           </plugin>
         </plugins>
@@ -1951,6 +2006,7 @@
       <properties>
         <!-- Override the value of the property to use the value that is configured in settings.xml -->
         <!-- TODO: Fail build if this is not defined -->
+        <!-- TODO-Jawad: name of this should be github.username even in os env -->
         <ghcrio.username>${GHCRIO_USERNAME}</ghcrio.username>
       </properties>
     </profile>
@@ -1985,6 +2041,7 @@
 
   <issueManagement>
     <system>GITHUB Issues</system>
+    <system>GITHUB Issues</system>
     <url>https://github.com/mjawadbutt/promptchain/issues</url>
   </issueManagement>
 
@@ -1999,15 +2056,23 @@
       generated from github.com which has the rights to publish to the repo
     -->
     <repository>
-      <id>ghcrio-promptchain</id>
-      <name>PromptChain Releases Repository in ghcr.io</name>
-      <url>https://ghcr.io/mjawadbutt/promptchain</url>
+      <id>github-promptchain</id>
+      <name>PromptChain Maven repository</name>
+      <url>https://maven.pkg.github.com/mjawadbutt/promptchain</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
-    <snapshotRepository>
-      <id>ghcrio-promptchain-snapshots</id>
-      <name>PromptChain Snapshots Repository in ghcr.io</name>
-      <url>https://ghcr.io/mjawadbutt/promptchain-snapshots</url>
-    </snapshotRepository>
+    <!--    <repository>-->
+    <!--      <id>ghcrio-promptchain</id>-->
+    <!--      <name>PromptChain Releases Repository in ghcr.io</name>-->
+    <!--      <url>https://ghcr.io/mjawadbutt/promptchain</url>-->
+    <!--    </repository>-->
+    <!--    <snapshotRepository>-->
+    <!--      <id>ghcrio-promptchain-snapshots</id>-->
+    <!--      <name>PromptChain Snapshots Repository in ghcr.io</name>-->
+    <!--      <url>https://ghcr.io/mjawadbutt/promptchain-snapshots</url>-->
+    <!--    </snapshotRepository>-->
   </distributionManagement>
 
   <developers>
