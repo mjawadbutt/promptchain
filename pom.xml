@@ -1660,7 +1660,7 @@
               <arguments>
                 <argument>-c</argument>
                 <argument>
-                  echo <TODO pick pwd from env> | docker login ghcr.io -u ${ghcrio.username} --password-stdin
+                  echo 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 | docker login ghcr.io -u ${ghcrio.username} --password-stdin
                 </argument>
               </arguments>
             </configuration>
@@ -1916,7 +1916,7 @@
                   <arguments>
                     <argument>/c</argument>
                     <argument>
-                      echo <TODO pick pwd from env> | docker login ghcr.io -u ${ghcrio.username} --password-stdin
+                      echo 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 | docker login ghcr.io -u ${ghcrio.username} --password-stdin
                     </argument>
                   </arguments>
                 </configuration>
@@ -2040,7 +2040,6 @@
   </pluginRepositories>
 
   <issueManagement>
-    <system>GITHUB Issues</system>
     <system>GITHUB Issues</system>
     <url>https://github.com/mjawadbutt/promptchain/issues</url>
   </issueManagement>
