@@ -2,7 +2,7 @@
 # my-app-stack.yml
 services:
   app:
-    image: ghcr.io/${GHCRIO_USERNAME}/${APP_ARTIFACT_ID}:${APP_VERSION}
+    image: ghcr.io/${GITHUB_USERNAME}/${APP_ARTIFACT_ID}:${APP_VERSION}
     environment:
       # The default value for the host, as per builder.properties (localhost), is for running promptchain locally.
       # In that case, Docker will expose the hosts at localhost:<postgres_port> (the postgres compose

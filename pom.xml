@@ -106,7 +106,7 @@
       fall back (see the profile'set-default-ghcrio-username') to the value defined by the corresponding OS level
       env var (which is also used by settings.xml).
     -->
-    <ghcrio.username>${env.GITHUB_ACTOR}</ghcrio.username>
+    <github.username>${env.GITHUB_ACTOR}</github.username>
 
     <postgres_host>localhost</postgres_host>
     <!-- Changing values not supported for now -->
@@ -1606,7 +1606,7 @@
               <arguments>
                 <argument>build</argument>
                 <argument>-t</argument>
-                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
+                <argument>ghcr.io/${github.username}/${project.artifactId}:${project.version}</argument>
                 <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_DIRECTORY=target</argument>
                 <argument>--build-arg</argument>
@@ -1624,47 +1624,6 @@
               <!--              </environmentVariables>-->
             </configuration>
           </execution>
-          <!--          <execution>-->
-          <!--            <id>docker-login-ghcr</id>-->
-          <!--            <phase>install</phase> &lt;!&ndash; Run before package/deploy &ndash;&gt;-->
-          <!--            <goals>-->
-          <!--              <goal>exec</goal>-->
-          <!--            </goals>-->
-          <!--            <configuration>-->
-          <!--              <executable>docker</executable>-->
-          <!--              <arguments>-->
-          <!--                <argument>login</argument>-->
-          <!--                <argument>ghcr.io</argument>-->
-          <!--                <argument>-u</argument>-->
-          <!--                &lt;!&ndash; Retrieve username from settings.xml server with id 'github' &ndash;&gt;-->
-          <!--                <argument>${ghcrio.username}</argument>-->
-          <!--              </arguments>-->
-          <!--              &lt;!&ndash; Pass password via standard input &ndash;&gt;-->
-          <!--              <inputString>${settings.servers[0].password}</inputString>-->
-          <!--&lt;!&ndash;              <environmentVariables>&ndash;&gt;-->
-          <!--&lt;!&ndash;                &lt;!&ndash; Optional: Set DOCKER_BUILDKIT=1 if you want to use BuildKit features &ndash;&gt;&ndash;&gt;-->
-          <!--&lt;!&ndash;                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>&ndash;&gt;-->
-          <!--&lt;!&ndash;              </environmentVariables>&ndash;&gt;-->
-          <!--              <longClasspath>false</longClasspath> &lt;!&ndash; Not needed for external executable &ndash;&gt;-->
-          <!--              <longModulepath>false</longModulepath> &lt;!&ndash; Not needed for external executable &ndash;&gt;-->
-          <!--            </configuration>-->
-          <!--          </execution>-->
-          <execution>
-            <id>docker-login-ghcr</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>sh</executable>
-              <arguments>
-                <argument>-c</argument>
-                <argument>
-                  echo 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 | docker login ghcr.io -u ${ghcrio.username} --password-stdin
-                </argument>
-              </arguments>
-            </configuration>
-          </execution>
           <execution>
             <id>push-docker-image-version</id>
             <phase>deploy</phase>
@@ -1675,27 +1634,10 @@
               <executable>docker</executable>
               <arguments>
                 <argument>push</argument>
-                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:${project.version}</argument>
+                <argument>ghcr.io/${github.username}/${project.artifactId}:${project.version}</argument>
               </arguments>
             </configuration>
           </execution>
-          <!--          <execution>-->
-          <!--            <id>push-docker-image-latest</id>-->
-          <!--            <phase>deploy</phase>-->
-          <!--            <goals>-->
-          <!--              <goal>exec</goal>-->
-          <!--            </goals>-->
-          <!--            <configuration>-->
-          <!--              <executable>docker</executable>-->
-          <!--              <arguments>-->
-          <!--                <argument>push</argument>-->
-          <!--                <argument>ghcr.io/${ghcrio.username}/${project.artifactId}:latest</argument>-->
-          <!--              </arguments>-->
-          <!--              &lt;!&ndash;              <environmentVariables>&ndash;&gt;-->
-          <!--              &lt;!&ndash;                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT>&ndash;&gt;-->
-          <!--              &lt;!&ndash;              </environmentVariables>&ndash;&gt;-->
-          <!--            </configuration>-->
-          <!--          </execution>-->
         </executions>
       </plugin>
 
@@ -1858,8 +1800,77 @@
   </reporting>
 
   <profiles>
+
+    <!--TODO-Jawad: Is this CRLF fix needed? (Since the files are generated by the same OS so should be needed) -->
+    <!--    <profile>-->
+    <!--      <id>mac></id>-->
+    <!--      <activation>-->
+    <!--        <os>-->
+    <!--          <family>mac</family>-->
+    <!--        </os>-->
+    <!--      </activation>-->
+    <!--      <build>-->
+    <!--        <plugins>-->
+    <!--          &lt;!&ndash; TODO: we could have just set an 'eol' property instead of defining a whole plugin &ndash;&gt;-->
+    <!--          <plugin>-->
+    <!--            <groupId>org.apache.maven.plugins</groupId>-->
+    <!--            <artifactId>maven-antrun-plugin</artifactId>-->
+    <!--            <executions>-->
+    <!--              &lt;!&ndash; TODO: when running locally in mac, is this needed? &ndash;&gt;-->
+    <!--              &lt;!&ndash;          <execution>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <id>make-local-dirs</id>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <phase>initialize</phase>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <goals>&ndash;&gt;-->
+    <!--              &lt;!&ndash;              <goal>run</goal>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            </goals>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <configuration>&ndash;&gt;-->
+    <!--              &lt;!&ndash;              <target>&ndash;&gt;-->
+    <!--              &lt;!&ndash;                <mkdir dir="target/logs"/>&ndash;&gt;-->
+    <!--              &lt;!&ndash;                <mkdir dir="target/data"/>&ndash;&gt;-->
+    <!--              &lt;!&ndash;              </target>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            </configuration>&ndash;&gt;-->
+    <!--              &lt;!&ndash;          </execution>&ndash;&gt;-->
+    <!--              &lt;!&ndash;          <execution>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <id>set-permissions-for-generated-scripts</id>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <phase>process-resources</phase>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <goals>&ndash;&gt;-->
+    <!--              &lt;!&ndash;              <goal>run</goal>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            </goals>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            <configuration>&ndash;&gt;-->
+    <!--              &lt;!&ndash;              <target>&ndash;&gt;-->
+    <!--              &lt;!&ndash;                <chmod file="${project.basedir}/*.sh" perm="755"/>&ndash;&gt;-->
+    <!--              &lt;!&ndash;              </target>&ndash;&gt;-->
+    <!--              &lt;!&ndash;            </configuration>&ndash;&gt;-->
+    <!--              &lt;!&ndash;          </execution>&ndash;&gt;-->
+    <!--              <execution>-->
+    <!--                <id>convert-line-endings-for-generated-local-nix-text-files</id>-->
+    <!--                &lt;!&ndash; Running in 'compile' phase to ensure the process-resource phase has completed &ndash;&gt;-->
+    <!--                <phase>compile</phase>-->
+    <!--                <goals>-->
+    <!--                  <goal>run</goal>-->
+    <!--                </goals>-->
+    <!--                <configuration>-->
+    <!--                  <target>-->
+    <!--                    <echo message="Converting line endings for generated local Linux scripts to Mac format..."/>-->
+    <!--                    <fixcrlf-->
+    <!--                            srcdir="${project.basedir}"-->
+    <!--                            includes="*.sh,*.env"-->
+    <!--                            eol="cr"-->
+    <!--                            encoding="UTF-8"-->
+    <!--                            preserveLastModified="true"-->
+    <!--                    />-->
+    <!--                    <echo message="Line ending conversion complete."/>-->
+    <!--                  </target>-->
+    <!--                </configuration>-->
+    <!--              </execution>-->
+    <!--            </executions>-->
+    <!--          </plugin>-->
+    <!--        </plugins>-->
+    <!--      </build>-->
+    <!--    </profile>-->
+
     <profile>
-      <id>os_windows</id>
+      <id>windows</id>
       <activation>
         <os>
           <family>windows</family>
@@ -1905,18 +1916,49 @@
                   <workingDirectory>${project.basedir}</workingDirectory>
                 </configuration>
               </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>localNix</id>
+      <activation>
+        <property>
+          <!--
+            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not
+            running in the GITHUB-Actions script (such as running locally).
+          -->
+          <name>!env.GITHUB_ACTOR</name>
+        </property>
+        <os>
+          <family>!windows</family>
+        </os>
+      </activation>
+      <properties>
+        <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
+        <!-- TODO: Fail build if this is not defined -->
+        <github.username>${GITHUB_USERNAME}</github.username>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
               <execution>
-                <id>docker-login-ghcr</id>
-                <phase>deploy</phase> <!-- Or use 'deploy' or 'install' -->
+                <id>docker-login-github</id>
+                <phase>deploy</phase>
                 <goals>
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>cmd</executable>
+                  <executable>sh</executable>
                   <arguments>
-                    <argument>/c</argument>
+                    <argument>-c</argument>
                     <argument>
-                      echo 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 | docker login ghcr.io -u ${ghcrio.username} --password-stdin
+                      echo ${env.GITHUB_PASSWORD} | docker login ghcr.io -u ${github.username} --password-stdin
                     </argument>
                   </arguments>
                 </configuration>
@@ -1926,74 +1968,9 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
-      <id>env_mac></id>
-      <activation>
-        <os>
-          <family>mac</family>
-        </os>
-      </activation>
-      <build>
-        <plugins>
-          <!-- TODO: we could have just set an 'eol' property instead of defining a whole plugin -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <!-- TODO: when running locally in mac, is this needed? -->
-              <!--          <execution>-->
-              <!--            <id>make-local-dirs</id>-->
-              <!--            <phase>initialize</phase>-->
-              <!--            <goals>-->
-              <!--              <goal>run</goal>-->
-              <!--            </goals>-->
-              <!--            <configuration>-->
-              <!--              <target>-->
-              <!--                <mkdir dir="target/logs"/>-->
-              <!--                <mkdir dir="target/data"/>-->
-              <!--              </target>-->
-              <!--            </configuration>-->
-              <!--          </execution>-->
-              <!--          <execution>-->
-              <!--            <id>set-permissions-for-generated-scripts</id>-->
-              <!--            <phase>process-resources</phase>-->
-              <!--            <goals>-->
-              <!--              <goal>run</goal>-->
-              <!--            </goals>-->
-              <!--            <configuration>-->
-              <!--              <target>-->
-              <!--                <chmod file="${project.basedir}/*.sh" perm="755"/>-->
-              <!--              </target>-->
-              <!--            </configuration>-->
-              <!--          </execution>-->
-              <execution>
-                <id>convert-line-endings-for-generated-local-nix-text-files</id>
-                <!-- Running in 'compile' phase to ensure the process-resource phase has completed -->
-                <phase>compile</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <target>
-                    <echo message="Converting line endings for generated local Linux scripts to Unix format..."/>
-                    <fixcrlf
-                            srcdir="${project.basedir}"
-                            includes="*.sh,*.env"
-                            eol="cr"
-                            encoding="UTF-8"
-                            preserveLastModified="true"
-                    />
-                    <echo message="Line ending conversion complete."/>
-                  </target>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>env_local</id>
+      <id>localWindows</id>
       <activation>
         <property>
           <!--
@@ -2002,14 +1979,43 @@
           -->
           <name>!env.GITHUB_ACTOR</name>
         </property>
+        <os>
+          <family>windows</family>
+        </os>
       </activation>
       <properties>
-        <!-- Override the value of the property to use the value that is configured in settings.xml -->
+        <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
         <!-- TODO: Fail build if this is not defined -->
-        <!-- TODO-Jawad: name of this should be github.username even in os env -->
-        <ghcrio.username>${GHCRIO_USERNAME}</ghcrio.username>
+        <github.username>${GITHUB_USERNAME}</github.username>
       </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>docker-login-github</id>
+                <phase>deploy</phase> <!-- Or use 'deploy' or 'install' -->
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>cmd</executable>
+                  <arguments>
+                    <argument>/c</argument>
+                    <argument>
+                      echo ${env.GITHUB_PASSWORD} | docker login ghcr.io -u ${github.username} --password-stdin
+                    </argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
+
   </profiles>
 
   <scm>

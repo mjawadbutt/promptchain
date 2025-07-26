@@ -3,7 +3,7 @@ Need to define 2 env vars for local setup to run in compose mode (always debug e
 REM 1. GitHub Container Registry (GHCR) Username:
 REM This is used in POM.xml as the github username when pushing a Docker image to ghcr.io from local machine.
 REM However when pushing via GITHUB-Workflow, this env.GITHUB_ACTOR is used.
-set GHCRIO_USERNAME="%GHCRIO_USERNAME%"
+set GITHUB_USERNAME="%GITHUB_USERNAME%"
 
 REM 2. PostgreSQL Superuser Password for Local Development:
 REM Used by 'docker-compose.override.yml' for the 'postgres' service and 'db-init' service.
