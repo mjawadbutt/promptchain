@@ -1246,31 +1246,31 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <!-- TODO: when running locally in linux or mac, is this needed? -->
-          <!--          <execution>-->
-          <!--            <id>make-local-dirs</id>-->
-          <!--            <phase>initialize</phase>-->
-          <!--            <goals>-->
-          <!--              <goal>run</goal>-->
-          <!--            </goals>-->
-          <!--            <configuration>-->
-          <!--              <target>-->
-          <!--                <mkdir dir="target/logs"/>-->
-          <!--                <mkdir dir="target/data"/>-->
-          <!--              </target>-->
-          <!--            </configuration>-->
-          <!--          </execution>-->
-          <!--          <execution>-->
-          <!--            <id>set-permissions-for-generated-scripts</id>-->
-          <!--            <phase>process-resources</phase>-->
-          <!--            <goals>-->
-          <!--              <goal>run</goal>-->
-          <!--            </goals>-->
-          <!--            <configuration>-->
-          <!--              <target>-->
-          <!--                <chmod file="${project.basedir}/*.sh" perm="755"/>-->
-          <!--              </target>-->
-          <!--            </configuration>-->
-          <!--          </execution>-->
+          <execution>
+            <id>make-local-dirs</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <mkdir dir="target/logs"/>
+                <mkdir dir="target/data"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>set-permissions-for-generated-scripts</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <chmod file="${project.basedir}/*.sh" perm="755"/>
+              </target>
+            </configuration>
+          </execution>
           <execution>
             <id>convert-line-endings-for-container-text-files</id>
             <!-- Running in 'compile' phase to ensure the process-resource phase has completed -->
