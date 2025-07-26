@@ -1,83 +1,125 @@
-Need to define 2 env vars for local setup to run in compose mode (always debug enabled):
 
-REM 1. GitHub Container Registry (GHCR) Username:
-REM This is used in POM.xml as the github username when pushing a Docker image to ghcr.io from local machine.
-REM However when pushing via GITHUB-Workflow, this env.GITHUB_ACTOR is used.
-set GITHUB_USERNAME="%GITHUB_USERNAME%"
+# 🚀 PromptChain Project Setup Guide
 
-REM 2. PostgreSQL Superuser Password for Local Development:
-REM Used by 'docker-compose.override.yml' for the 'postgres' service and 'db-init' service.
-REM TODO-SECURITY: Use a vault.
-set POSTGRES_SUPER_PASSWORD_LOCAL="postgres"
+## ✅ Prerequisites
 
+1. A GitHub account
+2. A **GitHub Classic Personal Access Token (PAT)** with the `write:packages` privilege
 
+---
 
-Need the following env var only if you want to run the app in swarm mode ('prod' like but not debuggable)  
-REM 3. PostgreSQL Superuser Password for Production Deployment:
-REM Used by 'docker-compose.prod.yml' for the 'postgres' service and by 'docker-compose.db-init.prod.yml'
-REM when running the one-off db-init for production.
-REM TODO-SECURITY: Use a vault.
-set POSTGRES_SUPER_PASSWORD_PROD="postgres"
+## 🛠️ Define OS-Level Environment Variables
 
+Set the following environment variables in your terminal:
 
-to run in non-swarm mode use:
+```bash
+export GITHUB_USERNAME=mjawadbutt
+export GITHUB_PASSWORD=<your GitHub classic PAT with write:packages privilege>
+```
 
-Force rebuild of image (build) and then start container in background (-d)
-docker compose --project-name promptchain_instance1 --build up 
+---
 
-docker-compose up --build
-Auto-loads docker-compose.yml + override.yml
+## 🧾 Configure Maven Credentials (`~/.m2/settings.xml`)
 
-Enables debugging, live-reload (if volume mapped), and builds from source
+Create a file named `settings.xml` in your `~/.m2` directory with the following content:
 
-For Production with Swarm:
-mvn install 
-OR
-mvn deploy
+```xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <servers>
+    <server>
+      <id>github-promptchain</id>
+      <username>${GITHUB_USERNAME}</username>
+      <password>${GITHUB_PASSWORD}</password>
+    </server>
+  </servers>
+</settings>
+```
 
-THEN to run local like prod:
-docker stack deploy -c docker-compose.yml -c docker-compose.prod.yml mystack
+> 📝 **Note:**  
+> This config is used for publishing JAR artifacts to GitHub Packages (a Maven-compatible repository).  
+> It **does not** support Docker image registries.
 
-Swarm manages orchestration features like scaling, placement, update strategy, and advanced restart policies, which are not part of local Compose's scope
+---
 
-Deploy the Stack
-Step 1: Initialize Swarm (if not already)
+## 🐳 Docker Registry Authentication
 
-docker swarm init 
+For publishing Docker images to `ghcr.io` (GitHub Container Registry), we use **shell scripts** executed via the `exec-maven-plugin`.
 
-Note: 
-If using swarm mode then the network type must be overlay and not bridge. 
-This means that now for running compose simple docker compose, the network used in compose file has to be overlay
+These scripts reuse the same environment variables (`GITHUB_USERNAME`, `GITHUB_PASSWORD`) for authenticating with GHCR.
 
-Overlay network can be created manually also (if swarm enabled):
-docker network create -d overlay my-overlay
+---
 
-and deleted if needed:
+## 📥 Clone the Repository
 
-swarm mode and overlay network created like this will persist across restarts unless explicitly disabled/removed
-docker network rm my-overlay
-docker swarm leave --force
+```bash
+cd ~/projects/personal
+git clone https://github.com/<your-username>/promptchain.git
+cd promptchain
+```
 
-The network selection can be made smart via ${NETWORK trick so it works for both sawrm and non-swarm
+---
 
+## 🔧 Maven Build Options
 
-Step 2: Deploy stack (last param is stack name, all services need to be prefixed with this & _ when running any docker command)
-docker stack deploy -c docker-compose.yml promptchain
+Make sure **Docker Desktop** (or the Docker Daemon) is running.
 
-Step 3: Check status
-docker service ls
-docker service ps promptchain-instance1_app
-docker service ps promptchain-instance1_redis
+You can use the following commands:
 
-Step 4: Tear down (when done)
-docker stack rm promptchain
+### 💡 Command Line
 
-To force Redis into an unhealthy state and test recovery:
+| Command               | Description                                                                 |
+|-----------------------|-----------------------------------------------------------------------------|
+| `mvn compile`         | Compiles source files (no JAR created)                                      |
+| `mvn package`         | Compiles and packages a JAR artifact                                        |
+| `mvn install`         | Packages the JAR, installs it in local `.m2`, and builds a Docker image     |
+| `mvn deploy`          | Also publishes JAR to GitHub Packages and Docker image to `ghcr.io`         |
+| `mvn clean package`   | (Optional) Clean target dir before packaging                                |
 
-bash
-Copy
-Edit
-docker exec -it $(docker ps --filter name=redis -q) redis-cli DEBUG SEGFAULT
+---
 
+## 🧠 Running from IntelliJ IDEA
 
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+### ▶️ Application Run Configuration
+
+1. Go to **Run → Edit Configurations**
+2. Create a new **Application** profile:
+    - **Name**: `PromptChain`
+    - **Before Launch**: Add Maven goal `clean compile`
+    - **Main class**:
+      ```
+      com.promptwise.promptchain.PromptChainApplication
+      ```
+    - **Program arguments**:
+        - Windows:
+          ```
+          --spring.profiles.active=localWin
+          ```
+        - Linux/macOS:
+          ```
+          --spring.profiles.active=localLinux
+          ```
+
+3. Save and run with ▶️ or debug with 🐞
+
+---
+
+## ✅ Running Integration Tests
+
+1. Open any `*IntegrationTests.java` file
+2. Right-click a method or class → **Run**
+3. Stop execution (this creates a run profile)
+4. Edit the JUnit profile:
+    - **Program arguments**:
+        - Windows:
+          ```
+          --spring.profiles.active=localWin
+          ```
+        - Linux/macOS:
+          ```
+          --spring.profiles.active=localLinux
+          ```
+
+5. Use dropdowns to select tests
+6. Run ▶️ or Debug 🐞
