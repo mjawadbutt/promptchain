@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="PromptChainIntegrationTests.testGetAppUser" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+  <configuration default="false" name="DevPromptChainIntegrationTests.testGetAppUser" type="JUnit" factoryName="JUnit">
     <module name="promptchain" />
     <extension name="coverage">
       <pattern>

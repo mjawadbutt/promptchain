@@ -4,17 +4,17 @@
 ## ✅ Prerequisites
 
 1. A GitHub account
-2. A **GitHub Classic Personal Access Token (PAT)** with the `write:packages` privilege
+2. Software: Docker Desktop 4+, Jdk 21+, IntelliJ Community 2025+
 
 ---
 
 ## 🛠️ Define OS-Level Environment Variables
 
-Set the following environment variables in your terminal:
+Set the following environment variables in `.bashrc` (similarly in Windows if using Windows):
 
 ```bash
-export GITHUB_USERNAME=mjawadbutt
-export GITHUB_PASSWORD=<your GitHub classic PAT with write:packages privilege>
+export GITHUB_USERNAME=<your GitHub username>
+export GITHUB_PASSWORD=<your GitHub password OR a classic PAT with write:packages privilege>
 ```
 
 ---
@@ -65,7 +65,7 @@ cd promptchain
 
 Make sure **Docker Desktop** (or the Docker Daemon) is running.
 
-You can use the following commands:
+You can run the following maven phases from command line or via IntelliJ maven plugin:
 
 ### 💡 Command Line
 
@@ -81,48 +81,17 @@ You can use the following commands:
 
 ## 🧠 Running from IntelliJ IDEA
 
-### ▶️ Application Run Configuration
+### ▶️ Running the application
 
-1. Go to **Run → Edit Configurations**
-2. Create a new **Application** profile:
-    - **Name**: `PromptChain`
-    - **Before Launch**: Add Maven goal `clean compile`
-    - **Main class**:
-      ```
-      com.promptwise.promptchain.PromptChainApplication
-      ```
-    - **Program arguments**:
-        - Windows:
-          ```
-          --spring.profiles.active=localWin
-          ```
-        - Linux/macOS:
-          ```
-          --spring.profiles.active=localLinux
-          ```
-
-3. Save and run with ▶️ or debug with 🐞
+1. Select the IntelliJ profile `DevPromptChain` and click Run ▶️ or Debug 🐞
 
 ---
 
 ## ✅ Running Integration Tests
 
-1. Open any `*IntegrationTests.java` file
-2. Right-click a method or class → **Run**
-3. Stop execution (this creates a run profile)
-4. Edit the JUnit profile:
-    - **Program arguments**:
-        - Windows:
-          ```
-          --spring.profiles.active=localWin
-          ```
-        - Linux/macOS:
-          ```
-          --spring.profiles.active=localLinux
-          ```
-
-5. Use dropdowns to select tests
-6. Run ▶️ or Debug 🐞
+1. Run ▶️ or Debug 🐞 the IntelliJ **profile** 'DevPromptChainIntegrationTests.testGetAppUser' to run the sample test.
+2. Modify or copy the sample profile as needed.
+3. If you modify the `build.properties` file then change the env-var defined in the profile accordingly.
 
 ---
 
