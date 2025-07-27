@@ -18,11 +18,11 @@ public class PromptChainUnitTestProfilesResolver implements ActiveProfilesResolv
       //-- The profiles i.e. property file load order for running JUnit tests on Windows locally.
       //-- testUnitWinLocal overrides test, test overrides winLocal. Then all props are merged and available for use
       // anywhere and in any way (@Value, @ConfigurationProperties, Environment bean etc.)
-      return new String[]{"winLocal", "test", "testUnit", "testUnitWinLocal"};
+      return new String[]{"test", "testUnit", "testUnitWindows"};
     } else {
       //-- The profiles i.e. property file load order for running JUnit tests on Linux locally (will be used by
       //-- Jenkins pipeline builds)
-      return new String[]{"linuxLocal", "test", "testUnit", "testUnitLinuxLocal"};
+      return new String[]{"test", "testUnit", "testUnitLinux"};
     }
   }
 }

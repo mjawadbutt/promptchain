@@ -8,7 +8,7 @@ if [ "${RUN_IN_DEBUG_MODE}" = "true" ]; then
   # ensuring proper signal handling (e.g., SIGTERM from Docker stop).
   # JAVA_OPTS is left unquoted to allow shell word splitting for multiple options.
   # APP_JAR_NAME is quoted as it's a single filename argument.
-  exec java "${JAVA_OPTS}" -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT} -jar "${APP_JAR_NAME}"
+  exec java "${JAVA_OPTS}" -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT:-5005} -jar "${APP_JAR_NAME}"
 else
   echo "Starting app normally"
   # Use 'exec' for normal startup as well, for consistent signal handling.

@@ -393,18 +393,19 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
-          <exclude>deploy-postgres-stack.bat</exclude>
-          <exclude>deploy-postgres-stack.sh</exclude>
-          <exclude>deploy-redis-stack.bat</exclude>
-          <exclude>deploy-redis-stack.sh</exclude>
-          <exclude>local-app.env</exclude>
-          <exclude>local-app-setenv.bat</exclude>
-          <exclude>local-app-setenv.sh</exclude>
-          <exclude>deploy-postgres-stack.bat</exclude>
-          <exclude>deploy-postgres-stack.sh</exclude>
-          <exclude>deploy-redis-stack.bat</exclude>
-          <exclude>deploy-redis-stack.sh</exclude>
-
+          <exclude>dev-app.env</exclude>
+          <exclude>dev-deploy-app-stack.bat</exclude>
+          <exclude>dev-deploy-app-stack.sh</exclude>
+          <exclude>dev-deploy-postgres-stack.bat</exclude>
+          <exclude>dev-deploy-postgres-stack.sh</exclude>
+          <exclude>dev-deploy-redis-stack.bat</exclude>
+          <exclude>dev-deploy-redis-stack.sh</exclude>
+          <exclude>dev-remove-app-stack.bat</exclude>
+          <exclude>dev-remove-app-stack.sh</exclude>
+          <exclude>dev-remove-postgres-stack.bat</exclude>
+          <exclude>dev-remove-postgres-stack.sh</exclude>
+          <exclude>dev-remove-redis-stack.bat</exclude>
+          <exclude>dev-remove-redis-stack.sh</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -433,21 +434,19 @@
             <fileset>
               <directory>${project.basedir}</directory>
               <includes>
-                <include>deploy-postgres-stack.bat</include>
-                <include>deploy-postgres-stack.sh</include>
-                <include>deploy-redis-stack.bat</include>
-                <include>deploy-redis-stack.sh</include>
-                <!--
-                  TODO: The local-app.env to be replaced with local-app-setenv.* only bc we need to support executing
-                  TODO: integration tests via IntelliJ because the JUnit plugin does not support passing env file.
-                -->
-                <include>local-app.env</include>
-                <include>local-app-setenv.bat</include>
-                <include>local-app-setenv.sh</include>
-                <include>remove-postgres-stack.bat</include>
-                <include>remove-postgres-stack.sh</include>
-                <include>remove-redis-stack.bat</include>
-                <include>remove-redis-stack.sh</include>
+                <include>dev-app.env</include>
+                <include>dev-deploy-app-stack.bat</include>
+                <include>dev-deploy-app-stack.sh</include>
+                <include>dev-deploy-postgres-stack.bat</include>
+                <include>dev-deploy-postgres-stack.sh</include>
+                <include>dev-deploy-redis-stack.bat</include>
+                <include>dev-deploy-redis-stack.sh</include>
+                <include>dev-remove-app-stack.bat</include>
+                <include>dev-remove-app-stack.sh</include>
+                <include>dev-remove-postgres-stack.bat</include>
+                <include>dev-remove-postgres-stack.sh</include>
+                <include>dev-remove-redis-stack.bat</include>
+                <include>dev-remove-redis-stack.sh</include>
               </includes>
               <followSymlinks>false</followSymlinks>
               <useDefaultExcludes>true</useDefaultExcludes>
@@ -475,24 +474,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!--      <plugin>-->
-      <!--        <groupId>io.github.mjourard</groupId>-->
-      <!--        <artifactId>env-file-maven-plugin</artifactId>-->
-      <!--        <version>2.1.0</version>-->
-      <!--        <executions>-->
-      <!--          <execution>-->
-      <!--            <phase>initialize</phase>-->
-      <!--            <goals>-->
-      <!--              <goal>loadenv</goal>-->
-      <!--            </goals>-->
-      <!--            <configuration>-->
-      <!--              <envFileDirectory>.</envFileDirectory>-->
-      <!--              <envFileName>local-app.env</envFileName>-->
-      <!--            </configuration>-->
-      <!--          </execution>-->
-      <!--        </executions>-->
-      <!--      </plugin>-->
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -1224,17 +1205,20 @@
                 <resource>
                   <directory>${main-resources-dir}</directory>
                   <includes>
-                    <include>deploy-postgres-stack.bat</include>
-                    <include>deploy-postgres-stack.sh</include>
-                    <include>deploy-redis-stack.bat</include>
-                    <include>deploy-redis-stack.sh</include>
-                    <include>local-app.env</include>
-                    <include>local-app-setenv.bat</include>
-                    <include>local-app-setenv.sh</include>
-                    <include>remove-postgres-stack.bat</include>
-                    <include>remove-postgres-stack.sh</include>
-                    <include>remove-redis-stack.bat</include>
-                    <include>remove-redis-stack.sh</include>
+                    <include>dev-app.env</include>
+                    <!--                    TODO-Jawad: Implement these -->
+                    <!--                    <include>dev-deploy-app-stack.bat</include>-->
+                    <!--                    <include>dev-deploy-app-stack.sh</include>-->
+                    <include>dev-deploy-postgres-stack.bat</include>
+                    <include>dev-deploy-postgres-stack.sh</include>
+                    <include>dev-deploy-redis-stack.bat</include>
+                    <include>dev-deploy-redis-stack.sh</include>
+                    <include>dev-remove-app-stack.bat</include>
+                    <include>dev-remove-app-stack.sh</include>
+                    <include>dev-remove-postgres-stack.bat</include>
+                    <include>dev-remove-postgres-stack.sh</include>
+                    <include>dev-remove-redis-stack.bat</include>
+                    <include>dev-remove-redis-stack.sh</include>
                   </includes>
                   <filtering>true</filtering>
                 </resource>

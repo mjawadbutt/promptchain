@@ -8,7 +8,7 @@ echo --- Starting All Infrastructure Stacks ---
 
 :: Call the Redis stack start script
 echo Calling Redis stack start script...
-call deploy-redis-stack.bat
+call dev-deploy-redis-stack.bat
 if %errorlevel% neq 0 (
     echo ERROR: Redis stack failed to start. Aborting.
     exit /b 1
@@ -19,7 +19,7 @@ echo. :: Newline for readability
 
 :: Call the PostgreSQL stack start script
 echo Calling PostgreSQL stack start script...
-call deploy-postgres-stack.bat
+call dev-deploy-postgres-stack.bat
 if %errorlevel% neq 0 (
     echo ERROR: PostgreSQL stack failed to start. Aborting.
     exit /b 1

@@ -3,6 +3,7 @@
 
 # Whitelist the files that should be part of the respository.
 !.github
+!.run
 # Note:
 # Do not use single or double asteriks at the end. They are not working properly.
 # To ignore all files in a dir recursively just add / at the end.

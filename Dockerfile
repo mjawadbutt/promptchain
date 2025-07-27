@@ -39,13 +39,6 @@ RUN apk add --no-cache dos2unix  \
 
 ENV APP_JAR_NAME=${PROJECT_BUILD_FINAL_NAME}
 
-# Set default JVM options (can be overridden by environment variables)
-# They are already defined in docker-compose.override.yml but, if needed, we can uncomment have the defaults
-# built into the image. Overkill, not needed.
-# ENV JAVA_OPTS="-Xms256m -Xmx512m"
-# ENV DEBUG_ENABLED=false
-# ENV DEBUG_PORT=5005
-
 # Switch to the non-root user before running the application
 # All subsequent RUN, CMD, and ENTRYPOINT commands will run as this user
 USER promptchain

@@ -8,7 +8,7 @@ echo --- Starting All Infrastructure Stack Removal ---
 
 :: Call the Redis stack removal script
 echo Calling Redis stack removal script...
-call remove-redis-stack.bat
+call dev-remove-redis-stack.bat
 if %errorlevel% neq 0 (
     echo WARNING: Redis stack removal encountered an issue, but continuing with PostgreSQL.
 )
@@ -18,7 +18,7 @@ echo. :: Newline for readability
 
 :: Call the PostgreSQL stack removal script
 echo Calling PostgreSQL stack removal script...
-call remove-postgres-stack.bat
+call dev-remove-postgres-stack.bat
 if %errorlevel% neq 0 (
     echo WARNING: PostgreSQL stack removal encountered an issue.
 )

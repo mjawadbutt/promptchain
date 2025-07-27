@@ -5,7 +5,7 @@ echo "--- Starting All Infrastructure Stacks ---"
 
 # Call the Redis stack start script
 echo "Calling Redis stack start script..."
-if ! ./deploy-redis-stack.sh; then
+if ! ./dev-deploy-redis-stack.sh; then
   echo "ERROR: Redis stack failed to start. Aborting."
   exit 1
 fi
@@ -15,7 +15,7 @@ echo "" # Newline for readability
 
 # Call the PostgreSQL stack start script
 echo "Calling PostgreSQL stack start script..."
-if ! ./deploy-postgres-stack.sh; then
+if ! ./dev-deploy-postgres-stack.sh; then
   echo "ERROR: PostgreSQL stack failed to start. Aborting."
   exit 1
 fi

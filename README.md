@@ -123,3 +123,18 @@ You can use the following commands:
 
 5. Use dropdowns to select tests
 6. Run ▶️ or Debug 🐞
+
+---
+
+## 🧠 Running in locally in 'prod-like' mode
+
+In a non-dev environment (i.e. a prod env), PromptChain is executed by deploying it as a stack in Docker Swarm.
+To run in this mode, execute the `dev-deploy-app-stack.bat` script from the command shell (Windows), or
+`dev-deploy-app-stack.sh` from the bash shell terminal (Linux/Mac).
+
+Even this can be started in debug mode. To enable, set the `RUN_IN_DEBUG_MODE` environment variable to `true`.
+
+This will enable remote debugging at the port defined by the environment variable `DEBUG_PORT`. Setting this
+env var is optional, and, if it is not set, then the default value is `5005`.
+
+When you want to stop the app, execute the corresponding `dev-remove-app-stack` script.
