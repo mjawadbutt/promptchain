@@ -1,3 +1,4 @@
+[![Maven Build and Deploy](https://github.com/mjawadbutt/promptchain/actions/workflows/prompthub-github-workflow.yml/badge.svg)](https://github.com/mjawadbutt/promptchain/actions/workflows/prompthub-github-workflow.yml)
 # 🚀 PromptChain Project Setup Guide
 
 ## ✅ Prerequisites
