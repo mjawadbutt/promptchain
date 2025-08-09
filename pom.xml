@@ -1301,7 +1301,7 @@
                 <chmod file="${project.basedir}/*.sh" perm="755"/>
                 <!-- List files alphabetically -->
                 <exec executable="ls">
-                  <arg value="-la"/>
+                  <arg value="-laR"/>
                   <arg value="${project.basedir}/src/main/container-resources/"/>
                 </exec>
                 <exec executable="ls">
