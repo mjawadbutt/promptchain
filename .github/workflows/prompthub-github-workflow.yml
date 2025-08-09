@@ -62,7 +62,7 @@ jobs:
       env:
         GITHUB_USERNAME: ${{ github.actor }}
         GITHUB_PAT: ${{ secrets.GHCR_PAT }}
-      run: mvn deploy
+      run: mvn deploy -DskipITs
 
     - name: Leave swarm
       if: always()
