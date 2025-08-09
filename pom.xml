@@ -108,7 +108,7 @@
       env var (which is also used by settings.xml).
     -->
     <github.username>${env.GITHUB_USERNAME}</github.username>
-    <github.password>${env.GITHUB_PASSWORD}</github.password>
+    <github.pat>${env.GITHUB_PAT}</github.pat>
     <!--    <github.username>${env.GITHUB_ACTOR}</github.username>-->
     <!--    <github.password>${env.GITHUB_TOKEN}</github.password>-->
 
@@ -1902,7 +1902,7 @@
         <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
         <!-- TODO: Fail build if this is not defined -->
         <github.username>${env.GITHUB_USERNAME}</github.username>
-        <github.password>${env.GITHUB_PASSWORD}</github.password>
+        <github.password>${env.GITHUB_PAT}</github.password>
       </properties>
       <build>
         <plugins>

@@ -96,7 +96,7 @@ mvn deploy
 For Linux/Mac (add to `.bashrc`):
 ```bash
 export GITHUB_USERNAME=<your GitHub username>
-export GITHUB_PASSWORD=<your classic PAT>
+export GITHUB_PAT=<your classic PAT>
 ```
 
 ### 3️⃣ Configure Maven Credentials (`~/.m2/settings.xml`)
@@ -108,7 +108,7 @@ export GITHUB_PASSWORD=<your classic PAT>
     <server>
       <id>github-promptchain</id>
       <username>${GITHUB_USERNAME}</username>
-      <password>${GITHUB_PASSWORD}</password>
+      <password>${GITHUB_PAT}</password>
     </server>
   </servers>
 </settings>
@@ -119,7 +119,7 @@ export GITHUB_PASSWORD=<your classic PAT>
 ### 4️⃣ Setup GHCR Authentication
 For Docker images to `ghcr.io`, the `exec-maven-plugin` runs shell scripts that reuse the same variables:
 - `GITHUB_USERNAME`
-- `GITHUB_PASSWORD`
+- `GITHUB_PAT`
 
 No extra configuration is needed.
 

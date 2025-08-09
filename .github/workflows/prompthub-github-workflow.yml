@@ -8,6 +8,7 @@ on:
     branches:
       - '**'   # All branches
 
+#TODO: Not needed. GITHUB_TOKEN cannot be used for GHCR. only for GitHub Packages.
 permissions:
   contents: read
   packages: write
@@ -29,7 +30,7 @@ jobs:
     - name: Configure Maven settings
       env:
         GITHUB_USERNAME: ${{ github.actor }}
-        GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_PAT: ${{ secrets.GHCR_PAT }}
       run: |
         mkdir -p ~/.m2
         cat > ~/.m2/settings.xml <<EOF
@@ -41,7 +42,7 @@ jobs:
             <server>
               <id>github-promptchain</id>
               <username>${GITHUB_USERNAME}</username>
-              <password>${GITHUB_PASSWORD}</password>
+              <password>${GITHUB_PAT}</password>
             </server>
           </servers>
         </settings>
@@ -60,8 +61,8 @@ jobs:
       continue-on-error: ${{ github.ref != 'refs/heads/main' }}
       env:
         GITHUB_USERNAME: ${{ github.actor }}
-        GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-      run: mvn deploy -DskipITs
+        GITHUB_PAT: ${{ secrets.GHCR_PAT }}
+      run: mvn deploy
 
     - name: Leave swarm
       if: always()
