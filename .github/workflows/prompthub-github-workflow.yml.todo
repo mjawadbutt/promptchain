@@ -1,39 +1,42 @@
-name: CI - Build and Test
+name: Maven Build and Deploy
 
 on:
   push:
     branches:
-      - main
-      - '**'  # All branches
+      - '**'   # All branches
+  pull_request:
+    branches:
+      - '**'   # All branches
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_ACTOR: ${{ github.actor }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v3
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 21
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
 
-# TODO:before doing test or verify, do chmod +x dev-deploy-*.sh and dev-remove-*.sh so maven-exec can start/stop services
-      - name: Build and Push Docker Image via Maven
-        # The maven-settings file is needed because fabric8 plugin that were are using only supports readiing
-        # repo creds from setting.xml and does not allow providing them directly.
-        run: mvn -s .github/maven-settings.xml --batch-mode deploy
+    - name: Build and deploy with Maven
+      id: maven_build
+      continue-on-error: ${{ github.ref != 'refs/heads/main' }}
+      run: mvn deploy -DskipITs
+
+    - name: Fail on non-main if build failed
+      if: ${{ github.ref == 'refs/heads/main' && steps.maven_build.outcome != 'success' }}
+      run: |
+        echo "Build failed on main branch — failing workflow."
+        exit 1
