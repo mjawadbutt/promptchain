@@ -107,8 +107,10 @@
       fall back (see the profile'set-default-ghcrio-username') to the value defined by the corresponding OS level
       env var (which is also used by settings.xml).
     -->
-    <github.username>${env.GITHUB_ACTOR}</github.username>
-    <github.password>${env.GITHUB_TOKEN}</github.password>
+    <github.username>${env.GITHUB_USERNAME}</github.username>
+    <github.password>${env.GITHUB_PASSWORD}</github.password>
+    <!--    <github.username>${env.GITHUB_ACTOR}</github.username>-->
+    <!--    <github.password>${env.GITHUB_TOKEN}</github.password>-->
 
     <postgres_host>localhost</postgres_host>
     <!-- Changing values not supported for now -->
@@ -1860,38 +1862,38 @@
       </build>
     </profile>
 
-    <profile>
-      <id>localNix</id>
-      <activation>
-        <property>
-          <!--
-            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not
-            running in the GITHUB-Actions script (such as running locally).
-          -->
-          <name>!env.GITHUB_ACTOR</name>
-        </property>
-        <os>
-          <family>!windows</family>
-        </os>
-      </activation>
-      <properties>
-        <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
-        <!-- TODO: Fail build if this is not defined -->
-        <github.username>${env.GITHUB_USERNAME}</github.username>
-        <github.password>${env.GITHUB_PASSWORD}</github.password>
-      </properties>
-    </profile>
+    <!--    <profile>-->
+    <!--      <id>localNix</id>-->
+    <!--      <activation>-->
+    <!--        <property>-->
+    <!--          &lt;!&ndash;-->
+    <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
+    <!--            running in the GITHUB-Actions script (such as running locally).-->
+    <!--          &ndash;&gt;-->
+    <!--          <name>!env.GITHUB_ACTOR</name>-->
+    <!--        </property>-->
+    <!--        <os>-->
+    <!--          <family>!windows</family>-->
+    <!--        </os>-->
+    <!--      </activation>-->
+    <!--      <properties>-->
+    <!--        &lt;!&ndash; Override the value of the property to use the value that is configured in the OS-level env var &ndash;&gt;-->
+    <!--        &lt;!&ndash; TODO: Fail build if this is not defined &ndash;&gt;-->
+    <!--        <github.username>${env.GITHUB_USERNAME}</github.username>-->
+    <!--        <github.password>${env.GITHUB_PASSWORD}</github.password>-->
+    <!--      </properties>-->
+    <!--    </profile>-->
 
     <profile>
       <id>localWindows</id>
       <activation>
-        <property>
-          <!--
-            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not
-            running in the GITHUB-Actions script (such as running locally).
-          -->
-          <name>!env.GITHUB_ACTOR</name>
-        </property>
+        <!--        <property>-->
+        <!--          &lt;!&ndash;-->
+        <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
+        <!--            running in the GITHUB-Actions script (such as running locally).-->
+        <!--          &ndash;&gt;-->
+        <!--          <name>!env.GITHUB_ACTOR</name>-->
+        <!--        </property>-->
         <os>
           <family>windows</family>
         </os>

@@ -59,8 +59,8 @@ jobs:
       id: maven_build
       continue-on-error: ${{ github.ref != 'refs/heads/main' }}
       env:
-        GITHUB_ACTOR: ${{ github.actor }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USERNAME: ${{ github.actor }}
+        GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       run: mvn deploy -DskipITs
 
     - name: Leave swarm
