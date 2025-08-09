@@ -30,7 +30,7 @@ jobs:
     - name: Configure Maven settings
       env:
         GITHUB_USERNAME: ${{ github.actor }}
-        GITHUB_PAT: ${{ secrets.GHCR_PAT }}
+        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       run: |
         mkdir -p ~/.m2
         cat > ~/.m2/settings.xml <<EOF
