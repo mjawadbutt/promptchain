@@ -8,6 +8,10 @@ on:
     branches:
       - '**'   # All branches
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -58,6 +62,10 @@ jobs:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: mvn deploy -DskipITs
+
+    - name: Leave swarm
+      if: always()
+      run: docker swarm leave --force
 
     - name: Fail on non-main if build failed
       if: ${{ github.ref == 'refs/heads/main' && steps.maven_build.outcome != 'success' }}
