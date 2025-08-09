@@ -22,6 +22,21 @@ jobs:
         distribution: temurin
         java-version: 21
 
+    - name: Setup Maven settings.xml
+      run: |
+        mkdir -p $HOME/.m2
+        cat > $HOME/.m2/settings.xml <<EOF
+        <settings>
+          <servers>
+            <server>
+              <id>github</id>
+              <username>${{ github.actor }}</username>
+              <password>${{ secrets.GITHUB_TOKEN }}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+
     - name: Cache Maven packages
       uses: actions/cache@v4
       with:
@@ -33,6 +48,9 @@ jobs:
     - name: Build and deploy with Maven
       id: maven_build
       continue-on-error: ${{ github.ref != 'refs/heads/main' }}
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: mvn deploy -DskipITs
 
     - name: Fail on non-main if build failed
