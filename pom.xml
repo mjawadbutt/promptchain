@@ -1625,7 +1625,7 @@
                 <argument>-c</argument>
                 <argument>
                   <!-- TODO: Fail build if this is not defined -->
-                  echo ${github.pat} | docker login ghcr.io -u ${github.username} --password-stdin
+                  echo "${github.pat}" | docker login ghcr.io -u "${github.username}" --password-stdin
                 </argument>
               </arguments>
             </configuration>
