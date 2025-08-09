@@ -24,8 +24,8 @@ jobs:
 
     - name: Configure Maven settings
       env:
-        GITHUB_ACTOR: ${{ github.actor }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USERNAME: ${{ github.actor }}
+        GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       run: |
         mkdir -p ~/.m2
         cat > ~/.m2/settings.xml <<EOF
@@ -36,8 +36,8 @@ jobs:
           <servers>
             <server>
               <id>github</id>
-              <username>${GITHUB_ACTOR}</username>
-              <password>${GITHUB_TOKEN}</password>
+              <username>${GITHUB_USERNAME}</username>
+              <password>${GITHUB_PASSWORD}</password>
             </server>
           </servers>
         </settings>
