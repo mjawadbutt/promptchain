@@ -109,8 +109,6 @@
     -->
     <github.username>${env.GITHUB_USERNAME}</github.username>
     <github.pat>${env.GITHUB_PAT}</github.pat>
-    <!--    <github.username>${env.GITHUB_ACTOR}</github.username>-->
-    <!--    <github.password>${env.GITHUB_TOKEN}</github.password>-->
 
     <postgres_host>localhost</postgres_host>
     <!-- Changing values not supported for now -->
@@ -1627,7 +1625,7 @@
                 <argument>-c</argument>
                 <argument>
                   <!-- TODO: Fail build if this is not defined -->
-                  echo ${github.password} | docker login ghcr.io -u ${github.username} --password-stdin
+                  echo ${github.pat} | docker login ghcr.io -u ${github.username} --password-stdin
                 </argument>
               </arguments>
             </configuration>
@@ -1880,7 +1878,7 @@
     <!--        &lt;!&ndash; Override the value of the property to use the value that is configured in the OS-level env var &ndash;&gt;-->
     <!--        &lt;!&ndash; TODO: Fail build if this is not defined &ndash;&gt;-->
     <!--        <github.username>${env.GITHUB_USERNAME}</github.username>-->
-    <!--        <github.password>${env.GITHUB_PASSWORD}</github.password>-->
+    <!--        <github.pat>${env.GITHUB_PAT}</github.pat>-->
     <!--      </properties>-->
     <!--    </profile>-->
 
@@ -1902,7 +1900,7 @@
         <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
         <!-- TODO: Fail build if this is not defined -->
         <github.username>${env.GITHUB_USERNAME}</github.username>
-        <github.password>${env.GITHUB_PAT}</github.password>
+        <github.pat>${env.GITHUB_PAT}</github.pat>
       </properties>
       <build>
         <plugins>
@@ -1922,7 +1920,7 @@
                     <argument>/c</argument>
                     <argument>
                       <!-- TODO: Fail build if this is not defined -->
-                      echo ${github.password} | docker login ghcr.io -u ${github.username} --password-stdin
+                      echo ${github.pat} | docker login ghcr.io -u ${github.username} --password-stdin
                     </argument>
                   </arguments>
                 </configuration>
