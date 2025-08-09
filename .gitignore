@@ -10,6 +10,7 @@
 !src/
 src/main/resources/static/client/
 !.editorconfig
+!.gitattributes
 !.gitignore
 !.mvn
 !deploy-infrastructure-stacks.*
