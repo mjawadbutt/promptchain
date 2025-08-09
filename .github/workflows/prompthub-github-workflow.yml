@@ -57,15 +57,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-#TODO-Jawad: Remove DskipITs but integration tests not running properly bc the create-user script not running
-#TODO-Jawad: properly in the postgres container. Will debug it later bc its a pain.
     - name: Build and deploy with Maven
       id: maven_build
       continue-on-error: ${{ github.ref != 'refs/heads/main' }}
       env:
         GITHUB_USERNAME: ${{ github.actor }}
         GITHUB_PAT: ${{ secrets.PAT_GHCR }}
-      run: mvn deploy -DskipITs | grep -v "Downloading from" | grep -v "Downloaded from" | grep -v "Progress (1)"
+      run: mvn deploy | grep -v "Downloading from" | grep -v "Downloaded from" | grep -v "Progress (1)"
 
     - name: Leave swarm
       if: always()
