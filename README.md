@@ -1,28 +1,105 @@
-
 # 🚀 PromptChain Project Setup Guide
 
 ## ✅ Prerequisites
 
-1. A GitHub account
-2. Software: Docker Desktop 4+, Jdk 21+, IntelliJ Community 2025+
+1. A **GitHub account**
+2. Software:
+    - **Docker Desktop** 4+
+    - **JDK** 21+
+    - **IntelliJ Community** 2025+
 
 ---
 
-## 🛠️ Define OS-Level Environment Variables
-
-Set the following environment variables in `.bashrc` (similarly in Windows if using Windows):
+## 📥 Clone the Repository
 
 ```bash
-export GITHUB_USERNAME=<your GitHub username>
-export GITHUB_PASSWORD=<your GitHub password OR a classic PAT with write:packages privilege>
+cd ~/projects/personal
+git clone https://github.com/mjawadbutt/promptchain.git
+cd promptchain
 ```
 
 ---
 
-## 🧾 Configure Maven Credentials (`~/.m2/settings.xml`)
+## 🔧 Maven Build Options
 
-Create a file named `settings.xml` in your `~/.m2` directory with the following content:
+Make sure **Docker Desktop** (or the Docker Daemon) is running.
 
+You can run the following Maven phases from the **command line** or via the **IntelliJ Maven plugin**:
+
+### 💡 Command Line
+
+| Command               | Description                                                                 |
+|-----------------------|-----------------------------------------------------------------------------|
+| `mvn compile`         | Compiles source files (no JAR created)                                      |
+| `mvn package`         | Compiles and packages a JAR artifact                                        |
+| `mvn install`         | Packages the JAR, installs it in local `.m2`, and builds a Docker image     |
+| `mvn deploy`          | Publishes the JAR to GitHub Packages and the Docker image to `ghcr.io`      |
+| `mvn clean package`   | Cleans target dir before packaging (optional)                               |
+
+---
+
+## 🧠 Running from IntelliJ IDEA
+
+### ▶️ Running the Application
+
+1. Select the IntelliJ **profile** `DevPromptChain`.
+2. Click **Run ▶️** or **Debug 🐞**.
+
+---
+
+## ✅ Running Integration Tests
+
+1. Run ▶️ or Debug 🐞 the IntelliJ **profile** `DevPromptChainIntegrationTests.testGetAppUser` to run the sample test.
+2. Modify or copy the sample profile as needed.
+3. If you modify the `build.properties` file, update the environment variable in the profile accordingly.
+
+---
+
+## 🧠 Running Locally in 'Prod-like' Mode
+
+In a **non-dev environment** (i.e., production-like), PromptChain runs as a **stack in Docker Swarm**.
+
+- On **Windows**: run `dev-deploy-app-stack.bat`
+- On **Linux/Mac**: run `dev-deploy-app-stack.sh`
+
+**Debug Mode:**
+- Enable by setting the environment variable:
+  ```bash
+  export RUN_IN_DEBUG_MODE=true
+  ```
+- Default debug port: **5005** (change by setting `DEBUG_PORT`)
+
+**Stopping the App:**
+- Run the corresponding `dev-remove-app-stack` script.
+
+---
+
+## 📦 Publishing Artifacts Manually
+
+The Maven build creates both:
+- A **JAR artifact**
+- A **Docker Image**
+
+Although CI (GitHub Actions) publishes these automatically, you can manually publish them by running:
+
+```bash
+mvn deploy
+```
+
+**Authentication Setup:**
+
+### 1️⃣ Create a Personal Access Token (PAT)
+- Type: **Classic**
+- Scope: `write:packages`
+
+### 2️⃣ Set Environment Variables
+For Linux/Mac (add to `.bashrc`):
+```bash
+export GITHUB_USERNAME=<your GitHub username>
+export GITHUB_PASSWORD=<your classic PAT>
+```
+
+### 3️⃣ Configure Maven Credentials (`~/.m2/settings.xml`)
 ```xml
 <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -36,74 +113,14 @@ Create a file named `settings.xml` in your `~/.m2` directory with the following 
   </servers>
 </settings>
 ```
+> 📝 **Note:** This config is for **publishing JAR artifacts** to GitHub Packages.  
+> It does **not** handle Docker image registries.
 
-> 📝 **Note:**  
-> This config is used for publishing JAR artifacts to GitHub Packages (a Maven-compatible repository).  
-> It **does not** support Docker image registries.
+### 4️⃣ Setup GHCR Authentication
+For Docker images to `ghcr.io`, the `exec-maven-plugin` runs shell scripts that reuse the same variables:
+- `GITHUB_USERNAME`
+- `GITHUB_PASSWORD`
 
----
-
-## 🐳 Docker Registry Authentication
-
-For publishing Docker images to `ghcr.io` (GitHub Container Registry), we use **shell scripts** executed via the `exec-maven-plugin`.
-
-These scripts reuse the same environment variables (`GITHUB_USERNAME`, `GITHUB_PASSWORD`) for authenticating with GHCR.
+No extra configuration is needed.
 
 ---
-
-## 📥 Clone the Repository
-
-```bash
-cd ~/projects/personal
-git clone https://github.com/<your-username>/promptchain.git
-cd promptchain
-```
-
----
-
-## 🔧 Maven Build Options
-
-Make sure **Docker Desktop** (or the Docker Daemon) is running.
-
-You can run the following maven phases from command line or via IntelliJ maven plugin:
-
-### 💡 Command Line
-
-| Command               | Description                                                                 |
-|-----------------------|-----------------------------------------------------------------------------|
-| `mvn compile`         | Compiles source files (no JAR created)                                      |
-| `mvn package`         | Compiles and packages a JAR artifact                                        |
-| `mvn install`         | Packages the JAR, installs it in local `.m2`, and builds a Docker image     |
-| `mvn deploy`          | Also publishes JAR to GitHub Packages and Docker image to `ghcr.io`         |
-| `mvn clean package`   | (Optional) Clean target dir before packaging                                |
-
----
-
-## 🧠 Running from IntelliJ IDEA
-
-### ▶️ Running the application
-
-1. Select the IntelliJ profile `DevPromptChain` and click Run ▶️ or Debug 🐞
-
----
-
-## ✅ Running Integration Tests
-
-1. Run ▶️ or Debug 🐞 the IntelliJ **profile** 'DevPromptChainIntegrationTests.testGetAppUser' to run the sample test.
-2. Modify or copy the sample profile as needed.
-3. If you modify the `build.properties` file then change the env-var defined in the profile accordingly.
-
----
-
-## 🧠 Running in locally in 'prod-like' mode
-
-In a non-dev environment (i.e. a prod env), PromptChain is executed by deploying it as a stack in Docker Swarm.
-To run in this mode, execute the `dev-deploy-app-stack.bat` script from the command shell (Windows), or
-`dev-deploy-app-stack.sh` from the bash shell terminal (Linux/Mac).
-
-Even this can be started in debug mode. To enable, set the `RUN_IN_DEBUG_MODE` environment variable to `true`.
-
-This will enable remote debugging at the port defined by the environment variable `DEBUG_PORT`. Setting this
-env var is optional, and, if it is not set, then the default value is `5005`.
-
-When you want to stop the app, execute the corresponding `dev-remove-app-stack` script.
