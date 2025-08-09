@@ -1297,7 +1297,12 @@
             </goals>
             <configuration>
               <target>
-                <chmod file="${project.basedir}/src/main/container-resources/*.sh" perm="755"/>
+                <!-- Recursively chmod all .sh files under container-resources -->
+                <chmod perm="755">
+                  <fileset dir="${project.basedir}/src/main/container-resources">
+                    <include name="**/*.sh"/>
+                  </fileset>
+                </chmod>
                 <chmod file="${project.basedir}/*.sh" perm="755"/>
                 <!-- List files alphabetically -->
                 <exec executable="ls">
