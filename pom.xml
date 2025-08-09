@@ -1299,6 +1299,15 @@
               <target>
                 <chmod file="${project.basedir}/src/main/container-resources/*.sh" perm="755"/>
                 <chmod file="${project.basedir}/*.sh" perm="755"/>
+                <!-- List files alphabetically -->
+                <exec executable="ls">
+                  <arg value="-la"/>
+                  <arg value="${project.basedir}/src/main/container-resources/"/>
+                </exec>
+                <exec executable="ls">
+                  <arg value="-la"/>
+                  <arg value="${project.basedir}"/>
+                </exec>
               </target>
             </configuration>
           </execution>
