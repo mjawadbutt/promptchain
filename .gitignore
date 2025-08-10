@@ -1,14 +1,14 @@
-# Blacklist the highest level directory with /*
+# Ignore everything at the root by default
 /*
 
-# Whitelist the files that should be part of the respository.
+# Whitelist essential folders and files
 !.github
 !.run
-# Note:
-# Do not use single or double asteriks at the end. They are not working properly.
-# To ignore all files in a dir recursively just add / at the end.
 !src/
-src/main/resources/static/client/
+!src/main/
+!src/main/resources/
+!src/main/resources/static/
+!src/main/resources/static/client/
 !.editorconfig
 !.gitattributes
 !.gitignore
@@ -25,3 +25,13 @@ src/main/resources/static/client/
 !prune-all-images.*
 !README.md
 !remove-infrastructure-stacks.*
+
+# ------------------------------
+# Ignore only Next.js build artifacts inside static/client
+# ------------------------------
+src/main/resources/static/client/node_modules/
+src/main/resources/static/client/.next/
+src/main/resources/static/client/out/
+src/main/resources/static/client/.turbo/
+src/main/resources/static/client/.env*
+src/main/resources/static/client/.DS_Store

@@ -1,0 +1,154 @@
+{
+    "dashboard": {
+      "title": "LLM Observability Dashboard",
+      "description": "Get insights on your LLM application. View latency, token usage, errors, and quality trends.",
+      "timeRange": "Last 1h",
+      "availableRanges": ["Last 1h", "24h", "7d", "Custom"],
+      "lastUpdated": "2025-04-19T15:30:00Z"
+    },
+    "kpis": [
+      {
+        "label": "Requests Today",
+        "value": 7523,
+        "unit": "requests",
+        "trend": { "percentChange": 6.2, "direction": "up" }
+      },
+      {
+        "label": "Average Latency",
+        "value": 210,
+        "unit": "ms",
+        "trend": { "sparkline": [205, 220, 210, 215, 210, 200, 210] }
+      },
+      {
+        "label": "Average Token Usage per Request",
+        "value": 1320,
+        "unit": "tokens"
+      },
+      {
+        "label": "Error Rate",
+        "value": 3.2,
+        "unit": "%",
+        "trend": { "percentChange": -1.5, "direction": "down" }
+      }
+    ],
+    "performanceMetrics": {
+      "latencyDistribution": {
+        "buckets": [
+          { "range": "0-100", "count": 150 },
+          { "range": "101-200", "count": 320 },
+          { "range": "201-300", "count": 420 },
+          { "range": "301-400", "count": 500 },
+          { "range": "401-500", "count": 420 },
+          { "range": "501-600", "count": 360 },
+          { "range": "601-700", "count": 300 },
+          { "range": "701-800", "count": 180 },
+          { "range": "801-900", "count": 90 },
+          { "range": "901-1000", "count": 50 },
+          { "range": "1001-1200", "count": 30 }
+        ]
+      },
+      "p95LatencyOverTime": [
+        { "timestamp": "2025-04-13T00:00:00Z", "value": 180 },
+        { "timestamp": "2025-04-14T00:00:00Z", "value": 200 },
+        { "timestamp": "2025-04-15T00:00:00Z", "value": 190 },
+        { "timestamp": "2025-04-16T00:00:00Z", "value": 210 },
+        { "timestamp": "2025-04-17T00:00:00Z", "value": 205 },
+        { "timestamp": "2025-04-18T00:00:00Z", "value": 215 },
+        { "timestamp": "2025-04-19T00:00:00Z", "value": 220 }
+      ],
+      "p99LatencyOverTime": [
+        { "timestamp": "2025-04-13T00:00:00Z", "value": 240 },
+        { "timestamp": "2025-04-14T00:00:00Z", "value": 260 },
+        { "timestamp": "2025-04-15T00:00:00Z", "value": 250 },
+        { "timestamp": "2025-04-16T00:00:00Z", "value": 270 },
+        { "timestamp": "2025-04-17T00:00:00Z", "value": 265 },
+        { "timestamp": "2025-04-18T00:00:00Z", "value": 275 },
+        { "timestamp": "2025-04-19T00:00:00Z", "value": 300 }
+      ],
+      "tokenUsageTrend": [
+        { "timestamp": "2025-04-13T00:00:00Z", "inputTokens": 850, "outputTokens": 470 },
+        { "timestamp": "2025-04-14T00:00:00Z", "inputTokens": 870, "outputTokens": 460 },
+        { "timestamp": "2025-04-15T00:00:00Z", "inputTokens": 860, "outputTokens": 480 },
+        { "timestamp": "2025-04-16T00:00:00Z", "inputTokens": 890, "outputTokens": 500 },
+        { "timestamp": "2025-04-17T00:00:00Z", "inputTokens": 880, "outputTokens": 490 },
+        { "timestamp": "2025-04-18T00:00:00Z", "inputTokens": 900, "outputTokens": 520 },
+        { "timestamp": "2025-04-19T00:00:00Z", "inputTokens": 910, "outputTokens": 530 }
+      ]
+    },
+    "errors": {
+      "errorBreakdown": [
+        { "type": "Rate Limit", "count": 45 },
+        { "type": "Timeout", "count": 30 },
+        { "type": "Invalid JSON", "count": 25 }
+      ]
+    },
+    "qualityMetrics": {
+      "userFeedbackTrends": [
+        { "timestamp": "2025-04-13T00:00:00Z", "positivePercent": 77 },
+        { "timestamp": "2025-04-14T00:00:00Z", "positivePercent": 80 },
+        { "timestamp": "2025-04-15T00:00:00Z", "positivePercent": 79 },
+        { "timestamp": "2025-04-16T00:00:00Z", "positivePercent": 81 },
+        { "timestamp": "2025-04-17T00:00:00Z", "positivePercent": 80 },
+        { "timestamp": "2025-04-18T00:00:00Z", "positivePercent": 78 },
+        { "timestamp": "2025-04-19T00:00:00Z", "positivePercent": 82 }
+      ],
+      "promptResponseDrift": [
+        { "timestamp": "2025-04-13T00:00:00Z", "driftPercent": 5 },
+        { "timestamp": "2025-04-14T00:00:00Z", "driftPercent": 8 },
+        { "timestamp": "2025-04-15T00:00:00Z", "driftPercent": 6 },
+        { "timestamp": "2025-04-16T00:00:00Z", "driftPercent": 7 },
+        { "timestamp": "2025-04-17T00:00:00Z", "driftPercent": 6 },
+        { "timestamp": "2025-04-18T00:00:00Z", "driftPercent": 5 },
+        { "timestamp": "2025-04-19T00:00:00Z", "driftPercent": 7 }
+      ]
+    },
+    "anomalyDetection": {
+      "timeline": [
+        { "timestamp": "2025-04-13T00:00:00Z", "count": 2 },
+        { "timestamp": "2025-04-14T00:00:00Z", "count": 3 },
+        { "timestamp": "2025-04-15T00:00:00Z", "count": 1 },
+        { "timestamp": "2025-04-16T00:00:00Z", "count": 2 },
+        { "timestamp": "2025-04-17T00:00:00Z", "count": 2 },
+        { "timestamp": "2025-04-18T00:00:00Z", "count": 3 },
+        { "timestamp": "2025-04-19T00:00:00Z", "count": 4 }
+      ]
+    },
+    "modelComparison": [
+      {
+        "model": "gpt-4",
+        "avgLatency": 220,
+        "errorRate": 2.5,
+        "avgCostPerRequestUsd": 0.012
+      },
+      {
+        "model": "gpt-3.5-turbo",
+        "avgLatency": 180,
+        "errorRate": 3.8,
+        "avgCostPerRequestUsd": 0.004
+      }
+    ],
+    "topExpensiveRequests": [
+      {
+        "requestId": "req_abc123",
+        "timestamp": "2025-04-19T14:45:00Z",
+        "tokensUsed": 5200,
+        "costUsd": 0.42,
+        "latencyMs": 480
+      },
+      {
+        "requestId": "req_def456",
+        "timestamp": "2025-04-19T14:50:00Z",
+        "tokensUsed": 4800,
+        "costUsd": 0.39,
+        "latencyMs": 450
+      },
+      {
+        "requestId": "req_ghi789",
+        "timestamp": "2025-04-19T15:05:00Z",
+        "tokensUsed": 4600,
+        "costUsd": 0.38,
+        "latencyMs": 460
+      }
+    ]
+  }
+  
