@@ -125,3 +125,50 @@ For Docker images to `ghcr.io`, the `exec-maven-plugin` runs shell scripts that 
 No extra configuration is needed.
 
 ---
+
+## Running the Client (Next.js)
+
+The frontend for this project is built with **Next.js** and lives inside the Spring Boot project at:
+
+```
+src/main/resources/static/client/
+```
+
+### 1. Navigate to the client folder
+```bash
+cd src/main/resources/static/client
+```
+
+### 2. Install dependencies
+Make sure you have **Node.js 18+** and **npm** installed.  
+Then run:
+```bash
+npm install
+```
+
+### 3. Run in development mode
+This will start the Next.js development server on port **3000**:
+```bash
+npm run dev
+```
+The app will be available at:
+```
+http://localhost:3000
+```
+> In development, the client runs separately from the Spring Boot backend.
+
+### 4. Build for production
+To generate the production build:
+```bash
+npm run build
+```
+Then start it locally with:
+```bash
+npm start
+```
+
+### 5. Serving with Spring Boot
+When deployed, the built client files (`.next` or `out`) are served by Spring Boot from:
+```
+src/main/resources/static/client/
+```
