@@ -49,6 +49,29 @@ if ! docker stack deploy -c "${COMPOSE_FILE}" "${STACK_NAME}"; then
 fi
 echo "Stack '${STACK_NAME}' deployment initiated."
 
+echo "--- Docker Services ---"
+docker service ls
+
+echo "--- Postgres service tasks ---"
+docker service ps postgres-stack_postgres
+
+echo "--- Postgres service logs (last 50 lines) ---"
+docker service logs --tail 50 postgres-stack_postgres
+
+echo "--- Containers running ---"
+docker ps
+
+echo "--- Container logs for Postgres ---"
+container_id=$(docker ps --filter "name=postgres-stack_postgres" --format '{{.ID}}' | head -n1)
+if [ -n "$container_id" ]; then
+  docker logs --tail 50 "$container_id"
+else
+  echo "No Postgres container found."
+fi
+
+echo "--- Network ports listening on runner ---"
+ss -tlnp || netstat -tlnp || echo "ss/netstat not available"
+
 echo "Waiting for Postgres service to be healthy and listening on localhost:5432..."
 
 MAX_WAIT=300
@@ -56,19 +79,19 @@ SLEEP_INTERVAL=5
 elapsed=0
 
 while true; do
-  # Check service health status
-  health_status=$(docker inspect --format '{{range .Status.ContainerStatus.Health.Log}}{{.ExitCode}} {{end}}' $(docker service ps --filter desired-state=running --format '{{.ID}}' ${STACK_NAME}_postgres) 2>/dev/null | grep -v '^0$' || true)
 
   # Healthcheck might not be set on service task level; check container health directly:
   container_id=$(docker ps --filter "name=${STACK_NAME}_postgres" --format '{{.ID}}')
+
   if [ -n "$container_id" ]; then
     container_health=$(docker inspect --format '{{.State.Health.Status}}' "$container_id" 2>/dev/null || echo "none")
+    docker exec "$container_id" pg_isready -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}"
   else
     container_health="none"
   fi
 
-  # Check port 5432 on localhost
-  nc -z localhost 5432
+  echo "Checking if port 5432 is open on localhost..."
+  nc -zv localhost 5432
   port_open=$?
 
   if [[ "$container_health" == "healthy" ]] && [[ $port_open -eq 0 ]]; then
