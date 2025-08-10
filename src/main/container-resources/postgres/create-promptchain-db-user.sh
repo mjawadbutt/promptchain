@@ -11,7 +11,7 @@ set -x
 echo "--- Starting create-app-db-user script ---"
 
 # Ensure all required environment variables are set
-REQUIRED_VARS="POSTGRES_HOST POSTGRES_PORT POSTGRES_DB_NAME POSTGRES_SUPER_USER_NAME POSTGRES_SUPER_USER_PASSWORD APP_DB_NAME APP_DB_USER_NAME APP_DB_USER_PASSWORD"
+REQUIRED_VARS="POSTGRES_HOST POSTGRES_PORT POSTGRES_DB POSTGRES_SUPER_USER_NAME POSTGRES_SUPER_USER_PASSWORD APP_DB_NAME APP_DB_USER_NAME APP_DB_USER_PASSWORD"
 for var in $REQUIRED_VARS; do
   if [ -z "${!var:-}" ]; then
     echo "ERROR: Required environment variable $var is not set" >&2
@@ -31,7 +31,7 @@ MAX_RETRIES=10
 RETRY_INTERVAL=3
 CURRENT_RETRY=0
 
-until pg_isready -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB_NAME}" > /dev/null 2>&1; do
+until pg_isready -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB}" > /dev/null 2>&1; do
   CURRENT_RETRY=$((CURRENT_RETRY + 1))
   if [ "$CURRENT_RETRY" -gt "$MAX_RETRIES" ]; then
     echo "ERROR: PostgreSQL not ready after $MAX_RETRIES retries. Aborting." >&2
