@@ -29,7 +29,7 @@ services:
       - target: 5432         # Port inside the container
         published: 5432      # Port published on the Swarm's routing mesh
         protocol: tcp
-        mode: ingress        # Use ingress mode for a shared service to allow access from any node
+        mode: ingress
     networks:
       - network
     deploy:

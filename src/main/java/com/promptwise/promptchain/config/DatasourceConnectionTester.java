@@ -23,7 +23,7 @@ public class DatasourceConnectionTester {
   @Retryable(
           retryFor = {SQLException.class}, // Retry when SQLException occurs from getConnection()
           maxAttempts = 10,
-          backoff = @Backoff(delay = 5000, multiplier = 1.5)
+          backoff = @Backoff(delay = 3000, multiplier = 1.5)
   )
   public HikariDataSource buildAndTestHikariDataSource(@NotNull final String url,
                                                        @NotNull final String username,

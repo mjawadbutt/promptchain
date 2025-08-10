@@ -107,7 +107,8 @@
       fall back (see the profile'set-default-ghcrio-username') to the value defined by the corresponding OS level
       env var (which is also used by settings.xml).
     -->
-    <github.username>${env.GITHUB_ACTOR}</github.username>
+    <github.username>${env.GITHUB_USERNAME}</github.username>
+    <github.pat>${env.GITHUB_PAT}</github.pat>
 
     <postgres_host>localhost</postgres_host>
     <!-- Changing values not supported for now -->
@@ -1296,8 +1297,22 @@
             </goals>
             <configuration>
               <target>
-                <chmod file="${project.basedir}/src/main/container-resources/*.sh" perm="755"/>
+                <!-- Recursively chmod all .sh files under container-resources -->
+                <chmod perm="755">
+                  <fileset dir="${project.basedir}/src/main/container-resources">
+                    <include name="**/*.sh"/>
+                  </fileset>
+                </chmod>
                 <chmod file="${project.basedir}/*.sh" perm="755"/>
+                <!-- List files alphabetically -->
+                <exec executable="sh">
+                  <arg value="-c"/>
+                  <arg value="ls -laR '${project.basedir}/src/main/container-resources/'*.sh"/>
+                </exec>
+                <exec executable="sh">
+                  <arg value="-c"/>
+                  <arg value="ls -la '${project.basedir}/'*.sh"/>
+                </exec>
               </target>
             </configuration>
           </execution>
@@ -1569,6 +1584,20 @@
               <workingDirectory>${project.basedir}</workingDirectory>
             </configuration>
           </execution>
+<!--          <execution>-->
+<!--            <id>echo-create-promptchain-db-user-log-file</id>-->
+<!--            <phase>post-integration-test</phase>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <executable>cat</executable>-->
+<!--              <arguments>-->
+<!--                <argument>${project.build.directory}/container-logs/postgres-init/create-promptchain-db-user.log-->
+<!--                </argument>-->
+<!--              </arguments>-->
+<!--            </configuration>-->
+<!--          </execution>-->
           <execution>
             <id>local-compose-stop-services</id>
             <phase>post-integration-test</phase>
@@ -1610,6 +1639,37 @@
               <!--              <environmentVariables>-->
               <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT> &lt;!&ndash; Ensure BuildKit is enabled &ndash;&gt;-->
               <!--              </environmentVariables>-->
+            </configuration>
+          </execution>
+          <execution>
+            <id>docker-login-github</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>sh</executable>
+              <arguments>
+                <argument>-c</argument>
+                <argument>
+                  <!-- TODO: Fail build if this is not defined -->
+                  echo "${github.pat}" | docker login ghcr.io -u "${github.username}" --password-stdin
+                </argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>push-docker-image-to-ghcrio</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>docker</executable>
+              <arguments>
+                <argument>push</argument>
+                <argument>ghcr.io/${github.username}/${project.artifactId}:${project.version}</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>
@@ -1828,78 +1888,38 @@
       </build>
     </profile>
 
-    <profile>
-      <id>localNix</id>
-      <activation>
-        <property>
-          <!--
-            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not
-            running in the GITHUB-Actions script (such as running locally).
-          -->
-          <name>!env.GITHUB_ACTOR</name>
-        </property>
-        <os>
-          <family>!windows</family>
-        </os>
-      </activation>
-      <properties>
-        <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
-        <!-- TODO: Fail build if this is not defined -->
-        <github.username>${GITHUB_USERNAME}</github.username>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>docker-login-github</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>sh</executable>
-                  <arguments>
-                    <argument>-c</argument>
-                    <argument>
-                      <!-- TODO: Fail build if this is not defined -->
-                      echo ${env.GITHUB_PASSWORD} | docker login ghcr.io -u ${github.username} --password-stdin
-                    </argument>
-                  </arguments>
-                </configuration>
-              </execution>
-              <execution>
-                <id>push-docker-image-to-ghcrio</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>docker</executable>
-                  <arguments>
-                    <argument>push</argument>
-                    <argument>ghcr.io/${github.username}/${project.artifactId}:${project.version}</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
+    <!--    <profile>-->
+    <!--      <id>localNix</id>-->
+    <!--      <activation>-->
+    <!--        <property>-->
+    <!--          &lt;!&ndash;-->
+    <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
+    <!--            running in the GITHUB-Actions script (such as running locally).-->
+    <!--          &ndash;&gt;-->
+    <!--          <name>!env.GITHUB_ACTOR</name>-->
+    <!--        </property>-->
+    <!--        <os>-->
+    <!--          <family>!windows</family>-->
+    <!--        </os>-->
+    <!--      </activation>-->
+    <!--      <properties>-->
+    <!--        &lt;!&ndash; Override the value of the property to use the value that is configured in the OS-level env var &ndash;&gt;-->
+    <!--        &lt;!&ndash; TODO: Fail build if this is not defined &ndash;&gt;-->
+    <!--        <github.username>${env.GITHUB_USERNAME}</github.username>-->
+    <!--        <github.pat>${env.GITHUB_PAT}</github.pat>-->
+    <!--      </properties>-->
+    <!--    </profile>-->
 
     <profile>
       <id>localWindows</id>
       <activation>
-        <property>
-          <!--
-            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not
-            running in the GITHUB-Actions script (such as running locally).
-          -->
-          <name>!env.GITHUB_ACTOR</name>
-        </property>
+        <!--        <property>-->
+        <!--          &lt;!&ndash;-->
+        <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
+        <!--            running in the GITHUB-Actions script (such as running locally).-->
+        <!--          &ndash;&gt;-->
+        <!--          <name>!env.GITHUB_ACTOR</name>-->
+        <!--        </property>-->
         <os>
           <family>windows</family>
         </os>
@@ -1907,7 +1927,8 @@
       <properties>
         <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
         <!-- TODO: Fail build if this is not defined -->
-        <github.username>${GITHUB_USERNAME}</github.username>
+        <github.username>${env.GITHUB_USERNAME}</github.username>
+        <github.pat>${env.GITHUB_PAT}</github.pat>
       </properties>
       <build>
         <plugins>
@@ -1927,7 +1948,7 @@
                     <argument>/c</argument>
                     <argument>
                       <!-- TODO: Fail build if this is not defined -->
-                      echo ${env.GITHUB_PASSWORD} | docker login ghcr.io -u ${github.username} --password-stdin
+                      echo ${github.pat} | docker login ghcr.io -u ${github.username} --password-stdin
                     </argument>
                   </arguments>
                 </configuration>
