@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+  <springProperty scope="local" name="application.loggingProperties.rootDir"
+                  source="application.loggingProperties.rootDir"/>
+  <springProperty scope="local" name="application.loggingProperties.mainLogFileName"
+                  source="application.loggingProperties.mainLogFileName"/>
+  <springProperty scope="local" name="application.loggingProperties.mainLogFilePath"
+                  source="application.loggingProperties.mainLogFilePath"/>
+  <springProperty scope="local" name="application.loggingProperties.stacktraceLogFileName"
+                  source="application.loggingProperties.stacktraceLogFileName"/>
+  <springProperty scope="local" name="application.loggingProperties.stacktraceLogFilePath"
+                  source="application.loggingProperties.stacktraceLogFilePath"/>
+  <appender name="defaultConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+    <immediateFlush>true</immediateFlush> <!-- Ensure immediate flush -->
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>
+        [[%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX"}] [%highlight(%-5level)] %message]%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <!-- AsyncAppender to handle logging asynchronously -->
+  <appender name="defaultAsyncConsoleAppender" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="defaultConsoleAppender"/>
+    <queueSize>512</queueSize>  <!-- Queue size for async appender -->
+    <discardingThreshold>0</discardingThreshold>  <!-- Discard old events if the queue overflows -->
+  </appender>
+
+  <appender name="defaultMainLogFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${application.loggingProperties.mainLogFilePath}</file>
+    <immediateFlush>true</immediateFlush> <!-- Ensure immediate flush -->
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>
+        <!--
+           The file-beat config for this service relies on the assumption that the first two characters of
+           any log entry are [[. It uses this assumption to detect and parse multiline log messages
+           (for example, messages that contain a stacktrace). If this is changed here then the corresponding
+           file-beat configuration must also be changed accordingly.
+        -->
+        [[%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX"}] [%highlight(%-5level)] [%logger{48}] [%thread] %message]%n
+        <!-- [[%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX"}] [%highlight(%-5level)] [%logger{48}] %message]%n -->
+      </pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- Rollover monthly -->
+      <fileNamePattern>
+        ${application.loggingProperties.rootDir}/archive/${application.loggingProperties.mainLogFileName}.%d{yyyy-MM}-%i.log
+      </fileNamePattern>
+      <maxFileSize>16MB</maxFileSize>
+      <!-- Keep a maximum of 1 month of history. Note that the unit is derived from the pattern. -->
+      <maxHistory>1</maxHistory>
+      <totalSizeCap>64MB</totalSizeCap>
+      <cleanHistoryOnStart>true</cleanHistoryOnStart>
+    </rollingPolicy>
+  </appender>
+
+  <appender name="defaultAsyncMainLogFileAppender" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="defaultMainLogFileAppender"/>
+    <queueSize>512</queueSize>  <!-- Queue size for async appender -->
+    <discardingThreshold>0</discardingThreshold>  <!-- Discard old events if the queue overflows -->
+  </appender>
+
+  <appender name="stacktraceLogFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${application.loggingProperties.stacktraceLogFilePath}</file>
+    <immediateFlush>true</immediateFlush> <!-- Ensure immediate flush -->
+    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+      <!--
+        Support for JaninoEventEvaluator has been disabled/removed from logback since v1.5.13 because of security
+        issues. Now a custom evaluator is needed for any kind of logging event filtering.
+
+        See:
+        https://github.com/qos-ch/logback/discussions/888
+        https://stackoverflow.com/questions/79326623/error-after-updating-logback-to-version-1-5-13
+      -->
+      <evaluator class="com.promptwise.promptchain.common.util.LogbackExceptionEventFilter"/>
+      <OnMatch>ACCEPT</OnMatch>
+      <OnMismatch>DENY</OnMismatch>
+    </filter>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>
+        <!--
+           The file-beat config for this service relies on the assumption that the first two characters of
+           any log entry are [[. It uses this assumption to detect and parse multiline log messages
+           (for example, messages that contain a stacktrace). If this is changed here then the corresponding
+           file-beat configuration must also be changed accordingly.
+        -->
+        [[%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX"}] [%-5level] %message]%n
+        <!-- [[%date{"yyyy-MM-dd'T'HH:mm:ss,SSSXXX"}] [%highlight(%-5level)] %caller{1, ExceptionEventFilter} %message]%n -->
+      </pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- Rollover monthly -->
+      <fileNamePattern>
+        ${application.loggingProperties.rootDir}/archive/${application.loggingProperties.stacktraceLogFileName}.%d{yyyy-MM}-%i.log
+      </fileNamePattern>
+      <maxFileSize>8MB</maxFileSize>
+      <!-- Keep a maximum of 1 month of history. Note that the unit is derived from the pattern. -->
+      <maxHistory>1</maxHistory>
+      <totalSizeCap>32MB</totalSizeCap>
+      <cleanHistoryOnStart>true</cleanHistoryOnStart>
+    </rollingPolicy>
+  </appender>
+
+  <appender name="asyncStacktraceLogFileAppender" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="stacktraceLogFileAppender"/>
+    <queueSize>512</queueSize>  <!-- Queue size for async appender -->
+    <discardingThreshold>0</discardingThreshold>  <!-- Discard old events if the queue overflows -->
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="defaultAsyncConsoleAppender"/>
+    <appender-ref ref="defaultAsyncMainLogFileAppender"/>
+    <appender-ref ref="asyncStacktraceLogFileAppender"/>
+  </root>
+
+</configuration>
