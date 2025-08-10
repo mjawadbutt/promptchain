@@ -1584,20 +1584,20 @@
               <workingDirectory>${project.basedir}</workingDirectory>
             </configuration>
           </execution>
-          <execution>
-            <id>echo-create-promptchain-db-user-log-file</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>cat</executable>
-              <arguments>
-                <argument>${project.build.directory}/container-logs/postgres-init/create-promptchain-db-user.log
-                </argument>
-              </arguments>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>echo-create-promptchain-db-user-log-file</id>-->
+<!--            <phase>post-integration-test</phase>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <executable>cat</executable>-->
+<!--              <arguments>-->
+<!--                <argument>${project.build.directory}/container-logs/postgres-init/create-promptchain-db-user.log-->
+<!--                </argument>-->
+<!--              </arguments>-->
+<!--            </configuration>-->
+<!--          </execution>-->
           <execution>
             <id>local-compose-stop-services</id>
             <phase>post-integration-test</phase>
