@@ -4,7 +4,7 @@ services:
   app:
     image: ghcr.io/${GITHUB_USERNAME}/${APP_ARTIFACT_ID}:${APP_VERSION}
     environment:
-      # The default value for the host, as per builder.properties (localhost), is for running promptchain locally.
+      # The default value for the host, as per dev-env.properties (localhost), is for running promptchain locally.
       # In that case, Docker will expose the hosts at localhost:<postgres_port> (the postgres compose
       # file must configure the port as a published port, which we have already done).
       # However, in this case, since we are running inside docker swarm, the Docker will expose the postgres host

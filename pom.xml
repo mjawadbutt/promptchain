@@ -99,6 +99,11 @@
 
     <jooq-generated-classes-package>${project.groupId}.promptchain.generated.jooq</jooq-generated-classes-package>
 
+    <org.liquibase.version>4.33.0</org.liquibase.version>
+    <org.jooq.version>3.20.5</org.jooq.version>
+    <org.mapstruct.version>1.6.3</org.mapstruct.version>
+    <org.hsqldb.version>2.7.4</org.hsqldb.version>
+
     <!--
       GitHub Container Registry (GHCR) Username. This is used to authenticate to GHCR whenever needed (such as
       when publishing a container image or downloading it from the registry)
@@ -110,40 +115,6 @@
     <github.username>${env.GITHUB_USERNAME}</github.username>
     <github.pat>${env.GITHUB_PAT}</github.pat>
 
-    <postgres_host>localhost</postgres_host>
-    <!-- Changing values not supported for now -->
-    <postgres_port>5432</postgres_port>
-
-    <!-- Hardcoded to default value of POSTGRES installation -->
-    <postgres_db_name>postgres</postgres_db_name>
-    <!-- Hardcoded to default value of POSTGRES installation -->
-    <postgres_super_user_name>postgres</postgres_super_user_name>
-    <!-- Will be initialized by builder.properties -->
-    <!--    <postgres_super_user_password>BUILD_PROPERTY</postgres_super_user_password>-->
-
-    <redis_host>localhost</redis_host>
-    <!-- Changing values not supported for now -->
-    <redis_port>6379</redis_port>
-    <!--    <redis_password>BUILD_PROPERTY</redis_password>-->
-
-    <app_data_parent_dir>target</app_data_parent_dir>
-    <!--    <app_data_dir_name>BUILD_PROPERTY</app_data_dir_name>-->
-    <app_logs_parent_dir>target</app_logs_parent_dir>
-    <!--    <app_logs_dir_name>BUILD_PROPERTY</app_logs_dir_name>-->
-
-    <!--
-      Bound to the default db-name because we are not creating different db for our app,
-      and for now we do not need to.
-    -->
-    <app_db_name>${postgres_db_name}</app_db_name>
-    <!--    <app_db_user_name>BUILD_PROPERTY</app_db_user_name>-->
-    <!--    <app_db_user_password>BUILD_PROPERTY</app_db_user_password>-->
-
-    <org.liquibase.version>4.33.0</org.liquibase.version>
-    <!--TODO-Jawad-now: upgrade to 4x version -->
-    <org.jooq.version>3.20.5</org.jooq.version>
-    <org.mapstruct.version>1.6.3</org.mapstruct.version>
-    <org.hsqldb.version>2.7.4</org.hsqldb.version>
   </properties>
 
   <dependencies>
@@ -468,7 +439,7 @@
             </goals>
             <configuration>
               <files>
-                <file>${builder-resources-dir}/builder.properties</file>
+                <file>${project.basedir}/dev-env.properties</file>
               </files>
               <override>true</override>
             </configuration>
@@ -987,8 +958,8 @@
               <jdbc>
                 <driver>oracle.jdbc.OracleDriver</driver>
                 <url>jdbc:oracle:thin:@//localhost:1521/xe</url>
-                <user>${app_db_user_name}</user>
-                <password>${app_db_user_password}</password>
+                <user>${APP_DB_USER_NAME}</user>
+                <password>${APP_DB_USER_PASSWORD}</password>
               </jdbc>
             </configuration>
           </execution>
@@ -1021,9 +992,9 @@
               </generator>
               <jdbc>
                 <driver>org.postgresql.Driver</driver>
-                <url>jdbc:postgresql://${postgres_host}:${postgres_port}/${app_db_name}</url>
-                <user>${app_db_user_name}</user>
-                <password>${app_db_user_password}</password>
+                <url>jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+                <user>${APP_DB_USER_NAME}</user>
+                <password>${APP_DB_USER_PASSWORD}</password>
               </jdbc>
             </configuration>
           </execution>
@@ -1391,18 +1362,18 @@
             <include>com/promptwise/promptchain/test/unittest/**/*UnitTests.java</include>
           </includes>
           <environmentVariables>
-            <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
-            <POSTGRES_PORT>${postgres_port}</POSTGRES_PORT>
-            <REDIS_HOST>${redis_host}</REDIS_HOST>
-            <REDIS_PORT>${redis_port}</REDIS_PORT>
-            <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
-            <APP_DATA_PARENT_DIR>${app_data_parent_dir}</APP_DATA_PARENT_DIR>
-            <APP_DATA_DIR_NAME>${app_data_dir_name}</APP_DATA_DIR_NAME>
-            <APP_LOGS_PARENT_DIR>${app_logs_parent_dir}</APP_LOGS_PARENT_DIR>
-            <APP_LOGS_DIR_NAME>${app_logs_dir_name}</APP_LOGS_DIR_NAME>
-            <APP_DB_NAME>${app_db_name}</APP_DB_NAME>
-            <APP_DB_USER_NAME>${app_db_user_name}</APP_DB_USER_NAME>
-            <APP_DB_USER_PASSWORD>${app_db_user_password}</APP_DB_USER_PASSWORD>
+            <POSTGRES_HOST>${POSTGRES_HOST}</POSTGRES_HOST>
+            <POSTGRES_PORT>${POSTGRES_PORT}</POSTGRES_PORT>
+            <REDIS_HOST>${REDIS_HOST}</REDIS_HOST>
+            <REDIS_PORT>${REDIS_PORT}</REDIS_PORT>
+            <REDIS_PASSWORD>${REDIS_PASSWORD}</REDIS_PASSWORD>
+            <APP_DATA_PARENT_DIR>${APP_DATA_PARENT_DIR}</APP_DATA_PARENT_DIR>
+            <APP_DATA_DIR_NAME>${APP_DATA_DIR_NAME}</APP_DATA_DIR_NAME>
+            <APP_LOGS_PARENT_DIR>${APP_LOGS_PARENT_DIR}</APP_LOGS_PARENT_DIR>
+            <APP_LOGS_DIR_NAME>${APP_LOGS_DIR_NAME}</APP_LOGS_DIR_NAME>
+            <APP_DB_NAME>${APP_DB_NAME}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${APP_DB_USER_NAME}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${APP_DB_USER_PASSWORD}</APP_DB_USER_PASSWORD>
           </environmentVariables>
           <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
                a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
@@ -1466,18 +1437,18 @@
             <include>com/promptwise/promptchain/test/integrationtest/**/*IntegrationTests.java</include>
           </includes>
           <environmentVariables>
-            <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
-            <POSTGRES_PORT>${postgres_port}</POSTGRES_PORT>
-            <REDIS_HOST>${redis_host}</REDIS_HOST>
-            <REDIS_PORT>${redis_port}</REDIS_PORT>
-            <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
-            <APP_DATA_PARENT_DIR>${app_data_parent_dir}</APP_DATA_PARENT_DIR>
-            <APP_DATA_DIR_NAME>${app_data_dir_name}</APP_DATA_DIR_NAME>
-            <APP_LOGS_PARENT_DIR>${app_logs_parent_dir}</APP_LOGS_PARENT_DIR>
-            <APP_LOGS_DIR_NAME>${app_logs_dir_name}</APP_LOGS_DIR_NAME>
-            <APP_DB_NAME>${app_db_name}</APP_DB_NAME>
-            <APP_DB_USER_NAME>${app_db_user_name}</APP_DB_USER_NAME>
-            <APP_DB_USER_PASSWORD>${app_db_user_password}</APP_DB_USER_PASSWORD>
+            <POSTGRES_HOST>${POSTGRES_HOST}</POSTGRES_HOST>
+            <POSTGRES_PORT>${POSTGRES_PORT}</POSTGRES_PORT>
+            <REDIS_HOST>${REDIS_HOST}</REDIS_HOST>
+            <REDIS_PORT>${REDIS_PORT}</REDIS_PORT>
+            <REDIS_PASSWORD>${REDIS_PASSWORD}</REDIS_PASSWORD>
+            <APP_DATA_PARENT_DIR>${APP_DATA_PARENT_DIR}</APP_DATA_PARENT_DIR>
+            <APP_DATA_DIR_NAME>${APP_DATA_DIR_NAME}</APP_DATA_DIR_NAME>
+            <APP_LOGS_PARENT_DIR>${APP_LOGS_PARENT_DIR}</APP_LOGS_PARENT_DIR>
+            <APP_LOGS_DIR_NAME>${APP_LOGS_DIR_NAME}</APP_LOGS_DIR_NAME>
+            <APP_DB_NAME>${APP_DB_NAME}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${APP_DB_USER_NAME}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${APP_DB_USER_PASSWORD}</APP_DB_USER_PASSWORD>
           </environmentVariables>
           <reportsDirectory>target/failsafe-reports</reportsDirectory>
         </configuration>
@@ -1570,20 +1541,20 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.1</version>
         <executions>
-          <execution>
-            <id>local-compose-start-services</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/deploy-infrastructure-stacks.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>local-compose-start-services</id>-->
+<!--            <phase>pre-integration-test</phase>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <executable>bash</executable>-->
+<!--              <arguments>-->
+<!--                <argument>${project.basedir}/deploy-infrastructure-stacks.sh</argument>-->
+<!--              </arguments>-->
+<!--              <workingDirectory>${project.basedir}</workingDirectory>-->
+<!--            </configuration>-->
+<!--          </execution>-->
 <!--          <execution>-->
 <!--            <id>echo-create-promptchain-db-user-log-file</id>-->
 <!--            <phase>post-integration-test</phase>-->
@@ -1598,20 +1569,20 @@
 <!--              </arguments>-->
 <!--            </configuration>-->
 <!--          </execution>-->
-          <execution>
-            <id>local-compose-stop-services</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/remove-infrastructure-stacks.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>local-compose-stop-services</id>-->
+<!--            <phase>post-integration-test</phase>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <executable>bash</executable>-->
+<!--              <arguments>-->
+<!--                <argument>${project.basedir}/remove-infrastructure-stacks.sh</argument>-->
+<!--              </arguments>-->
+<!--              <workingDirectory>${project.basedir}</workingDirectory>-->
+<!--            </configuration>-->
+<!--          </execution>-->
           <execution>
             <id>build-docker-image</id>
             <phase>install</phase>
@@ -1627,9 +1598,9 @@
                 <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_DIRECTORY=target</argument>
                 <argument>--build-arg</argument>
-                <argument>APP_DATA_DIR_NAME=${app_data_dir_name}</argument>
+                <argument>APP_DATA_DIR_NAME=${APP_DATA_DIR_NAME}</argument>
                 <argument>--build-arg</argument>
-                <argument>APP_LOGS_DIR_NAME=${app_logs_dir_name}</argument>
+                <argument>APP_LOGS_DIR_NAME=${APP_LOGS_DIR_NAME}</argument>
                 <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_FINAL_NAME=${project.build.finalName}.jar</argument>
                 <argument>-f</argument>
@@ -1835,58 +1806,58 @@
 
   <profiles>
 
-    <profile>
-      <id>windows</id>
-      <activation>
-        <os>
-          <family>windows</family>
-        </os>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <!--
-                Override the nix-specific executions defined in the profile independent build-plugins section
-                with windows-specific versions.
-              -->
-              <execution>
-                <id>local-compose-start-services</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>cmd.exe</executable>
-                  <arguments>
-                    <argument>/c</argument>
-                    <argument>${project.basedir}/deploy-infrastructure-stacks.bat</argument>
-                  </arguments>
-                  <workingDirectory>${project.basedir}</workingDirectory>
-                </configuration>
-              </execution>
-              <execution>
-                <id>local-compose-stop-services</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>cmd.exe</executable>
-                  <arguments>
-                    <argument>/c</argument>
-                    <argument>${project.basedir}/remove-infrastructure-stacks.bat</argument>
-                  </arguments>
-                  <workingDirectory>${project.basedir}</workingDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
+<!--    <profile>-->
+<!--      <id>windows</id>-->
+<!--      <activation>-->
+<!--        <os>-->
+<!--          <family>windows</family>-->
+<!--        </os>-->
+<!--      </activation>-->
+<!--      <build>-->
+<!--        <plugins>-->
+<!--          <plugin>-->
+<!--            <groupId>org.codehaus.mojo</groupId>-->
+<!--            <artifactId>exec-maven-plugin</artifactId>-->
+<!--            <executions>-->
+<!--              &lt;!&ndash;-->
+<!--                Override the nix-specific executions defined in the profile independent build-plugins section-->
+<!--                with windows-specific versions.-->
+<!--              &ndash;&gt;-->
+<!--              <execution>-->
+<!--                <id>local-compose-start-services</id>-->
+<!--                <phase>pre-integration-test</phase>-->
+<!--                <goals>-->
+<!--                  <goal>exec</goal>-->
+<!--                </goals>-->
+<!--                <configuration>-->
+<!--                  <executable>cmd.exe</executable>-->
+<!--                  <arguments>-->
+<!--                    <argument>/c</argument>-->
+<!--                    <argument>${project.basedir}/deploy-infrastructure-stacks.bat</argument>-->
+<!--                  </arguments>-->
+<!--                  <workingDirectory>${project.basedir}</workingDirectory>-->
+<!--                </configuration>-->
+<!--              </execution>-->
+<!--              <execution>-->
+<!--                <id>local-compose-stop-services</id>-->
+<!--                <phase>post-integration-test</phase>-->
+<!--                <goals>-->
+<!--                  <goal>exec</goal>-->
+<!--                </goals>-->
+<!--                <configuration>-->
+<!--                  <executable>cmd.exe</executable>-->
+<!--                  <arguments>-->
+<!--                    <argument>/c</argument>-->
+<!--                    <argument>${project.basedir}/remove-infrastructure-stacks.bat</argument>-->
+<!--                  </arguments>-->
+<!--                  <workingDirectory>${project.basedir}</workingDirectory>-->
+<!--                </configuration>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
+<!--        </plugins>-->
+<!--      </build>-->
+<!--    </profile>-->
 
     <!--    <profile>-->
     <!--      <id>localNix</id>-->
@@ -1924,12 +1895,12 @@
           <family>windows</family>
         </os>
       </activation>
-      <properties>
-        <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
-        <!-- TODO: Fail build if this is not defined -->
-        <github.username>${env.GITHUB_USERNAME}</github.username>
-        <github.pat>${env.GITHUB_PAT}</github.pat>
-      </properties>
+<!--      <properties>-->
+<!--        &lt;!&ndash; Override the value of the property to use the value that is configured in the OS-level env var &ndash;&gt;-->
+<!--        &lt;!&ndash; TODO: Fail build if this is not defined &ndash;&gt;-->
+<!--        <github.username>${env.GITHUB_USERNAME}</github.username>-->
+<!--        <github.pat>${env.GITHUB_PAT}</github.pat>-->
+<!--      </properties>-->
       <build>
         <plugins>
           <plugin>

@@ -14,6 +14,7 @@
 !.gitignore
 !.mvn
 !deploy-infrastructure-stacks.*
+!dev-env.properties
 !docker-compose.yml
 !docker-compose-postgres.yml
 !docker-compose-redis.yml
