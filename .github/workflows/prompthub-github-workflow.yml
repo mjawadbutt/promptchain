@@ -2,9 +2,9 @@ name: Maven Build and Deploy
 
 env:
   ACTIONS_STEP_DEBUG: true
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: postgres
-  POSTGRES_DB: postgres
+  POSTGRES_SUPER_USER_NAME: postgres
+  POSTGRES_SUPER_USER_PASSWORD: postgres
+  POSTGRES_DB_NAME: postgres
 
 on:
   push:
@@ -27,9 +27,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_SUPER_USER_NAME }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_SUPER_USER_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB_NAME }}
         ports:
           - 5432:5432
         options: >-
@@ -68,17 +68,17 @@ jobs:
         run: |
           env
 
-      - name: Wait for Postgres to be ready
-        run: |
-          until pg_isready -h ${{ env.POSTGRES_HOST }} -p ${{ env.POSTGRES_PORT }} -U ${{ env.POSTGRES_USER }}; do
-            echo "Waiting for Postgres..."
-            sleep 5
-          done
+#      - name: Wait for Postgres to be ready
+#        run: |
+#          until pg_isready -h ${{ env.POSTGRES_HOST }} -p ${{ env.POSTGRES_PORT }} -U ${{ env.POSTGRES_SUPER_USER_NAME }}; do
+#            echo "Waiting for Postgres..."
+#            sleep 5
+#          done
 
       - name: Create application DB user
         run: |
-          chmod +x ./src/main/container-resources/postgres/create-promptchain-db-user.sh
-          ./src/main/container-resources/postgres/create-promptchain-db-user.sh
+          chmod +x ./create-promptchain-db-user.sh
+          ./create-promptchain-db-user.sh
 
       - name: Set up Java
         uses: actions/setup-java@v3

@@ -1,0 +1,26 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="true" type="JUnit" factoryName="JUnit">
+    <module name="promptchain" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <envs>
+      <env name="APP_DATA_DIR_NAME" value="data" />
+      <env name="APP_DATA_PARENT_DIR" value="target" />
+      <env name="APP_DB_NAME" value="postgres" />
+      <env name="APP_DB_USER_NAME" value="promptchain" />
+      <env name="APP_DB_USER_PASSWORD" value="promptchain" />
+      <env name="APP_LOGS_DIR_NAME" value="logs" />
+      <env name="APP_LOGS_PARENT_DIR" value="target" />
+      <env name="POSTGRES_HOST" value="localhost" />
+      <env name="POSTGRES_PORT" value="5432" />
+      <env name="REDIS_HOST" value="localhost" />
+      <env name="REDIS_PASSWORD" value="redis" />
+      <env name="REDIS_PORT" value="6379" />
+    </envs>
+    <method v="2">
+      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="clean test-compile" />
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

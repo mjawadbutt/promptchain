@@ -166,37 +166,6 @@
       <artifactId>spring-boot-starter-aop</artifactId>
     </dependency>
 
-    <!--    <dependency>-->
-    <!--      <groupId>org.testcontainers</groupId>-->
-    <!--      <artifactId>postgresql</artifactId>-->
-    <!--      <scope>test</scope>-->
-    <!--    </dependency>-->
-
-    <!--    &lt;!&ndash;-->
-    <!--     To be able to spinup redis in docker (we use this instead of the-->
-    <!--     "Testcontainers Redis :: JUnit Jupiter Extension" (com.redis.testcontainers -> testcontainers-redis-junit)-->
-    <!--     because the JUnit extension is more tightly integrated with JUnit testing whereas we want to use redis when-->
-    <!--     running locally, in build server (unit/integration test phases), as well as prod in a seamless profile-->
-    <!--     based configuration.-->
-    <!--    &ndash;&gt;-->
-    <!--    &lt;!&ndash; https://mvnrepository.com/artifact/com.redis.testcontainers/testcontainers-redis &ndash;&gt;-->
-    <!--    <dependency>-->
-    <!--      <groupId>com.redis.testcontainers</groupId>-->
-    <!--      <artifactId>testcontainers-redis</artifactId>-->
-    <!--      <version>1.6.4</version>-->
-    <!--    </dependency>-->
-
-    <!--    <dependency>-->
-    <!--      <groupId>org.testcontainers</groupId>-->
-    <!--      <artifactId>junit-jupiter</artifactId>-->
-    <!--      <scope>test</scope>-->
-    <!--    </dependency>-->
-
-    <!--    <dependency>-->
-    <!--      <groupId>org.testcontainers</groupId>-->
-    <!--      <artifactId>testcontainers</artifactId>-->
-    <!--    </dependency>-->
-
     <dependency>
       <groupId>org.jooq</groupId>
       <artifactId>jooq-meta-extensions</artifactId>
@@ -365,19 +334,6 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
-          <exclude>dev-app.env</exclude>
-          <exclude>dev-deploy-app-stack.bat</exclude>
-          <exclude>dev-deploy-app-stack.sh</exclude>
-          <exclude>dev-deploy-postgres-stack.bat</exclude>
-          <exclude>dev-deploy-postgres-stack.sh</exclude>
-          <exclude>dev-deploy-redis-stack.bat</exclude>
-          <exclude>dev-deploy-redis-stack.sh</exclude>
-          <exclude>dev-remove-app-stack.bat</exclude>
-          <exclude>dev-remove-app-stack.sh</exclude>
-          <exclude>dev-remove-postgres-stack.bat</exclude>
-          <exclude>dev-remove-postgres-stack.sh</exclude>
-          <exclude>dev-remove-redis-stack.bat</exclude>
-          <exclude>dev-remove-redis-stack.sh</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -397,35 +353,6 @@
       </testResource>
     </testResources>
     <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${project.basedir}</directory>
-              <includes>
-                <include>dev-app.env</include>
-                <include>dev-deploy-app-stack.bat</include>
-                <include>dev-deploy-app-stack.sh</include>
-                <include>dev-deploy-postgres-stack.bat</include>
-                <include>dev-deploy-postgres-stack.sh</include>
-                <include>dev-deploy-redis-stack.bat</include>
-                <include>dev-deploy-redis-stack.sh</include>
-                <include>dev-remove-app-stack.bat</include>
-                <include>dev-remove-app-stack.sh</include>
-                <include>dev-remove-postgres-stack.bat</include>
-                <include>dev-remove-postgres-stack.sh</include>
-                <include>dev-remove-redis-stack.bat</include>
-                <include>dev-remove-redis-stack.sh</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-              <useDefaultExcludes>true</useDefaultExcludes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -1166,38 +1093,6 @@
               <outputDirectory>${project.build.directory}/classes/com/promptwise/promptchain</outputDirectory>
             </configuration>
           </execution>
-          <execution>
-            <id>generate-basedir-files</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>${main-resources-dir}</directory>
-                  <includes>
-                    <include>dev-app.env</include>
-                    <!--                    TODO-Jawad: Implement these -->
-                    <!--                    <include>dev-deploy-app-stack.bat</include>-->
-                    <!--                    <include>dev-deploy-app-stack.sh</include>-->
-                    <include>dev-deploy-postgres-stack.bat</include>
-                    <include>dev-deploy-postgres-stack.sh</include>
-                    <include>dev-deploy-redis-stack.bat</include>
-                    <include>dev-deploy-redis-stack.sh</include>
-                    <include>dev-remove-app-stack.bat</include>
-                    <include>dev-remove-app-stack.sh</include>
-                    <include>dev-remove-postgres-stack.bat</include>
-                    <include>dev-remove-postgres-stack.sh</include>
-                    <include>dev-remove-redis-stack.bat</include>
-                    <include>dev-remove-redis-stack.sh</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-              <outputDirectory>${project.basedir}</outputDirectory>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 
@@ -1216,74 +1111,6 @@
                 <mkdir dir="target/logs"/>
                 <mkdir dir="target/data"/>
                 <mkdir dir="target/container-logs/postgres-init"/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>convert-line-endings-for-container-text-files</id>
-            <!-- Running in 'compile' phase to ensure the process-resource phase has completed -->
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <echo message="Converting line endings for Linux container text files to NIX format..."/>
-                <fixcrlf
-                        srcdir="${project.basedir}/src/main/container-resources"
-                        includes="**/*.sh"
-                        eol="lf"
-                        encoding="UTF-8"
-                        preserveLastModified="true"
-                />
-                <echo message="Line ending conversion for Linux container text files complete."/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>convert-line-endings-for-generated-nix-text-files</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <echo message="Converting line endings for generated NIX text files to Unix format..."/>
-                <fixcrlf
-                        srcdir="${project.basedir}"
-                        includes="*.sh,*.env"
-                        eol="lf"
-                        encoding="UTF-8"
-                        preserveLastModified="true"
-                />
-                <echo message="Line ending conversion for generated NIX text files complete."/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>set-execute-permission-for-generated-nix-scripts</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <!-- Recursively chmod all .sh files under container-resources -->
-                <chmod perm="755">
-                  <fileset dir="${project.basedir}/src/main/container-resources">
-                    <include name="**/*.sh"/>
-                  </fileset>
-                </chmod>
-                <chmod file="${project.basedir}/*.sh" perm="755"/>
-                <!-- List files alphabetically -->
-                <exec executable="sh">
-                  <arg value="-c"/>
-                  <arg value="ls -laR '${project.basedir}/src/main/container-resources/'*.sh"/>
-                </exec>
-                <exec executable="sh">
-                  <arg value="-c"/>
-                  <arg value="ls -la '${project.basedir}/'*.sh"/>
-                </exec>
               </target>
             </configuration>
           </execution>
@@ -1541,48 +1368,6 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.1</version>
         <executions>
-<!--          <execution>-->
-<!--            <id>local-compose-start-services</id>-->
-<!--            <phase>pre-integration-test</phase>-->
-<!--            <goals>-->
-<!--              <goal>exec</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <executable>bash</executable>-->
-<!--              <arguments>-->
-<!--                <argument>${project.basedir}/deploy-infrastructure-stacks.sh</argument>-->
-<!--              </arguments>-->
-<!--              <workingDirectory>${project.basedir}</workingDirectory>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--          <execution>-->
-<!--            <id>echo-create-promptchain-db-user-log-file</id>-->
-<!--            <phase>post-integration-test</phase>-->
-<!--            <goals>-->
-<!--              <goal>exec</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <executable>cat</executable>-->
-<!--              <arguments>-->
-<!--                <argument>${project.build.directory}/container-logs/postgres-init/create-promptchain-db-user.log-->
-<!--                </argument>-->
-<!--              </arguments>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--          <execution>-->
-<!--            <id>local-compose-stop-services</id>-->
-<!--            <phase>post-integration-test</phase>-->
-<!--            <goals>-->
-<!--              <goal>exec</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <executable>bash</executable>-->
-<!--              <arguments>-->
-<!--                <argument>${project.basedir}/remove-infrastructure-stacks.sh</argument>-->
-<!--              </arguments>-->
-<!--              <workingDirectory>${project.basedir}</workingDirectory>-->
-<!--            </configuration>-->
-<!--          </execution>-->
           <execution>
             <id>build-docker-image</id>
             <phase>install</phase>
@@ -1607,9 +1392,6 @@
                 <argument>${project.basedir}/Dockerfile</argument>
                 <argument>${project.basedir}</argument> <!-- Build context -->
               </arguments>
-              <!--              <environmentVariables>-->
-              <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT> &lt;!&ndash; Ensure BuildKit is enabled &ndash;&gt;-->
-              <!--              </environmentVariables>-->
             </configuration>
           </execution>
           <execution>
@@ -1806,101 +1588,68 @@
 
   <profiles>
 
-<!--    <profile>-->
-<!--      <id>windows</id>-->
-<!--      <activation>-->
-<!--        <os>-->
-<!--          <family>windows</family>-->
-<!--        </os>-->
-<!--      </activation>-->
-<!--      <build>-->
-<!--        <plugins>-->
-<!--          <plugin>-->
-<!--            <groupId>org.codehaus.mojo</groupId>-->
-<!--            <artifactId>exec-maven-plugin</artifactId>-->
-<!--            <executions>-->
-<!--              &lt;!&ndash;-->
-<!--                Override the nix-specific executions defined in the profile independent build-plugins section-->
-<!--                with windows-specific versions.-->
-<!--              &ndash;&gt;-->
-<!--              <execution>-->
-<!--                <id>local-compose-start-services</id>-->
-<!--                <phase>pre-integration-test</phase>-->
-<!--                <goals>-->
-<!--                  <goal>exec</goal>-->
-<!--                </goals>-->
-<!--                <configuration>-->
-<!--                  <executable>cmd.exe</executable>-->
-<!--                  <arguments>-->
-<!--                    <argument>/c</argument>-->
-<!--                    <argument>${project.basedir}/deploy-infrastructure-stacks.bat</argument>-->
-<!--                  </arguments>-->
-<!--                  <workingDirectory>${project.basedir}</workingDirectory>-->
-<!--                </configuration>-->
-<!--              </execution>-->
-<!--              <execution>-->
-<!--                <id>local-compose-stop-services</id>-->
-<!--                <phase>post-integration-test</phase>-->
-<!--                <goals>-->
-<!--                  <goal>exec</goal>-->
-<!--                </goals>-->
-<!--                <configuration>-->
-<!--                  <executable>cmd.exe</executable>-->
-<!--                  <arguments>-->
-<!--                    <argument>/c</argument>-->
-<!--                    <argument>${project.basedir}/remove-infrastructure-stacks.bat</argument>-->
-<!--                  </arguments>-->
-<!--                  <workingDirectory>${project.basedir}</workingDirectory>-->
-<!--                </configuration>-->
-<!--              </execution>-->
-<!--            </executions>-->
-<!--          </plugin>-->
-<!--        </plugins>-->
-<!--      </build>-->
-<!--    </profile>-->
-
-    <!--    <profile>-->
-    <!--      <id>localNix</id>-->
-    <!--      <activation>-->
-    <!--        <property>-->
-    <!--          &lt;!&ndash;-->
-    <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
-    <!--            running in the GITHUB-Actions script (such as running locally).-->
-    <!--          &ndash;&gt;-->
-    <!--          <name>!env.GITHUB_ACTOR</name>-->
-    <!--        </property>-->
-    <!--        <os>-->
-    <!--          <family>!windows</family>-->
-    <!--        </os>-->
-    <!--      </activation>-->
-    <!--      <properties>-->
-    <!--        &lt;!&ndash; Override the value of the property to use the value that is configured in the OS-level env var &ndash;&gt;-->
-    <!--        &lt;!&ndash; TODO: Fail build if this is not defined &ndash;&gt;-->
-    <!--        <github.username>${env.GITHUB_USERNAME}</github.username>-->
-    <!--        <github.pat>${env.GITHUB_PAT}</github.pat>-->
-    <!--      </properties>-->
-    <!--    </profile>-->
+    <profile>
+      <id>nix</id>
+      <activation>
+        <os>
+          <family>!windows</family>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>convert-line-endings-for-generated-nix-text-files</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo message="Converting line endings for NIX text files to Unix format..."/>
+                    <fixcrlf
+                            srcdir="${project.basedir}"
+                            includes="*.sh,*.env"
+                            eol="lf"
+                            encoding="UTF-8"
+                            preserveLastModified="true"
+                    />
+                    <echo message="Line ending conversion for generated NIX text files complete."/>
+                  </target>
+                </configuration>
+              </execution>
+              <execution>
+                <id>set-execute-permission-for-generated-nix-scripts</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <chmod file="${project.basedir}/*.sh" perm="755"/>
+                    <exec executable="sh">
+                      <arg value="-c"/>
+                      <arg value="ls -la '${project.basedir}/'*.sh"/>
+                    </exec>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
     <profile>
       <id>localWindows</id>
       <activation>
-        <!--        <property>-->
-        <!--          &lt;!&ndash;-->
-        <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
-        <!--            running in the GITHUB-Actions script (such as running locally).-->
-        <!--          &ndash;&gt;-->
-        <!--          <name>!env.GITHUB_ACTOR</name>-->
-        <!--        </property>-->
         <os>
           <family>windows</family>
         </os>
       </activation>
-<!--      <properties>-->
-<!--        &lt;!&ndash; Override the value of the property to use the value that is configured in the OS-level env var &ndash;&gt;-->
-<!--        &lt;!&ndash; TODO: Fail build if this is not defined &ndash;&gt;-->
-<!--        <github.username>${env.GITHUB_USERNAME}</github.username>-->
-<!--        <github.pat>${env.GITHUB_PAT}</github.pat>-->
-<!--      </properties>-->
       <build>
         <plugins>
           <plugin>
@@ -1996,16 +1745,6 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
-    <!--    <repository>-->
-    <!--      <id>ghcrio-promptchain</id>-->
-    <!--      <name>PromptChain Releases Repository in ghcr.io</name>-->
-    <!--      <url>https://ghcr.io/mjawadbutt/promptchain</url>-->
-    <!--    </repository>-->
-    <!--    <snapshotRepository>-->
-    <!--      <id>ghcrio-promptchain-snapshots</id>-->
-    <!--      <name>PromptChain Snapshots Repository in ghcr.io</name>-->
-    <!--      <url>https://ghcr.io/mjawadbutt/promptchain-snapshots</url>-->
-    <!--    </snapshotRepository>-->
   </distributionManagement>
 
   <developers>

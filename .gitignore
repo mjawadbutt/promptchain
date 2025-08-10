@@ -1,19 +1,19 @@
-# Ignore everything at the root by default
+# Blacklist the highest level directory with /*
 /*
 
-# Whitelist essential folders and files
+# Whitelist the files that should be part of the respository.
 !.github
 !.run
+# Note:
+# Do not use single or double asteriks at the end. They are not working properly.
+# To ignore all files in a dir recursively just add / at the end.
 !src/
-!src/main/
-!src/main/resources/
-!src/main/resources/static/
-!src/main/resources/static/client/
+src/main/resources/static/client/
 !.editorconfig
 !.gitattributes
 !.gitignore
 !.mvn
-!deploy-infrastructure-stacks.*
+!create-promptchain-db-user.*
 !dev-env.properties
 !docker-compose.yml
 !docker-compose-postgres.yml
@@ -25,8 +25,12 @@
 !pom.xml
 !prune-all-images.*
 !README.md
-!remove-infrastructure-stacks.*
+!start-postgres-container.*
+!start-redis-container.*
+!stop-postgres-container.*
+!stop-redis-container.*
 
+#TODO-Jawad: This will not be needed because build output will be sent to another dir when npm build is configured in mvn
 # ------------------------------
 # Ignore only Next.js build artifacts inside static/client
 # ------------------------------
