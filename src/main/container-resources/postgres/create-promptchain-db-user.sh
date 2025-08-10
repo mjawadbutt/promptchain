@@ -11,7 +11,7 @@ set -x
 echo "--- Starting create-app-db-user script ---"
 
 # Ensure all required environment variables are set
-REQUIRED_VARS="POSTGRES_HOST POSTGRES_PORT POSTGRES_DB POSTGRES_SUPER_USER_NAME POSTGRES_SUPER_USER_PASSWORD APP_DB_NAME APP_DB_USER_NAME APP_DB_USER_PASSWORD"
+REQUIRED_VARS="POSTGRES_HOST POSTGRES_PORT POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD APP_DB_NAME APP_DB_USER_NAME APP_DB_USER_PASSWORD"
 for var in $REQUIRED_VARS; do
   if [ -z "${!var:-}" ]; then
     echo "ERROR: Required environment variable $var is not set" >&2
@@ -20,18 +20,18 @@ for var in $REQUIRED_VARS; do
 done
 
 # Set PGPASSWORD for pg_isready and psql to authenticate as superuser
-export PGPASSWORD="${POSTGRES_SUPER_USER_PASSWORD}"
+export PGPASSWORD="${POSTGRES_PASSWORD}"
 
 POSTGRES_PORT="${POSTGRES_PORT:-5432}"
 
-echo "Waiting for PostgreSQL at ${POSTGRES_HOST}:${POSTGRES_PORT} as superuser ${POSTGRES_SUPER_USER_NAME}..."
+echo "Waiting for PostgreSQL at ${POSTGRES_HOST}:${POSTGRES_PORT} as superuser ${POSTGRES_USER}..."
 
 # Wait for PostgreSQL to be ready
 MAX_RETRIES=10
 RETRY_INTERVAL=3
 CURRENT_RETRY=0
 
-until pg_isready -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${POSTGRES_DB}" > /dev/null 2>&1; do
+until pg_isready -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" > /dev/null 2>&1; do
   CURRENT_RETRY=$((CURRENT_RETRY + 1))
   if [ "$CURRENT_RETRY" -gt "$MAX_RETRIES" ]; then
     echo "ERROR: PostgreSQL not ready after $MAX_RETRIES retries. Aborting." >&2
@@ -45,11 +45,11 @@ echo "PostgreSQL is up and running! Proceeding with user and database creation."
 
 # Create the application database if it doesn't exist (idempotent)
 echo "Checking if database '${APP_DB_NAME}' exists..."
-if psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "postgres" -tc "SELECT 1 FROM pg_database WHERE datname = '${APP_DB_NAME}'" | grep -q 1; then
+if psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "postgres" -tc "SELECT 1 FROM pg_database WHERE datname = '${APP_DB_NAME}'" | grep -q 1; then
   echo "Database '${APP_DB_NAME}' already exists. Skipping creation."
 else
   echo "Creating database '${APP_DB_NAME}'..."
-  psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "postgres" -c "CREATE DATABASE ${APP_DB_NAME};"
+  psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "postgres" -c "CREATE DATABASE ${APP_DB_NAME};"
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to create database '${APP_DB_NAME}'." >&2
     unset PGPASSWORD
@@ -60,11 +60,11 @@ fi
 
 # Create the application user if it doesn't exist (idempotent)
 echo "Checking if user '${APP_DB_USER_NAME}' exists..."
-if psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${APP_DB_NAME}" -tc "SELECT 1 FROM pg_user WHERE usename = '${APP_DB_USER_NAME}'" | grep -q 1; then
+if psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${APP_DB_NAME}" -tc "SELECT 1 FROM pg_user WHERE usename = '${APP_DB_USER_NAME}'" | grep -q 1; then
   echo "User '${APP_DB_USER_NAME}' already exists. Skipping creation."
 else
   echo "Creating user '${APP_DB_USER_NAME}'..."
-  psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${APP_DB_NAME}" -c "CREATE USER ${APP_DB_USER_NAME} WITH PASSWORD '${APP_DB_USER_PASSWORD}';"
+  psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${APP_DB_NAME}" -c "CREATE USER ${APP_DB_USER_NAME} WITH PASSWORD '${APP_DB_USER_PASSWORD}';"
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to create user '${APP_DB_USER_NAME}'." >&2
     unset PGPASSWORD
@@ -95,7 +95,7 @@ GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO ${APP_DB_USER_NAME};
 "
 
 # Execute the combined SQL commands
-psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_SUPER_USER_NAME}" -d "${APP_DB_NAME}" -c "${SQL_COMMANDS}"
+psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${APP_DB_NAME}" -c "${SQL_COMMANDS}"
 
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to grant specific privileges on database '${APP_DB_NAME}' to user '${APP_DB_USER_NAME}'." >&2
