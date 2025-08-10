@@ -66,7 +66,7 @@ jobs:
       env:
         GITHUB_USERNAME: ${{ github.actor }}
         GITHUB_PAT: ${{ secrets.PAT_GHCR }}
-      run: mvn deploy | grep -v "Downloading from" | grep -v "Downloaded from" | grep -v "Progress (1)"
+      run: mvn deploy -DskipITs | grep -v "Downloading from" | grep -v "Downloaded from" | grep -v "Progress (1)"
 
     - name: Leave swarm
       if: always()
