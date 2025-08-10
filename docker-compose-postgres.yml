@@ -23,13 +23,24 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      # Publish the PostgreSQL port to the Swarm's routing mesh (ingress)
-      # This allows other services to connect to it via the service name,
-      # and potentially allows external access through any Swarm node's 5432 port.
-      - target: 5432         # Port inside the container
-        published: 5432      # Port published on the Swarm's routing mesh
-        protocol: tcp
-        mode: ingress        # Use ingress mode for a shared service to allow access from any node
+      # Even though the commented out port block works on local machines (because Docker Desktop configures
+      # ingress ports properly by default, it does not work on GitHub Workflows because it requires some
+      # additional config to allow host apps to connect to swarm containers.
+      # So we use the simple port mapping for now (which assumes the host app and this container run on the
+      # same host). This allows the app to connect to this postgres container while running integration tests
+      # on GitHub workflows and also works for all local use cases.
+      - "5432:5432"
+    # TODO: Dont need this for now. It will be needed only if we deploy to a swarm with multiple nodes for example
+    # TODO: in production envs, where it is possible that this container and the app are running on different hosts.
+    # TODO: However then we would need to make a separate compose file (copy paste this and replace port mapping
+    # TODO: above with this one) and create a prod deploy script that uses the prod compose file.
+    #      # Publish the PostgreSQL port to the Swarm's routing mesh (ingress)
+    #      # This allows other services to connect to it via the service name,
+    #      # and potentially allows external access through any Swarm node's 5432 port.
+    #      - target: 5432         # Port inside the container
+    #        published: 5432      # Port published on the Swarm's routing mesh
+    #        protocol: tcp
+    #        mode: ingress
     networks:
       - network
     deploy:
