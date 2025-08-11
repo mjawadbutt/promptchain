@@ -29,14 +29,3 @@ src/main/resources/static/client/
 !start-redis-container.*
 !stop-postgres-container.*
 !stop-redis-container.*
-
-#TODO-Jawad: This will not be needed because build output will be sent to another dir when npm build is configured in mvn
-# ------------------------------
-# Ignore only Next.js build artifacts inside static/client
-# ------------------------------
-src/main/resources/static/client/node_modules/
-src/main/resources/static/client/.next/
-src/main/resources/static/client/out/
-src/main/resources/static/client/.turbo/
-src/main/resources/static/client/.env*
-src/main/resources/static/client/.DS_Store
