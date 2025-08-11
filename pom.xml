@@ -261,6 +261,15 @@
     <!-- END: Dependencies related to JAXB and JAX-WS support in Java 11 and onwards. -->
     <!---->
 
+    <!--
+      A simple in-process memory based (spring.cache.type=simple) JCache implementation that is used when
+      Redisson is disabled.
+    -->
+    <dependency>
+      <groupId>org.ehcache</groupId>
+      <artifactId>ehcache</artifactId>
+      <version>3.10.8</version>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter-->
     <dependency>
       <groupId>org.redisson</groupId>

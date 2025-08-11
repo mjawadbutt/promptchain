@@ -15,8 +15,8 @@
       <env name="POSTGRES_HOST" value="localhost" />
       <env name="POSTGRES_PORT" value="5432" />
       <env name="REDIS_HOST" value="localhost" />
-      <env name="REDIS_PASSWORD" value="redis" />
       <env name="REDIS_PORT" value="6379" />
+      <env name="REDIS_ENABLED" value="false" />
     </envs>
     <method v="2">
       <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="clean test-compile" />

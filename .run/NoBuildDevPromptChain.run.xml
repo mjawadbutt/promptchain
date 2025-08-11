@@ -7,7 +7,7 @@
     <module name="promptchain" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.promptwise.promptchain.config.*" />
+        <option name="PATTERN" value="com.promptwise.promptchain.common.util.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
