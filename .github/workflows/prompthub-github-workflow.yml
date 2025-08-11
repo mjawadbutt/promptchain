@@ -2,6 +2,9 @@ name: Maven Build and Deploy
 
 env:
   ACTIONS_STEP_DEBUG: true
+  POSTGRES_SUPER_USER_NAME: postgres
+  POSTGRES_SUPER_USER_PASSWORD: postgres
+  POSTGRES_DB_NAME: postgres
 
 on:
   push:
@@ -12,7 +15,6 @@ on:
       - '**'   # All branches
   workflow_dispatch:
 
-#TODO: Not needed. GITHUB_TOKEN cannot be used for GHCR. only for GitHub Packages.
 permissions:
   contents: read
   packages: write
@@ -21,59 +23,108 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_SUPER_USER_NAME }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_SUPER_USER_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:8
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping | grep PONG"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=3
+          --health-start-period=15s
+
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Java
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 21
+      - name: Load env vars from property file and export for next steps
+        id: load_env_vars
+        run: |
+          cat ./dev-env.properties | grep -v '^#' | while read line; do
+            echo "Exporting $line"
+            # Split key and value
+            KEY=$(echo "$line" | cut -d '=' -f 1)
+            VALUE=$(echo "$line" | cut -d '=' -f 2-)
+            echo "$KEY=$VALUE" >> $GITHUB_ENV
+          done
 
-    - name: Configure Maven settings
-      env:
-        GITHUB_USERNAME: ${{ github.actor }}
-        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        mkdir -p ~/.m2
-        cat > ~/.m2/settings.xml <<EOF
-        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
-          <servers>
-            <server>
-              <id>github-promptchain</id>
-              <username>${GITHUB_USERNAME}</username>
-              <password>${GITHUB_PAT}</password>
-            </server>
-          </servers>
-        </settings>
-        EOF
+      - name: Check loaded vars
+        run: |
+          env
 
-    - name: Cache Maven packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
+#      - name: Wait for Postgres to be ready
+#        run: |
+#          until pg_isready -h ${{ env.POSTGRES_HOST }} -p ${{ env.POSTGRES_PORT }} -U ${{ env.POSTGRES_SUPER_USER_NAME }}; do
+#            echo "Waiting for Postgres..."
+#            sleep 5
+#          done
 
-    - name: Build and deploy with Maven
-      id: maven_build
-      continue-on-error: ${{ github.ref != 'refs/heads/main' }}
-      env:
-        GITHUB_USERNAME: ${{ github.actor }}
-        GITHUB_PAT: ${{ secrets.PAT_GHCR }}
-      run: mvn deploy -DskipITs | grep -v "Downloading from" | grep -v "Downloaded from" | grep -v "Progress (1)"
+      - name: Create application DB user
+        run: |
+          chmod +x ./create-promptchain-db-user.sh
+          ./create-promptchain-db-user.sh
 
-    - name: Leave swarm
-      if: always()
-      run: docker swarm leave --force
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
 
-    - name: Fail on non-main if build failed
-      if: ${{ github.ref == 'refs/heads/main' && steps.maven_build.outcome != 'success' }}
-      run: |
-        echo "Build failed on main branch — failing workflow."
-        exit 1
+      - name: Configure Maven settings
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github-promptchain</id>
+                <username>${GITHUB_USERNAME}</username>
+                <password>${GITHUB_PAT}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build and deploy with Maven
+        id: maven_build
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_PAT: ${{ secrets.PAT_GHCR }}
+        run: mvn deploy | grep -v "Downloading from" | grep -v "Downloaded from" | grep -v "Progress (1)"
+
+      - name: Fail on non-main if build failed
+        if: ${{ github.ref == 'refs/heads/main' && steps.maven_build.outcome != 'success' }}
+        run: |
+          echo "Build failed on main branch — failing workflow."
+          exit 1

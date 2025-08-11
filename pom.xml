@@ -99,6 +99,11 @@
 
     <jooq-generated-classes-package>${project.groupId}.promptchain.generated.jooq</jooq-generated-classes-package>
 
+    <org.liquibase.version>4.33.0</org.liquibase.version>
+    <org.jooq.version>3.20.5</org.jooq.version>
+    <org.mapstruct.version>1.6.3</org.mapstruct.version>
+    <org.hsqldb.version>2.7.4</org.hsqldb.version>
+
     <!--
       GitHub Container Registry (GHCR) Username. This is used to authenticate to GHCR whenever needed (such as
       when publishing a container image or downloading it from the registry)
@@ -110,40 +115,6 @@
     <github.username>${env.GITHUB_USERNAME}</github.username>
     <github.pat>${env.GITHUB_PAT}</github.pat>
 
-    <postgres_host>localhost</postgres_host>
-    <!-- Changing values not supported for now -->
-    <postgres_port>5432</postgres_port>
-
-    <!-- Hardcoded to default value of POSTGRES installation -->
-    <postgres_db_name>postgres</postgres_db_name>
-    <!-- Hardcoded to default value of POSTGRES installation -->
-    <postgres_super_user_name>postgres</postgres_super_user_name>
-    <!-- Will be initialized by builder.properties -->
-    <!--    <postgres_super_user_password>BUILD_PROPERTY</postgres_super_user_password>-->
-
-    <redis_host>localhost</redis_host>
-    <!-- Changing values not supported for now -->
-    <redis_port>6379</redis_port>
-    <!--    <redis_password>BUILD_PROPERTY</redis_password>-->
-
-    <app_data_parent_dir>target</app_data_parent_dir>
-    <!--    <app_data_dir_name>BUILD_PROPERTY</app_data_dir_name>-->
-    <app_logs_parent_dir>target</app_logs_parent_dir>
-    <!--    <app_logs_dir_name>BUILD_PROPERTY</app_logs_dir_name>-->
-
-    <!--
-      Bound to the default db-name because we are not creating different db for our app,
-      and for now we do not need to.
-    -->
-    <app_db_name>${postgres_db_name}</app_db_name>
-    <!--    <app_db_user_name>BUILD_PROPERTY</app_db_user_name>-->
-    <!--    <app_db_user_password>BUILD_PROPERTY</app_db_user_password>-->
-
-    <org.liquibase.version>4.33.0</org.liquibase.version>
-    <!--TODO-Jawad-now: upgrade to 4x version -->
-    <org.jooq.version>3.20.5</org.jooq.version>
-    <org.mapstruct.version>1.6.3</org.mapstruct.version>
-    <org.hsqldb.version>2.7.4</org.hsqldb.version>
   </properties>
 
   <dependencies>
@@ -194,37 +165,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-aop</artifactId>
     </dependency>
-
-    <!--    <dependency>-->
-    <!--      <groupId>org.testcontainers</groupId>-->
-    <!--      <artifactId>postgresql</artifactId>-->
-    <!--      <scope>test</scope>-->
-    <!--    </dependency>-->
-
-    <!--    &lt;!&ndash;-->
-    <!--     To be able to spinup redis in docker (we use this instead of the-->
-    <!--     "Testcontainers Redis :: JUnit Jupiter Extension" (com.redis.testcontainers -> testcontainers-redis-junit)-->
-    <!--     because the JUnit extension is more tightly integrated with JUnit testing whereas we want to use redis when-->
-    <!--     running locally, in build server (unit/integration test phases), as well as prod in a seamless profile-->
-    <!--     based configuration.-->
-    <!--    &ndash;&gt;-->
-    <!--    &lt;!&ndash; https://mvnrepository.com/artifact/com.redis.testcontainers/testcontainers-redis &ndash;&gt;-->
-    <!--    <dependency>-->
-    <!--      <groupId>com.redis.testcontainers</groupId>-->
-    <!--      <artifactId>testcontainers-redis</artifactId>-->
-    <!--      <version>1.6.4</version>-->
-    <!--    </dependency>-->
-
-    <!--    <dependency>-->
-    <!--      <groupId>org.testcontainers</groupId>-->
-    <!--      <artifactId>junit-jupiter</artifactId>-->
-    <!--      <scope>test</scope>-->
-    <!--    </dependency>-->
-
-    <!--    <dependency>-->
-    <!--      <groupId>org.testcontainers</groupId>-->
-    <!--      <artifactId>testcontainers</artifactId>-->
-    <!--    </dependency>-->
 
     <dependency>
       <groupId>org.jooq</groupId>
@@ -321,6 +261,15 @@
     <!-- END: Dependencies related to JAXB and JAX-WS support in Java 11 and onwards. -->
     <!---->
 
+    <!--
+      A simple in-process memory based (spring.cache.type=simple) JCache implementation that is used when
+      Redisson is disabled.
+    -->
+    <dependency>
+      <groupId>org.ehcache</groupId>
+      <artifactId>ehcache</artifactId>
+      <version>3.10.8</version>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter-->
     <dependency>
       <groupId>org.redisson</groupId>
@@ -394,19 +343,6 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
-          <exclude>dev-app.env</exclude>
-          <exclude>dev-deploy-app-stack.bat</exclude>
-          <exclude>dev-deploy-app-stack.sh</exclude>
-          <exclude>dev-deploy-postgres-stack.bat</exclude>
-          <exclude>dev-deploy-postgres-stack.sh</exclude>
-          <exclude>dev-deploy-redis-stack.bat</exclude>
-          <exclude>dev-deploy-redis-stack.sh</exclude>
-          <exclude>dev-remove-app-stack.bat</exclude>
-          <exclude>dev-remove-app-stack.sh</exclude>
-          <exclude>dev-remove-postgres-stack.bat</exclude>
-          <exclude>dev-remove-postgres-stack.sh</exclude>
-          <exclude>dev-remove-redis-stack.bat</exclude>
-          <exclude>dev-remove-redis-stack.sh</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -428,35 +364,6 @@
     <plugins>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${project.basedir}</directory>
-              <includes>
-                <include>dev-app.env</include>
-                <include>dev-deploy-app-stack.bat</include>
-                <include>dev-deploy-app-stack.sh</include>
-                <include>dev-deploy-postgres-stack.bat</include>
-                <include>dev-deploy-postgres-stack.sh</include>
-                <include>dev-deploy-redis-stack.bat</include>
-                <include>dev-deploy-redis-stack.sh</include>
-                <include>dev-remove-app-stack.bat</include>
-                <include>dev-remove-app-stack.sh</include>
-                <include>dev-remove-postgres-stack.bat</include>
-                <include>dev-remove-postgres-stack.sh</include>
-                <include>dev-remove-redis-stack.bat</include>
-                <include>dev-remove-redis-stack.sh</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-              <useDefaultExcludes>true</useDefaultExcludes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>
         <version>1.2.1</version>
@@ -468,7 +375,7 @@
             </goals>
             <configuration>
               <files>
-                <file>${builder-resources-dir}/builder.properties</file>
+                <file>${project.basedir}/dev-env.properties</file>
               </files>
               <override>true</override>
             </configuration>
@@ -987,8 +894,8 @@
               <jdbc>
                 <driver>oracle.jdbc.OracleDriver</driver>
                 <url>jdbc:oracle:thin:@//localhost:1521/xe</url>
-                <user>${app_db_user_name}</user>
-                <password>${app_db_user_password}</password>
+                <user>${APP_DB_USER_NAME}</user>
+                <password>${APP_DB_USER_PASSWORD}</password>
               </jdbc>
             </configuration>
           </execution>
@@ -1021,9 +928,9 @@
               </generator>
               <jdbc>
                 <driver>org.postgresql.Driver</driver>
-                <url>jdbc:postgresql://${postgres_host}:${postgres_port}/${app_db_name}</url>
-                <user>${app_db_user_name}</user>
-                <password>${app_db_user_password}</password>
+                <url>jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+                <user>${APP_DB_USER_NAME}</user>
+                <password>${APP_DB_USER_PASSWORD}</password>
               </jdbc>
             </configuration>
           </execution>
@@ -1195,38 +1102,6 @@
               <outputDirectory>${project.build.directory}/classes/com/promptwise/promptchain</outputDirectory>
             </configuration>
           </execution>
-          <execution>
-            <id>generate-basedir-files</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>${main-resources-dir}</directory>
-                  <includes>
-                    <include>dev-app.env</include>
-                    <!--                    TODO-Jawad: Implement these -->
-                    <!--                    <include>dev-deploy-app-stack.bat</include>-->
-                    <!--                    <include>dev-deploy-app-stack.sh</include>-->
-                    <include>dev-deploy-postgres-stack.bat</include>
-                    <include>dev-deploy-postgres-stack.sh</include>
-                    <include>dev-deploy-redis-stack.bat</include>
-                    <include>dev-deploy-redis-stack.sh</include>
-                    <include>dev-remove-app-stack.bat</include>
-                    <include>dev-remove-app-stack.sh</include>
-                    <include>dev-remove-postgres-stack.bat</include>
-                    <include>dev-remove-postgres-stack.sh</include>
-                    <include>dev-remove-redis-stack.bat</include>
-                    <include>dev-remove-redis-stack.sh</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-              <outputDirectory>${project.basedir}</outputDirectory>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 
@@ -1245,74 +1120,6 @@
                 <mkdir dir="target/logs"/>
                 <mkdir dir="target/data"/>
                 <mkdir dir="target/container-logs/postgres-init"/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>convert-line-endings-for-container-text-files</id>
-            <!-- Running in 'compile' phase to ensure the process-resource phase has completed -->
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <echo message="Converting line endings for Linux container text files to NIX format..."/>
-                <fixcrlf
-                        srcdir="${project.basedir}/src/main/container-resources"
-                        includes="**/*.sh"
-                        eol="lf"
-                        encoding="UTF-8"
-                        preserveLastModified="true"
-                />
-                <echo message="Line ending conversion for Linux container text files complete."/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>convert-line-endings-for-generated-nix-text-files</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <echo message="Converting line endings for generated NIX text files to Unix format..."/>
-                <fixcrlf
-                        srcdir="${project.basedir}"
-                        includes="*.sh,*.env"
-                        eol="lf"
-                        encoding="UTF-8"
-                        preserveLastModified="true"
-                />
-                <echo message="Line ending conversion for generated NIX text files complete."/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>set-execute-permission-for-generated-nix-scripts</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <!-- Recursively chmod all .sh files under container-resources -->
-                <chmod perm="755">
-                  <fileset dir="${project.basedir}/src/main/container-resources">
-                    <include name="**/*.sh"/>
-                  </fileset>
-                </chmod>
-                <chmod file="${project.basedir}/*.sh" perm="755"/>
-                <!-- List files alphabetically -->
-                <exec executable="sh">
-                  <arg value="-c"/>
-                  <arg value="ls -laR '${project.basedir}/src/main/container-resources/'*.sh"/>
-                </exec>
-                <exec executable="sh">
-                  <arg value="-c"/>
-                  <arg value="ls -la '${project.basedir}/'*.sh"/>
-                </exec>
               </target>
             </configuration>
           </execution>
@@ -1391,18 +1198,19 @@
             <include>com/promptwise/promptchain/test/unittest/**/*UnitTests.java</include>
           </includes>
           <environmentVariables>
-            <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
-            <POSTGRES_PORT>${postgres_port}</POSTGRES_PORT>
-            <REDIS_HOST>${redis_host}</REDIS_HOST>
-            <REDIS_PORT>${redis_port}</REDIS_PORT>
-            <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
-            <APP_DATA_PARENT_DIR>${app_data_parent_dir}</APP_DATA_PARENT_DIR>
-            <APP_DATA_DIR_NAME>${app_data_dir_name}</APP_DATA_DIR_NAME>
-            <APP_LOGS_PARENT_DIR>${app_logs_parent_dir}</APP_LOGS_PARENT_DIR>
-            <APP_LOGS_DIR_NAME>${app_logs_dir_name}</APP_LOGS_DIR_NAME>
-            <APP_DB_NAME>${app_db_name}</APP_DB_NAME>
-            <APP_DB_USER_NAME>${app_db_user_name}</APP_DB_USER_NAME>
-            <APP_DB_USER_PASSWORD>${app_db_user_password}</APP_DB_USER_PASSWORD>
+            <POSTGRES_HOST>${POSTGRES_HOST}</POSTGRES_HOST>
+            <POSTGRES_PORT>${POSTGRES_PORT}</POSTGRES_PORT>
+            <REDIS_HOST>${REDIS_HOST}</REDIS_HOST>
+            <REDIS_PORT>${REDIS_PORT}</REDIS_PORT>
+            <REDIS_PASSWORD>${REDIS_PASSWORD}</REDIS_PASSWORD>
+            <REDIS_ENABLED>${REDIS_ENABLED}</REDIS_ENABLED>
+            <APP_DATA_PARENT_DIR>${APP_DATA_PARENT_DIR}</APP_DATA_PARENT_DIR>
+            <APP_DATA_DIR_NAME>${APP_DATA_DIR_NAME}</APP_DATA_DIR_NAME>
+            <APP_LOGS_PARENT_DIR>${APP_LOGS_PARENT_DIR}</APP_LOGS_PARENT_DIR>
+            <APP_LOGS_DIR_NAME>${APP_LOGS_DIR_NAME}</APP_LOGS_DIR_NAME>
+            <APP_DB_NAME>${APP_DB_NAME}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${APP_DB_USER_NAME}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${APP_DB_USER_PASSWORD}</APP_DB_USER_PASSWORD>
           </environmentVariables>
           <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
                a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
@@ -1466,18 +1274,19 @@
             <include>com/promptwise/promptchain/test/integrationtest/**/*IntegrationTests.java</include>
           </includes>
           <environmentVariables>
-            <POSTGRES_HOST>${postgres_host}</POSTGRES_HOST>
-            <POSTGRES_PORT>${postgres_port}</POSTGRES_PORT>
-            <REDIS_HOST>${redis_host}</REDIS_HOST>
-            <REDIS_PORT>${redis_port}</REDIS_PORT>
-            <REDIS_PASSWORD>${redis_password}</REDIS_PASSWORD>
-            <APP_DATA_PARENT_DIR>${app_data_parent_dir}</APP_DATA_PARENT_DIR>
-            <APP_DATA_DIR_NAME>${app_data_dir_name}</APP_DATA_DIR_NAME>
-            <APP_LOGS_PARENT_DIR>${app_logs_parent_dir}</APP_LOGS_PARENT_DIR>
-            <APP_LOGS_DIR_NAME>${app_logs_dir_name}</APP_LOGS_DIR_NAME>
-            <APP_DB_NAME>${app_db_name}</APP_DB_NAME>
-            <APP_DB_USER_NAME>${app_db_user_name}</APP_DB_USER_NAME>
-            <APP_DB_USER_PASSWORD>${app_db_user_password}</APP_DB_USER_PASSWORD>
+            <POSTGRES_HOST>${POSTGRES_HOST}</POSTGRES_HOST>
+            <POSTGRES_PORT>${POSTGRES_PORT}</POSTGRES_PORT>
+            <REDIS_HOST>${REDIS_HOST}</REDIS_HOST>
+            <REDIS_PORT>${REDIS_PORT}</REDIS_PORT>
+            <REDIS_PASSWORD>${REDIS_PASSWORD}</REDIS_PASSWORD>
+            <REDIS_ENABLED>${REDIS_ENABLED}</REDIS_ENABLED>
+            <APP_DATA_PARENT_DIR>${APP_DATA_PARENT_DIR}</APP_DATA_PARENT_DIR>
+            <APP_DATA_DIR_NAME>${APP_DATA_DIR_NAME}</APP_DATA_DIR_NAME>
+            <APP_LOGS_PARENT_DIR>${APP_LOGS_PARENT_DIR}</APP_LOGS_PARENT_DIR>
+            <APP_LOGS_DIR_NAME>${APP_LOGS_DIR_NAME}</APP_LOGS_DIR_NAME>
+            <APP_DB_NAME>${APP_DB_NAME}</APP_DB_NAME>
+            <APP_DB_USER_NAME>${APP_DB_USER_NAME}</APP_DB_USER_NAME>
+            <APP_DB_USER_PASSWORD>${APP_DB_USER_PASSWORD}</APP_DB_USER_PASSWORD>
           </environmentVariables>
           <reportsDirectory>target/failsafe-reports</reportsDirectory>
         </configuration>
@@ -1571,48 +1380,6 @@
         <version>3.5.1</version>
         <executions>
           <execution>
-            <id>local-compose-start-services</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/deploy-infrastructure-stacks.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-            </configuration>
-          </execution>
-<!--          <execution>-->
-<!--            <id>echo-create-promptchain-db-user-log-file</id>-->
-<!--            <phase>post-integration-test</phase>-->
-<!--            <goals>-->
-<!--              <goal>exec</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <executable>cat</executable>-->
-<!--              <arguments>-->
-<!--                <argument>${project.build.directory}/container-logs/postgres-init/create-promptchain-db-user.log-->
-<!--                </argument>-->
-<!--              </arguments>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-          <execution>
-            <id>local-compose-stop-services</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <arguments>
-                <argument>${project.basedir}/remove-infrastructure-stacks.sh</argument>
-              </arguments>
-              <workingDirectory>${project.basedir}</workingDirectory>
-            </configuration>
-          </execution>
-          <execution>
             <id>build-docker-image</id>
             <phase>install</phase>
             <goals>
@@ -1627,18 +1394,15 @@
                 <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_DIRECTORY=target</argument>
                 <argument>--build-arg</argument>
-                <argument>APP_DATA_DIR_NAME=${app_data_dir_name}</argument>
+                <argument>APP_DATA_DIR_NAME=${APP_DATA_DIR_NAME}</argument>
                 <argument>--build-arg</argument>
-                <argument>APP_LOGS_DIR_NAME=${app_logs_dir_name}</argument>
+                <argument>APP_LOGS_DIR_NAME=${APP_LOGS_DIR_NAME}</argument>
                 <argument>--build-arg</argument>
                 <argument>PROJECT_BUILD_FINAL_NAME=${project.build.finalName}.jar</argument>
                 <argument>-f</argument>
                 <argument>${project.basedir}/Dockerfile</argument>
                 <argument>${project.basedir}</argument> <!-- Build context -->
               </arguments>
-              <!--              <environmentVariables>-->
-              <!--                <DOCKER_BUILDKIT>1</DOCKER_BUILDKIT> &lt;!&ndash; Ensure BuildKit is enabled &ndash;&gt;-->
-              <!--              </environmentVariables>-->
             </configuration>
           </execution>
           <execution>
@@ -1836,50 +1600,52 @@
   <profiles>
 
     <profile>
-      <id>windows</id>
+      <id>nix</id>
       <activation>
         <os>
-          <family>windows</family>
+          <family>!windows</family>
         </os>
       </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
             <executions>
-              <!--
-                Override the nix-specific executions defined in the profile independent build-plugins section
-                with windows-specific versions.
-              -->
               <execution>
-                <id>local-compose-start-services</id>
-                <phase>pre-integration-test</phase>
+                <id>convert-line-endings-for-generated-nix-text-files</id>
+                <phase>process-resources</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>run</goal>
                 </goals>
                 <configuration>
-                  <executable>cmd.exe</executable>
-                  <arguments>
-                    <argument>/c</argument>
-                    <argument>${project.basedir}/deploy-infrastructure-stacks.bat</argument>
-                  </arguments>
-                  <workingDirectory>${project.basedir}</workingDirectory>
+                  <target>
+                    <echo message="Converting line endings for NIX text files to Unix format..."/>
+                    <fixcrlf
+                            srcdir="${project.basedir}"
+                            includes="*.sh,*.env"
+                            eol="lf"
+                            encoding="UTF-8"
+                            preserveLastModified="true"
+                    />
+                    <echo message="Line ending conversion for generated NIX text files complete."/>
+                  </target>
                 </configuration>
               </execution>
               <execution>
-                <id>local-compose-stop-services</id>
-                <phase>post-integration-test</phase>
+                <id>set-execute-permission-for-generated-nix-scripts</id>
+                <phase>process-resources</phase>
                 <goals>
-                  <goal>exec</goal>
+                  <goal>run</goal>
                 </goals>
                 <configuration>
-                  <executable>cmd.exe</executable>
-                  <arguments>
-                    <argument>/c</argument>
-                    <argument>${project.basedir}/remove-infrastructure-stacks.bat</argument>
-                  </arguments>
-                  <workingDirectory>${project.basedir}</workingDirectory>
+                  <target>
+                    <chmod file="${project.basedir}/*.sh" perm="755"/>
+                    <exec executable="sh">
+                      <arg value="-c"/>
+                      <arg value="ls -la '${project.basedir}/'*.sh"/>
+                    </exec>
+                  </target>
                 </configuration>
               </execution>
             </executions>
@@ -1888,48 +1654,13 @@
       </build>
     </profile>
 
-    <!--    <profile>-->
-    <!--      <id>localNix</id>-->
-    <!--      <activation>-->
-    <!--        <property>-->
-    <!--          &lt;!&ndash;-->
-    <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
-    <!--            running in the GITHUB-Actions script (such as running locally).-->
-    <!--          &ndash;&gt;-->
-    <!--          <name>!env.GITHUB_ACTOR</name>-->
-    <!--        </property>-->
-    <!--        <os>-->
-    <!--          <family>!windows</family>-->
-    <!--        </os>-->
-    <!--      </activation>-->
-    <!--      <properties>-->
-    <!--        &lt;!&ndash; Override the value of the property to use the value that is configured in the OS-level env var &ndash;&gt;-->
-    <!--        &lt;!&ndash; TODO: Fail build if this is not defined &ndash;&gt;-->
-    <!--        <github.username>${env.GITHUB_USERNAME}</github.username>-->
-    <!--        <github.pat>${env.GITHUB_PAT}</github.pat>-->
-    <!--      </properties>-->
-    <!--    </profile>-->
-
     <profile>
       <id>localWindows</id>
       <activation>
-        <!--        <property>-->
-        <!--          &lt;!&ndash;-->
-        <!--            Activates if env.GITHUB_ACTOR is not defined in the environment, which will be the case when not-->
-        <!--            running in the GITHUB-Actions script (such as running locally).-->
-        <!--          &ndash;&gt;-->
-        <!--          <name>!env.GITHUB_ACTOR</name>-->
-        <!--        </property>-->
         <os>
           <family>windows</family>
         </os>
       </activation>
-      <properties>
-        <!-- Override the value of the property to use the value that is configured in the OS-level env var -->
-        <!-- TODO: Fail build if this is not defined -->
-        <github.username>${env.GITHUB_USERNAME}</github.username>
-        <github.pat>${env.GITHUB_PAT}</github.pat>
-      </properties>
       <build>
         <plugins>
           <plugin>
@@ -2025,16 +1756,6 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
-    <!--    <repository>-->
-    <!--      <id>ghcrio-promptchain</id>-->
-    <!--      <name>PromptChain Releases Repository in ghcr.io</name>-->
-    <!--      <url>https://ghcr.io/mjawadbutt/promptchain</url>-->
-    <!--    </repository>-->
-    <!--    <snapshotRepository>-->
-    <!--      <id>ghcrio-promptchain-snapshots</id>-->
-    <!--      <name>PromptChain Snapshots Repository in ghcr.io</name>-->
-    <!--      <url>https://ghcr.io/mjawadbutt/promptchain-snapshots</url>-->
-    <!--    </snapshotRepository>-->
   </distributionManagement>
 
   <developers>

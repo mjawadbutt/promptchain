@@ -1,13 +1,13 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="NoBuildDevPromptChain" type="Application" factoryName="Application">
     <option name="envFilePaths">
-      <option value="$PROJECT_DIR$/dev-app.env" />
+      <option value="$PROJECT_DIR$/dev-env.properties" />
     </option>
     <option name="MAIN_CLASS_NAME" value="com.promptwise.promptchain.PromptChainApplication" />
     <module name="promptchain" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.promptwise.promptchain.config.*" />
+        <option name="PATTERN" value="com.promptwise.promptchain.common.util.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

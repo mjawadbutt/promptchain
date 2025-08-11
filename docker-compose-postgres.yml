@@ -1,21 +1,14 @@
-# docker-compose-postgres.yml
 services:
-  # Note that the POSTGRES_XXX env vars (defined in override and prod yamls) are not used by the POSTGRES server,
-  # they are used by POSTGRES docker images. When a docker-based POSTGRES is started for the VERY FIRST TIME, it
-  # executes a bundled shell script that runs the POSTGRES 'initdb' process. This script actually uses the
-  # env vars such as POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB to initialize and configure the default db
-  # and the superuser account. Only the POSTGRES_PASSWORD needs to be specified. The other two, if not specified,
-  #  default to 'postgres'.
+
   postgres:
     image: postgres:15
     hostname: postgres
     environment:
-      # Do not change the names of these env-vars because the POSTGRES container image looks for these names only.
       POSTGRES_DB: ${POSTGRES_DB_NAME}
       POSTGRES_USER: ${POSTGRES_SUPER_USER_NAME}
       POSTGRES_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_SUPER_USER_NAME} -d ${POSTGRES_DB_NAME}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPER_USER_NAME} -d ${POSTGRES_DB_NAME}"]
       start_period: 10s
       interval: 5s
       timeout: 5s
@@ -23,74 +16,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      # Publish the PostgreSQL port to the Swarm's routing mesh (ingress)
-      # This allows other services to connect to it via the service name,
-      # and potentially allows external access through any Swarm node's 5432 port.
-      - target: 5432         # Port inside the container
-        published: 5432      # Port published on the Swarm's routing mesh
-        protocol: tcp
-        mode: ingress
+      - "5432:5432"
     networks:
-      - network
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: '2'      # Limit to 2 CPU cores
-          memory: 4GB    # Limit to 4GB of RAM
-        reservations:
-          cpus: '0.5'    # Reserve 0.5 CPU cores
-          memory: 1GB    # Reserve 1GB of RAM
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 30s
-      #      placement:
-      #        constraints:
-      #          - node.labels.type == database
-      update_config: # Control how service updates are performed
-        parallelism: 1 # Update one container at a time
-        delay: 10s     # Wait 10 seconds between updating containers
-      rollback_config: # Control how service rollbacks are performed
-        parallelism: 1 # Roll back one by one (safer for databases)
-        delay: 10s
+      - local_network
 
-  # Service to run the database initialization script. This is a short-lived and idempotent service that executes
-  # once after every POSTGRES container startup and ends.
-  create-promptchain-db-user:
-    image: postgres:15
-    environment:
-      # Pass all necessary environment variables to the init script.
-      POSTGRES_HOST_INTERNAL: postgres # The service name of your database container.
-      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
-      POSTGRES_SUPER_USER_NAME: ${POSTGRES_SUPER_USER_NAME}
-      POSTGRES_SUPER_USER_PASSWORD: ${POSTGRES_SUPER_USER_PASSWORD} # Used by PGPASSWORD in script
-      APP_DB_NAME: ${APP_DB_NAME}
-      APP_DB_USER_NAME: ${APP_DB_USER_NAME}
-      APP_DB_USER_PASSWORD: ${APP_DB_USER_PASSWORD}
-    volumes:
-      - ./src/main/container-resources/postgres/create-promptchain-db-user.sh:/usr/local/bin/create-promptchain-db-user.sh:ro
-      - ./target/container-logs/postgres-init:/var/log/postgres-init:rw
-    networks:
-      - network
-    depends_on:
-      - postgres
-    command: [ "bash", "-c", "/usr/local/bin/create-promptchain-db-user.sh > /var/log/postgres-init/create-promptchain-db-user.log 2>&1" ]
-    restart: "no"
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 128MB
-      restart_policy:
-        condition: none # <-- THIS IS THE CRUCIAL LINE for one-shot services
 volumes:
   postgres_data:
-    driver: local
 
 networks:
-  network:
-    driver: overlay
-    attachable: true
+
+  local_network:
+    driver: bridge

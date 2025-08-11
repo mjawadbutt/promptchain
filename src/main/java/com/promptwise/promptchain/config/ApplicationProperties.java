@@ -273,6 +273,7 @@ public class ApplicationProperties {
   }
 
   public static class CachingProperties {
+    private final Boolean redisEnabled;
     private final String redisHost;
     private final Integer redisPort;
     private final String redisPassword;
@@ -280,16 +281,22 @@ public class ApplicationProperties {
     private final Integer redisConnectionMinimumIdleSize;
     private final Integer redisTimeout;
 
-    public CachingProperties(@NotNull final String redisHost, @NotNull final Integer redisPort,
-                             final String redisPassword, @NotNull final Integer redisConnectionPoolSize,
+    public CachingProperties(@NotNull final Boolean redisEnabled, @NotNull final String redisHost,
+                             @NotNull final Integer redisPort, final String redisPassword,
+                             @NotNull final Integer redisConnectionPoolSize,
                              @NotNull final Integer redisConnectionMinimumIdleSize,
                              @NotNull final Integer redisTimeout) {
+      this.redisEnabled = redisEnabled;
       this.redisHost = redisHost;
       this.redisPort = redisPort;
       this.redisPassword = redisPassword;
       this.redisConnectionPoolSize = redisConnectionPoolSize;
       this.redisConnectionMinimumIdleSize = redisConnectionMinimumIdleSize;
       this.redisTimeout = redisTimeout;
+    }
+
+    public Boolean getRedisEnabled() {
+      return redisEnabled;
     }
 
     public String getRedisHost() {

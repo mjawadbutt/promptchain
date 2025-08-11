@@ -1,16 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DevPromptChainIntegrationTests.testGetAppUser" type="JUnit" factoryName="JUnit">
+  <configuration default="true" type="JUnit" factoryName="JUnit">
     <module name="promptchain" />
-    <extension name="coverage">
-      <pattern>
-        <option name="PATTERN" value="com.promptwise.promptchain.test.integrationtest.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-    </extension>
-    <option name="PACKAGE_NAME" value="com.promptwise.promptchain.test.integrationtest" />
-    <option name="MAIN_CLASS_NAME" value="com.promptwise.promptchain.test.integrationtest.PromptChainIntegrationTests" />
-    <option name="METHOD_NAME" value="testGetAppUser" />
-    <option name="TEST_OBJECT" value="method" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
     <envs>
       <env name="APP_DATA_DIR_NAME" value="data" />
       <env name="APP_DATA_PARENT_DIR" value="target" />
