@@ -343,6 +343,28 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
+          <exclude>client/**/node_modules/**</exclude>
+          <exclude>**/*.node</exclude>
+          <exclude>**/*.wasm</exclude>
+          <exclude>**/*.png</exclude>
+          <exclude>**/*.jpg</exclude>
+          <exclude>**/*.jpeg</exclude>
+          <exclude>**/*.gif</exclude>
+          <exclude>**/*.bmp</exclude>
+          <exclude>**/*.ico</exclude>
+          <exclude>**/*.svg</exclude>
+          <exclude>**/*.ttf</exclude>
+          <exclude>**/*.otf</exclude>
+          <exclude>**/*.woff</exclude>
+          <exclude>**/*.woff2</exclude>
+          <exclude>**/*.eot</exclude>
+          <exclude>**/*.mp3</exclude>
+          <exclude>**/*.mp4</exclude>
+          <exclude>**/*.webm</exclude>
+          <exclude>**/*.zip</exclude>
+          <exclude>**/*.gz</exclude>
+          <exclude>**/*.tar</exclude>
+          <exclude>**/*.7z</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -1068,18 +1090,27 @@
         <configuration>
           <!-- add this so that image files used for unit test don't get corrupted -->
           <nonFilteredFileExtensions>
-            <nonFilteredFileExtension>dll</nonFilteredFileExtension>
-            <nonFilteredFileExtension>eot</nonFilteredFileExtension>
-            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
-            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>node</nonFilteredFileExtension>
+            <nonFilteredFileExtension>wasm</nonFilteredFileExtension>
             <nonFilteredFileExtension>png</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>bmp</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
             <nonFilteredFileExtension>svg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>tif</nonFilteredFileExtension>
-            <nonFilteredFileExtension>tiff</nonFilteredFileExtension>
             <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>otf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>woff</nonFilteredFileExtension>
+            <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+            <nonFilteredFileExtension>eot</nonFilteredFileExtension>
+            <nonFilteredFileExtension>mp3</nonFilteredFileExtension>
+            <nonFilteredFileExtension>mp4</nonFilteredFileExtension>
+            <nonFilteredFileExtension>webm</nonFilteredFileExtension>
+            <nonFilteredFileExtension>zip</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gz</nonFilteredFileExtension>
+            <nonFilteredFileExtension>tar</nonFilteredFileExtension>
+            <nonFilteredFileExtension>7z</nonFilteredFileExtension>
           </nonFilteredFileExtensions>
         </configuration>
         <executions>
