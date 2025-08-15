@@ -1,8 +1,14 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  distDir: '../resources/static/client', // replaces `.next` with `build`
+  experimental: {
+    turbopack: {
+      fsAllow: [
+        path.resolve(__dirname, "../resources/static/client")
+      ]
+    }
+  }
 };
 
 export default nextConfig;
