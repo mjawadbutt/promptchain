@@ -12,10 +12,14 @@
     <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_01_create-tables.sql"/>
     <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_02_reference-data.sql"/>
     <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_03_create-constraints.sql"/>
+<!--    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_04_create_timeseries_metrics_table.sql"/>-->
+
+
   </changeSet>
 
   <changeSet id="v0.0.1-tag" author="jawad">
     <tagDatabase tag="0.0.1"/>
   </changeSet>
+
 
 </databaseChangeLog>

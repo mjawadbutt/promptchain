@@ -801,6 +801,7 @@
           -->
           <execution>
             <id>generate-via-hsqldb</id>
+            <phase>none</phase>
             <goals>
               <goal>generate</goal>
             </goals>
@@ -924,7 +925,6 @@
 
           <execution>
             <id>generate-via-postgres-schema</id>
-            <phase>none</phase>
             <goals>
               <goal>generate</goal>
             </goals>
