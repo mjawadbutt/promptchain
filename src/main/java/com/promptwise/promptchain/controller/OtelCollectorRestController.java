@@ -2,8 +2,13 @@ package com.promptwise.promptchain.controller;
 
 import com.promptwise.promptchain.PromptChainApplication;
 import com.promptwise.promptchain.dto.TelemetryRequest;
+import com.promptwise.promptchain.service.LogProcessorService;
+import com.promptwise.promptchain.service.MetricProcessorService;
+import com.promptwise.promptchain.service.TraceProcessorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,11 +22,20 @@ import java.util.concurrent.Executors;
  * metrics, logs, traces
  */
 @RestController
-@RequestMapping(OtlpImporterRestController.WEB_CONTEXT)
-public class OtlpImporterRestController {
+@RequestMapping(OtelCollectorRestController.WEB_CONTEXT)
+public class OtelCollectorRestController {
 
   public static final String WEB_CONTEXT = PromptChainApplication.WEB_CONTEXT + "/api/telemetry";
   ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+  @Autowired
+  MetricProcessorService metricProcessorService;
+  @Autowired
+  LogProcessorService logProcessorService;
+  @Autowired
+  //Traces = collection of spans.
+  TraceProcessorService traceProcessorService;
+
+
 
   /**
    * This is the main importer for metrics, logs, traces
@@ -42,20 +56,29 @@ public class OtlpImporterRestController {
 
   private void processTelemetry(TelemetryRequest request){
 
-    request.spans().forEach(span -> {
-      System.out.println("Received span: " + span.name() + " traceId=" + span.traceId());
-    });
+    if(request.spans()!=null) {
+      request.spans().forEach(span -> {
+        System.out.println("Received span: " + span.name() + " traceId=" + span.traceId());
+        //Traces = collection of spans.
+        traceProcessorService.process(request);
 
+      });
+    }
 
-    request.metrics().forEach(metric -> {
-      System.out.println("Received metric: " + metric.name() + " value=" + metric.value());
-    });
+    if(request.metrics()!=null) {
+      request.metrics().forEach(metric -> {
+        System.out.println("Received metric: " + metric.name() + " value=" + metric.unit());
+        metricProcessorService.process(request);
+      });
+    }
 
-
-    request.logs().forEach(log -> {
-      System.out.println("Received log: " + log.message() + " severity=" + log.severity());
-    });
-
+    if(request.logs()!=null) {
+      request.logs().forEach(log -> {
+        System.out.println("Received log: " + log.message() + " severity=" + log.severity());
+        logProcessorService.process(request);
+      });
+    }
   }
+
 
 }
