@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "1fea42f6-7bf2-4dc1-b937-d9743c779907",
+		"_postman_id": "988700cb-d40c-46fd-a41a-84aa1a80ad87",
 		"name": "PromptChain",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "47492583",
-		"_collection_link": "https://abdullahsiddiqui01-4434483.postman.co/workspace/promptchain~114a5227-dba7-4c35-ae60-b4c79cd01043/collection/47492583-1fea42f6-7bf2-4dc1-b937-d9743c779907?action=share&source=collection_link&creator=47492583"
+		"_exporter_id": "1914514"
 	},
 	"item": [
 		{
@@ -64,7 +63,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/promptchain/getAppUser?appUserId=3",
+					"raw": "http://localhost:8080/promptchain/admin/getAllAppUsers",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -72,13 +71,39 @@
 					"port": "8080",
 					"path": [
 						"promptchain",
-						"getAppUser"
-					],
-					"query": [
-						{
-							"key": "appUserId",
-							"value": "3"
+						"admin",
+						"getAllAppUsers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "telemetryImport",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"metrics\": [\r\n    {\r\n      \"name\": \"cpu_usage\",\r\n      \"unit\": \"%\",\r\n      \"serviceName\": \"ai-app\",\r\n      \"dataPoints\": [\r\n        {\r\n          \"timeUnixNano\": 1724067000000000000,\r\n          \"value\": 72.5,\r\n          \"labels\": {\r\n            \"core\": \"0\",\r\n            \"host\": \"server-01\"\r\n          }\r\n        },\r\n        {\r\n          \"timeUnixNano\": 1724067000000000000,\r\n          \"value\": 68.1,\r\n          \"labels\": {\r\n            \"core\": \"1\",\r\n            \"host\": \"server-01\"\r\n          }\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"name\": \"memory_usage\",\r\n      \"unit\": \"MB\",\r\n      \"serviceName\": \"ai-app\",\r\n      \"dataPoints\": [\r\n        {\r\n          \"timeUnixNano\": 1724067000000000000,\r\n          \"value\": 1536,\r\n          \"labels\": {\r\n            \"host\": \"server-01\"\r\n          }\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"name\": \"request_count\",\r\n      \"unit\": \"1\",\r\n      \"serviceName\": \"ai-app\",\r\n      \"dataPoints\": [\r\n        {\r\n          \"timeUnixNano\": 1724067000000000000,\r\n          \"value\": 523,\r\n          \"labels\": {\r\n            \"host\": \"server-01\"\r\n          }\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"name\": \"response_time\",\r\n      \"unit\": \"ms\",\r\n      \"serviceName\": \"ai-app\",\r\n      \"dataPoints\": [\r\n        {\r\n          \"timeUnixNano\": 1724067000000000000,\r\n          \"value\": 25,\r\n          \"labels\": {\r\n            \"host\": \"server-01\"\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
 						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/promptchain/api/telemetry/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"promptchain",
+						"api",
+						"telemetry",
+						"import"
 					]
 				}
 			},

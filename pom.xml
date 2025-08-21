@@ -1736,7 +1736,7 @@
               (so each run starts with a clean DB)
 
        Usage:
-         mvn clean install -P ephemeral-timescaledb
+         mvn clean compile -P ephemeral-timescaledb
 
        Notes:
          - This fully replaces the old HSQL-based setup. The generated code now
