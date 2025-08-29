@@ -696,9 +696,17 @@
         <version>4.31.0</version>
 
         <configuration>
+          <!--
+           The path in changeLogFile needs to be relative to db dir because we also run liquibase update
+           at application startup, and that uses spring-liquibase property:
+             spring.liquibase.change-log: classpath:/db/liquibase/db.changelog-master.xml
+           And in this case, liquibase uses db/liquibase/db.changelog-master.xml as the changelog file-name to
+           determine which changesets have executed or not. So if the path used here is not relative to db dir,
+           liquibase will determine that none of the changesets have run (because the filename field in the
+           databasechangelog table will not match) and will try to run all changesets again and fail.
+          -->
           <changeLogDirectory>src/main/resources</changeLogDirectory>
           <changeLogFile>db/liquibase/db.changelog-master.xml</changeLogFile>
-<!--          <changeLogFile>src/main/resources/db/liquibase/db.changelog-master.xml</changeLogFile>-->
         </configuration>
         <executions>
 

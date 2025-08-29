@@ -31,7 +31,6 @@ public class PromptChainRestController {
     return appUserEntity;
   }
 
-  @RequestMapping("")
   @GetMapping(path = "/ping", produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> ping() {
     return ResponseEntity.ok("pong");
