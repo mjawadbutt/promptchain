@@ -41,12 +41,33 @@ You can run the following Maven phases from the **command line** or via the **In
 
 ## 🧠 Running from IntelliJ IDEA
 
+### ▶️ Running the Application locally using ephemeral-timescaledb profile
+
+1. **Ensure prerequisites are installed**
+    - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) must be installed and running.
+    - Java 21+ and Maven installed.
+
+2. **Start the application database**
+    - The `ephemeral-timescaledb` Maven profile will spin up a TimescaleDB container,
+      create the `jooq_build_db` database, enable required extensions,
+      apply Liquibase migrations, and generate jOOQ code.
+    - You don’t need to run Docker commands manually — Maven will handle it.
+
+   From the project root:
+   ```bash
+   mvn clean compile -P ephemeral-timescaledb
+
+3. Select the IntelliJ **profile** `NoBuildDevPromptChain`.
+4. Click **Run ▶️** or **Debug 🐞**.
+
+
 ### ▶️ Running the Application
 
 1. Select the IntelliJ **profile** `DevPromptChain`.
 2. Click **Run ▶️** or **Debug 🐞**.
 
 ---
+
 
 ## ✅ Running Integration Tests
 

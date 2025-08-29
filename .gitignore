@@ -23,7 +23,8 @@ src/main/resources/static/client/
 !GIT_SETUP.md
 !LICENSE
 !pom.xml
-!prune-all-images.*
+!prune-docker.bat
+!prune-docker.sh
 !README.md
 !start-postgres-container.*
 !start-redis-container.*

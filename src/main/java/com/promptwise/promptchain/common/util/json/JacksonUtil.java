@@ -1,6 +1,7 @@
 package com.promptwise.promptchain.common.util.json;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -98,13 +99,17 @@ public class JacksonUtil {
                                                              String objectMapperModuleName, Version version) {
     objectMapperToConfigure.configure(SerializationFeature.INDENT_OUTPUT, true);
     objectMapperToConfigure.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+    objectMapperToConfigure.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    // Skip empty collections, arrays, and strings
+    objectMapperToConfigure.setDefaultPropertyInclusion(
+            JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY));
+
     objectMapperToConfigure.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-//    objectMapperToConfigure.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
     objectMapperToConfigure.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
     objectMapperToConfigure.setDateFormat((new StdDateFormat()).withColonInTimeZone(true));
     Module module = new JavaTimeModule();
     objectMapperToConfigure.registerModule(module);
-    objectMapperToConfigure.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
 
     SimpleModule simpleModule = new SimpleModule((
             objectMapperModuleName == null ? "" : objectMapperModuleName + "-") + "ObjectMapper-SimpleModule", version);

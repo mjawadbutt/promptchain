@@ -28,25 +28,24 @@ public class PromptChainServerConfiguration {
     this.objectMapper = objectMapper;
   }
 
-  @Bean
-  public SpringLiquibase liquibase(DataSource dataSource) {
-    //TODO-Jawad: cleanup liquibase props
-    SpringLiquibase liquibase = new SpringLiquibase();
-
-    // Set the changelog file path
-    liquibase.setChangeLog("classpath:/db/liquibase/db.changelog-master.xml");
-
-    // Set the DataSource for Liquibase to use for schema migrations
-    // This is typically the same DataSource your application uses
-    liquibase.setDataSource(dataSource);
-
-    // You can set other Liquibase properties here if needed, e.g.:
-    liquibase.setShouldRun(true); // Default is true, but good for clarity
-    liquibase.setLiquibaseSchema("public"); // Or your specific Liquibase schema
-    liquibase.setDefaultSchema("public"); // Or your application's default schema
-
-    return liquibase;
-  }
+//  @Bean
+//  public SpringLiquibase liquibase(DataSource dataSource) {
+//    //TODO-Jawad: cleanup liquibase props
+//    SpringLiquibase liquibase = new SpringLiquibase();
+//
+//    // Set the changelog file path
+//    liquibase.setChangeLog("classpath:/db/liquibase/db.changelog-master.xml");
+//
+//    // Set the DataSource for Liquibase to use for schema migrations
+//    // This is typically the same DataSource your application uses
+//    liquibase.setDataSource(dataSource);
+//
+//    // You can set other Liquibase properties here if needed, e.g.:
+//    liquibase.setLiquibaseSchema("public"); // Or your specific Liquibase schema
+//    liquibase.setDefaultSchema("public"); // Or your application's default schema
+//
+//    return liquibase;
+//  }
 
   @Bean
   public DataSource dataSource(DatasourceConnectionTester connectionTester) { // Inject the helper component

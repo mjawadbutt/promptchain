@@ -343,28 +343,6 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
-          <exclude>client/**/node_modules/**</exclude>
-          <exclude>**/*.node</exclude>
-          <exclude>**/*.wasm</exclude>
-          <exclude>**/*.png</exclude>
-          <exclude>**/*.jpg</exclude>
-          <exclude>**/*.jpeg</exclude>
-          <exclude>**/*.gif</exclude>
-          <exclude>**/*.bmp</exclude>
-          <exclude>**/*.ico</exclude>
-          <exclude>**/*.svg</exclude>
-          <exclude>**/*.ttf</exclude>
-          <exclude>**/*.otf</exclude>
-          <exclude>**/*.woff</exclude>
-          <exclude>**/*.woff2</exclude>
-          <exclude>**/*.eot</exclude>
-          <exclude>**/*.mp3</exclude>
-          <exclude>**/*.mp4</exclude>
-          <exclude>**/*.webm</exclude>
-          <exclude>**/*.zip</exclude>
-          <exclude>**/*.gz</exclude>
-          <exclude>**/*.tar</exclude>
-          <exclude>**/*.7z</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -716,17 +694,38 @@
         <artifactId>liquibase-maven-plugin</artifactId>
         <!-- Do not use version 4.32.0, it has bugs. Try upgrade to a later version whenever needed. -->
         <version>4.31.0</version>
+
         <configuration>
-          <changeLogFile>src/main/resources/db/liquibase/db.changelog-master.xml</changeLogFile>
-          <url>
-            jdbc:hsqldb:file:${hsqldb.jooq.db-path};create=true;shutdown=true;${hsqldb.common-options}
-          </url>
-          <username>${hsqldb.user}</username>
-          <password>${hsqldb.password}</password>
-          <driver>${hsqldb.driver-class-name}</driver>
+          <!--
+           The path in changeLogFile needs to be relative to db dir because we also run liquibase update
+           at application startup, and that uses spring-liquibase property:
+             spring.liquibase.change-log: classpath:/db/liquibase/db.changelog-master.xml
+           And in this case, liquibase uses db/liquibase/db.changelog-master.xml as the changelog file-name to
+           determine which changesets have executed or not. So if the path used here is not relative to db dir,
+           liquibase will determine that none of the changesets have run (because the filename field in the
+           databasechangelog table will not match) and will try to run all changesets again and fail.
+          -->
+          <changeLogDirectory>src/main/resources</changeLogDirectory>
+          <changeLogFile>db/liquibase/db.changelog-master.xml</changeLogFile>
         </configuration>
         <executions>
+
           <execution>
+            <id>update-db-schema</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>update</goal>
+            </goals>
+            <configuration>
+              <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+              <username>${APP_DB_USER_NAME}</username>
+              <password>${APP_DB_USER_PASSWORD}</password>
+              <driver>org.postgresql.Driver</driver>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>migrate-schema-via-embedded-hsqldb</id>
             <!--
               Note that since the output of this plugin is used by the jooq-codegen-maven plugin (defined just below),
               AND, since it executes in the same phase as the jooq-codegen-maven plugin, it HAS TO BE DEFINED before
@@ -734,10 +733,19 @@
               Alternatively, we could bind it to the initialize phase and then the order would no longer matter,
               however, the generate-sources phase seems more appropriate for this goal.
             -->
-            <phase>generate-sources</phase>
+            <!--            <phase>generate-sources</phase>-->
+            <phase>none</phase>
             <goals>
               <goal>update</goal>
             </goals>
+            <configuration>
+              <url>
+                jdbc:hsqldb:file:${hsqldb.jooq.db-path};create=true;shutdown=true;${hsqldb.common-options}
+              </url>
+              <username>${hsqldb.user}</username>
+              <password>${hsqldb.password}</password>
+              <driver>${hsqldb.driver-class-name}</driver>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -801,6 +809,7 @@
           -->
           <execution>
             <id>generate-via-hsqldb</id>
+            <phase>none</phase>
             <goals>
               <goal>generate</goal>
             </goals>
@@ -924,7 +933,7 @@
 
           <execution>
             <id>generate-via-postgres-schema</id>
-            <phase>none</phase>
+            <phase>generate-sources</phase>
             <goals>
               <goal>generate</goal>
             </goals>
@@ -1090,27 +1099,27 @@
         <configuration>
           <!-- add this so that image files used for unit test don't get corrupted -->
           <nonFilteredFileExtensions>
-            <nonFilteredFileExtension>node</nonFilteredFileExtension>
-            <nonFilteredFileExtension>wasm</nonFilteredFileExtension>
-            <nonFilteredFileExtension>png</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>7z</nonFilteredFileExtension>
             <nonFilteredFileExtension>bmp</nonFilteredFileExtension>
-            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
-            <nonFilteredFileExtension>svg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
-            <nonFilteredFileExtension>otf</nonFilteredFileExtension>
-            <nonFilteredFileExtension>woff</nonFilteredFileExtension>
-            <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
             <nonFilteredFileExtension>eot</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gz</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
             <nonFilteredFileExtension>mp3</nonFilteredFileExtension>
             <nonFilteredFileExtension>mp4</nonFilteredFileExtension>
-            <nonFilteredFileExtension>webm</nonFilteredFileExtension>
-            <nonFilteredFileExtension>zip</nonFilteredFileExtension>
-            <nonFilteredFileExtension>gz</nonFilteredFileExtension>
+            <nonFilteredFileExtension>node</nonFilteredFileExtension>
+            <nonFilteredFileExtension>otf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>png</nonFilteredFileExtension>
+            <nonFilteredFileExtension>svg</nonFilteredFileExtension>
             <nonFilteredFileExtension>tar</nonFilteredFileExtension>
-            <nonFilteredFileExtension>7z</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>wasm</nonFilteredFileExtension>
+            <nonFilteredFileExtension>webm</nonFilteredFileExtension>
+            <nonFilteredFileExtension>woff</nonFilteredFileExtension>
+            <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+            <nonFilteredFileExtension>zip</nonFilteredFileExtension>
           </nonFilteredFileExtensions>
         </configuration>
         <executions>

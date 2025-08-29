@@ -56,7 +56,7 @@ SLEEP_INTERVAL=5
 elapsed=0
 
 while true; do
-  container_id=$(docker ps --filter "ancestor=postgres:15" --format '{{.ID}}')
+  container_id=$(docker ps --filter "ancestor=timescaledb:latest-pg15" --format '{{.ID}}')
 
   if [ -n "$container_id" ]; then
     container_health=$(docker inspect --format '{{.State.Health.Status}}' "$container_id" 2>/dev/null || echo "none")

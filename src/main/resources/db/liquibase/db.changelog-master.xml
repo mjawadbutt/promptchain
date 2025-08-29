@@ -14,8 +14,20 @@
     <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_03_create-constraints.sql"/>
   </changeSet>
 
+  <!-- Tag DB after v0.0.1 -->
   <changeSet id="v0.0.1-tag" author="jawad">
     <tagDatabase tag="0.0.1"/>
+  </changeSet>
+
+  <!-- New changeset for v0.0.2 -->
+  <changeSet id="v0.0.2-create_timeseries_metrics" author="mustafa">
+
+    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.2/promptchain-0.0.2_01_create_timeseries_metrics_table.sql"/>
+  </changeSet>
+
+  <!-- Tag DB after v0.0.2 -->
+  <changeSet id="v0.0.2-tag" author="mustafa">
+    <tagDatabase tag="0.0.2"/>
   </changeSet>
 
 </databaseChangeLog>
