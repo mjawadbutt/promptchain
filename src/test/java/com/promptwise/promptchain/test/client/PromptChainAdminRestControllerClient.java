@@ -28,7 +28,7 @@ public class PromptChainAdminRestControllerClient extends AbstractPromptChainCon
   public AppUserEntity createAppUser(@NotNull final CreateOrUpdateAppUserRequest createOrUpdateAppUserRequest) {
     Assert.notNull(createOrUpdateAppUserRequest, "The parameter 'createOrUpdateAppUserRequest' cannot be 'null'");
     AppUserEntity appUserEntity = invokeRequest(HttpMethod.POST,
-            PromptChainAdminRestController.WEB_CONTEXT + "/createAppUser",
+            PromptChainAdminRestController.URI__ADMIN + "/createAppUser",
             MediaType.APPLICATION_JSON, null, null, MediaType.APPLICATION_JSON,
             (bodySpec) -> {
               return bodySpec
@@ -42,7 +42,7 @@ public class PromptChainAdminRestControllerClient extends AbstractPromptChainCon
 
   public Set<AppUserEntity> getAllAppUsers() {
     Set<AppUserEntity> appUserEntitySet = invokeRequest(HttpMethod.GET,
-            PromptChainAdminRestController.WEB_CONTEXT + "/getAllAppUsers",
+            PromptChainAdminRestController.URI__ADMIN + "/getAllAppUsers",
             MediaType.APPLICATION_JSON, null, null, MediaType.APPLICATION_JSON,
             (bodySpec) -> {
               return bodySpec
@@ -60,7 +60,7 @@ public class PromptChainAdminRestControllerClient extends AbstractPromptChainCon
     LinkedMultiValueMap<String, String> paramMultiMap = new LinkedMultiValueMap<>();
     paramMultiMap.put("appUserId", Collections.singletonList(String.valueOf(appUserId)));
 
-    invokeRequest(HttpMethod.DELETE, PromptChainAdminRestController.WEB_CONTEXT + "/deleteAppUser",
+    invokeRequest(HttpMethod.DELETE, PromptChainAdminRestController.URI__ADMIN + "/deleteAppUser",
             MediaType.APPLICATION_JSON, null, paramMultiMap, MediaType.APPLICATION_JSON,
             (bodySpec) -> {
               return bodySpec

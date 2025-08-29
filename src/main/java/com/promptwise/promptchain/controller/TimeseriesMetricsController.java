@@ -1,7 +1,7 @@
-package com.promptwise.promptchain.timeseries;
+package com.promptwise.promptchain.controller;
 
 import com.promptwise.promptchain.PromptChainApplication;
-import org.springframework.http.MediaType;
+import com.promptwise.promptchain.repository.TimeseriesMetricsRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,28 +13,24 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping(TimeseriesMetricsController.WEB_CONTEXT)
+@RequestMapping(TimeseriesMetricsController.URI)
 public class TimeseriesMetricsController {
 
-  public static final String WEB_CONTEXT = PromptChainApplication.WEB_CONTEXT + "/api/times";
+  public static final String URI = PromptChainApplication.URI__API + "/times";
 
-  TimeseriesMetricsRepository repository;
+  private final TimeseriesMetricsRepository timeseriesMetricsRepository;
 
-  public TimeseriesMetricsController(TimeseriesMetricsRepository repository) {
-    this.repository = repository;
+  public TimeseriesMetricsController(TimeseriesMetricsRepository timeseriesMetricsRepository) {
+    this.timeseriesMetricsRepository = timeseriesMetricsRepository;
   }
 
-  @GetMapping(path = "/ping", produces = MediaType.TEXT_PLAIN_VALUE)
-  public String ping() {
-    return "success";
-  }
   /**
    * Get all metrics from the last N minutes.
    */
   @GetMapping("/recent")
   public ResponseEntity<List<Map<String, Object>>> getRecentMetrics(
           @RequestParam(defaultValue = "15") int minutes) {
-    List<Map<String, Object>> results = repository.getMetricsLastNMinutes(minutes);
+    List<Map<String, Object>> results = getTimeseriesMetricsRepository().getMetricsLastNMinutes(minutes);
     return ResponseEntity.ok(results);
   }
 
@@ -47,8 +43,13 @@ public class TimeseriesMetricsController {
           @RequestParam String metricName,
           @RequestParam(defaultValue = "15") int minutes) {
 
-    List<Map<String, Object>> results = repository.getMetricsByServiceAndName(serviceName, metricName, minutes);
+    List<Map<String, Object>> results = getTimeseriesMetricsRepository().getMetricsByServiceAndName(
+            serviceName, metricName, minutes);
     return ResponseEntity.ok(results);
+  }
+
+  public TimeseriesMetricsRepository getTimeseriesMetricsRepository() {
+    return timeseriesMetricsRepository;
   }
 
 }

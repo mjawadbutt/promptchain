@@ -1,4 +1,4 @@
-package com.promptwise.promptchain.timeseries;
+package com.promptwise.promptchain.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

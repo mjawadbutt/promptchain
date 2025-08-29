@@ -1,4 +1,4 @@
-package com.promptwise.promptchain.timeseries;
+package com.promptwise.promptchain.entity;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

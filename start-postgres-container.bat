@@ -59,7 +59,7 @@ set /a COUNT=0
 :WAIT_LOOP
 REM Get Postgres container ID fresh each loop
 set CONTAINER_ID=
-for /f "tokens=*" %%i in ('docker ps --filter "ancestor=postgres:15" --format "{{.ID}}"') do (
+for /f "tokens=*" %%i in ('docker ps --filter "ancestor=timescale/timescaledb:latest-pg15" --format "{{.ID}}"') do (
     set CONTAINER_ID=%%i
 )
 

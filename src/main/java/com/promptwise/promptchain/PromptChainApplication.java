@@ -27,7 +27,7 @@ import java.nio.file.Path;
 @EnableRetry
 public class PromptChainApplication {
 
-  public static final String WEB_CONTEXT = "/promptchain";
+  public static final String URI__API = "/api";
   private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainApplication.class);
 
   //-- Even though there is no real need for storing these three in this class other than for ease of debugging,

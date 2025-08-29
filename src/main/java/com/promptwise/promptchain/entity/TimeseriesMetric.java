@@ -1,4 +1,4 @@
-package com.promptwise.promptchain.timeseries;
+package com.promptwise.promptchain.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;

@@ -10,7 +10,8 @@ import com.promptwise.promptchain.service.PromptChainService;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,15 +26,15 @@ import java.util.Set;
 
 @Hidden
 @RestController
-@RequestMapping(value = PromptChainAdminRestController.WEB_CONTEXT)
+@RequestMapping(value = PromptChainAdminRestController.URI)
 public class PromptChainAdminRestController {
 
-  public static final String WEB_CONTEXT = PromptChainApplication.WEB_CONTEXT + "/admin";
+  public static final String URI = PromptChainApplication.URI__API + "/admin";
+  private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainAdminRestController.class);
 
   private final PromptChainAdminService promptChainAdminService;
   private final PromptChainService promptChainService;
 
-  @Autowired
   public PromptChainAdminRestController(@NotNull final PromptChainAdminService promptChainAdminService,
                                         @NotNull final PromptChainService promptChainService) {
     this.promptChainAdminService = promptChainAdminService;

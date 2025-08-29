@@ -343,28 +343,6 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
-          <exclude>client/**/node_modules/**</exclude>
-          <exclude>**/*.node</exclude>
-          <exclude>**/*.wasm</exclude>
-          <exclude>**/*.png</exclude>
-          <exclude>**/*.jpg</exclude>
-          <exclude>**/*.jpeg</exclude>
-          <exclude>**/*.gif</exclude>
-          <exclude>**/*.bmp</exclude>
-          <exclude>**/*.ico</exclude>
-          <exclude>**/*.svg</exclude>
-          <exclude>**/*.ttf</exclude>
-          <exclude>**/*.otf</exclude>
-          <exclude>**/*.woff</exclude>
-          <exclude>**/*.woff2</exclude>
-          <exclude>**/*.eot</exclude>
-          <exclude>**/*.mp3</exclude>
-          <exclude>**/*.mp4</exclude>
-          <exclude>**/*.webm</exclude>
-          <exclude>**/*.zip</exclude>
-          <exclude>**/*.gz</exclude>
-          <exclude>**/*.tar</exclude>
-          <exclude>**/*.7z</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -706,6 +684,63 @@
       <!--          </executions>-->
       <!--        </plugin>-->
 
+      <!--
+        Used to deploy the app's schema to an actual file-based HSQLDB instance. This will be used by the JOOQ
+        code-generator to generate the type safe DSL classes via reverse engineering.
+        Docs at: https://docs.liquibase.com/tools-integrations/maven/commands/maven-update.html
+      -->
+      <plugin>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-maven-plugin</artifactId>
+        <!-- Do not use version 4.32.0, it has bugs. Try upgrade to a later version whenever needed. -->
+        <version>4.31.0</version>
+
+        <configuration>
+          <changeLogDirectory>src/main/resources</changeLogDirectory>
+          <changeLogFile>db/liquibase/db.changelog-master.xml</changeLogFile>
+<!--          <changeLogFile>src/main/resources/db/liquibase/db.changelog-master.xml</changeLogFile>-->
+        </configuration>
+        <executions>
+
+          <execution>
+            <id>update-db-schema</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>update</goal>
+            </goals>
+            <configuration>
+              <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+              <username>${APP_DB_USER_NAME}</username>
+              <password>${APP_DB_USER_PASSWORD}</password>
+              <driver>org.postgresql.Driver</driver>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>migrate-schema-via-embedded-hsqldb</id>
+            <!--
+              Note that since the output of this plugin is used by the jooq-codegen-maven plugin (defined just below),
+              AND, since it executes in the same phase as the jooq-codegen-maven plugin, it HAS TO BE DEFINED before
+              the jooq-codegen-maven plugin in order to make sure it executes before the jooq-codegen-maven plugin.
+              Alternatively, we could bind it to the initialize phase and then the order would no longer matter,
+              however, the generate-sources phase seems more appropriate for this goal.
+            -->
+            <!--            <phase>generate-sources</phase>-->
+            <phase>none</phase>
+            <goals>
+              <goal>update</goal>
+            </goals>
+            <configuration>
+              <url>
+                jdbc:hsqldb:file:${hsqldb.jooq.db-path};create=true;shutdown=true;${hsqldb.common-options}
+              </url>
+              <username>${hsqldb.user}</username>
+              <password>${hsqldb.password}</password>
+              <driver>${hsqldb.driver-class-name}</driver>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.jooq</groupId>
@@ -890,6 +925,7 @@
 
           <execution>
             <id>generate-via-postgres-schema</id>
+            <phase>generate-sources</phase>
             <goals>
               <goal>generate</goal>
             </goals>
@@ -915,9 +951,9 @@
               </generator>
               <jdbc>
                 <driver>org.postgresql.Driver</driver>
-                <url>jdbc:postgresql://${POSTGRES_HOST}:${EPHEMERAL_APP_DB_PORT}/${EPHEMERAL_APP_DB_NAME}</url>
-                <user>${EPHEMERAL_APP_DB_USER_NAME}</user>
-                <password>${EPHEMERAL_APP_DB_USER_PASSWORD}</password>
+                <url>jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+                <user>${APP_DB_USER_NAME}</user>
+                <password>${APP_DB_USER_PASSWORD}</password>
               </jdbc>
             </configuration>
           </execution>
@@ -1055,27 +1091,27 @@
         <configuration>
           <!-- add this so that image files used for unit test don't get corrupted -->
           <nonFilteredFileExtensions>
-            <nonFilteredFileExtension>node</nonFilteredFileExtension>
-            <nonFilteredFileExtension>wasm</nonFilteredFileExtension>
-            <nonFilteredFileExtension>png</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>7z</nonFilteredFileExtension>
             <nonFilteredFileExtension>bmp</nonFilteredFileExtension>
-            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
-            <nonFilteredFileExtension>svg</nonFilteredFileExtension>
-            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
-            <nonFilteredFileExtension>otf</nonFilteredFileExtension>
-            <nonFilteredFileExtension>woff</nonFilteredFileExtension>
-            <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
             <nonFilteredFileExtension>eot</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+            <nonFilteredFileExtension>gz</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ico</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
             <nonFilteredFileExtension>mp3</nonFilteredFileExtension>
             <nonFilteredFileExtension>mp4</nonFilteredFileExtension>
-            <nonFilteredFileExtension>webm</nonFilteredFileExtension>
-            <nonFilteredFileExtension>zip</nonFilteredFileExtension>
-            <nonFilteredFileExtension>gz</nonFilteredFileExtension>
+            <nonFilteredFileExtension>node</nonFilteredFileExtension>
+            <nonFilteredFileExtension>otf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>png</nonFilteredFileExtension>
+            <nonFilteredFileExtension>svg</nonFilteredFileExtension>
             <nonFilteredFileExtension>tar</nonFilteredFileExtension>
-            <nonFilteredFileExtension>7z</nonFilteredFileExtension>
+            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>wasm</nonFilteredFileExtension>
+            <nonFilteredFileExtension>webm</nonFilteredFileExtension>
+            <nonFilteredFileExtension>woff</nonFilteredFileExtension>
+            <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+            <nonFilteredFileExtension>zip</nonFilteredFileExtension>
           </nonFilteredFileExtensions>
         </configuration>
         <executions>
@@ -1207,13 +1243,6 @@
             <APP_DB_NAME>${APP_DB_NAME}</APP_DB_NAME>
             <APP_DB_USER_NAME>${APP_DB_USER_NAME}</APP_DB_USER_NAME>
             <APP_DB_USER_PASSWORD>${APP_DB_USER_PASSWORD}</APP_DB_USER_PASSWORD>
-            <EPHEMERAL_APP_DB_CONTAINER_NAME>${EPHEMERAL_APP_DB_CONTAINER_NAME}</EPHEMERAL_APP_DB_CONTAINER_NAME>
-            <EPHEMERAL_APP_DB_IMAGE>${EPHEMERAL_APP_DB_IMAGE}</EPHEMERAL_APP_DB_IMAGE>
-            <EPHEMERAL_APP_DB_PORT>${EPHEMERAL_APP_DB_PORT}</EPHEMERAL_APP_DB_PORT>
-            <EPHEMERAL_APP_DB_USER_NAME>${EPHEMERAL_APP_DB_USER_NAME}</EPHEMERAL_APP_DB_USER_NAME>
-            <EPHEMERAL_APP_DB_USER_PASSWORD>${EPHEMERAL_APP_DB_USER_PASSWORD}</EPHEMERAL_APP_DB_USER_PASSWORD>
-            <EPHEMERAL_APP_DB_NAME>${EPHEMERAL_APP_DB_NAME}</EPHEMERAL_APP_DB_NAME>
-
           </environmentVariables>
           <!-- The <test> element can be used to overrides all inclusions/exclusions and can be used to execute
                a particular test (i.e. test-class) OR a single test-case (test-class-method) -->
@@ -1290,13 +1319,6 @@
             <APP_DB_NAME>${APP_DB_NAME}</APP_DB_NAME>
             <APP_DB_USER_NAME>${APP_DB_USER_NAME}</APP_DB_USER_NAME>
             <APP_DB_USER_PASSWORD>${APP_DB_USER_PASSWORD}</APP_DB_USER_PASSWORD>
-
-            <EPHEMERAL_APP_DB_CONTAINER_NAME>${EPHEMERAL_APP_DB_CONTAINER_NAME}</EPHEMERAL_APP_DB_CONTAINER_NAME>
-            <EPHEMERAL_APP_DB_IMAGE>${EPHEMERAL_APP_DB_IMAGE}</EPHEMERAL_APP_DB_IMAGE>
-            <EPHEMERAL_APP_DB_PORT>${EPHEMERAL_APP_DB_PORT}</EPHEMERAL_APP_DB_PORT>
-            <EPHEMERAL_APP_DB_USER_NAME>${EPHEMERAL_APP_DB_USER_NAME}</EPHEMERAL_APP_DB_USER_NAME>
-            <EPHEMERAL_APP_DB_USER_PASSWORD>${EPHEMERAL_APP_DB_USER_PASSWORD}</EPHEMERAL_APP_DB_USER_PASSWORD>
-            <EPHEMERAL_APP_DB_NAME>${EPHEMERAL_APP_DB_NAME}</EPHEMERAL_APP_DB_NAME>
           </environmentVariables>
           <reportsDirectory>target/failsafe-reports</reportsDirectory>
         </configuration>
@@ -1713,142 +1735,6 @@
         </plugins>
       </build>
     </profile>
-
-    <!--
-      ===========================================================================
-       Profile: ephemeral-timescaledb
-
-       This profile spins up a temporary TimescaleDB/Postgres container using
-       docker-compose, applies Liquibase migrations, and then runs jOOQ codegen
-       against the *real database schema* (including extensions like TimescaleDB).
-
-       Flow:
-         1. validate phase → docker-compose -f docker-compose-timescaledb.yml up -d db
-
-            - Starts a fresh TimescaleDB instance
-            - Runs initdb scripts (creates jooq_build_db + extensions)
-            - Waits until healthcheck passes
-         2. generate-sources phase
-            - Liquibase applies all changelogs to jooq_build_db
-            - jOOQ introspects the schema and generates code
-         3. generate-sources phase (end)
-            - docker-compose down -v tears down the container & volumes
-              (so each run starts with a clean DB)
-
-       Usage:
-         mvn clean compile -P ephemeral-timescaledb
-
-       Notes:
-         - This fully replaces the old HSQL-based setup. The generated code now
-           reflects the actual Timescale/Postgres schema used in production.
-         - Make sure Docker + docker-compose are installed and running.
-      ===========================================================================
-    -->
-
-
-    <profile>
-      <id>ephemeral-timescaledb</id>
-      <build>
-        <plugins>
-
-          <!-- 1. Start/stop DB via docker-compose -->
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-
-            <executions>
-              <!-- Start DB -->
-              <execution>
-                <id>docker-compose-up</id>
-                <phase>validate</phase>
-                <goals><goal>exec</goal></goals>
-                <configuration>
-                  <executable>docker-compose</executable>
-                  <arguments>
-                    <argument>-f</argument>
-                    <argument>${project.basedir}/docker-compose-timescaledb.yml</argument>
-                    <argument>up</argument>
-                    <argument>-d</argument>
-                    <argument>db</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-
-              <!-- Stop DB -->
-              <execution>
-                <id>docker-compose-down</id>
-                <phase>generate-sources</phase>
-                <goals><goal>exec</goal></goals>
-                <configuration>
-                  <executable>docker-compose</executable>
-                  <arguments>
-                    <argument>-f</argument>
-                    <argument>${project.basedir}/docker-compose-timescaledb.yml</argument>
-                    <argument>down</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-          <!-- 2. Liquibase migration -->
-          <plugin>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-maven-plugin</artifactId>
-            <version>${org.liquibase.version}</version>
-            <executions>
-              <execution>
-                <id>update-db-schema</id>
-                <phase>generate-sources</phase>
-                <goals><goal>update</goal></goals>
-              </execution>
-            </executions>
-            <configuration>
-              <changeLogFile>src/main/resources/db/liquibase/db.changelog-master.xml</changeLogFile>
-              <url>jdbc:postgresql://localhost:${EPHEMERAL_APP_DB_PORT}/${EPHEMERAL_APP_DB_NAME}</url>
-              <username>${EPHEMERAL_APP_DB_USER_NAME}</username>
-              <password>${EPHEMERAL_APP_DB_USER_PASSWORD}</password>
-              <driver>org.postgresql.Driver</driver>
-            </configuration>
-          </plugin>
-
-          <!-- 3. jOOQ code generation -->
-          <plugin>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq-codegen-maven</artifactId>
-<!--            <version>3.19.9</version>-->
-            <executions>
-              <execution>
-                <id>generate-via-postgres-schema</id>
-                <phase>generate-sources</phase>
-                <goals><goal>generate</goal></goals>
-                <configuration>
-                  <generator>
-                    <database>
-                      <name>org.jooq.meta.postgres.PostgresDatabase</name>
-                      <inputSchema>public</inputSchema>
-                      <includes>.*</includes>
-                    </database>
-                    <target>
-                      <packageName>com.promptwise.promptchain.generated.jooq</packageName>
-                      <directory>target/generated-sources/jooq</directory>
-                    </target>
-                  </generator>
-                  <jdbc>
-                    <driver>org.postgresql.Driver</driver>
-                    <url>jdbc:postgresql://localhost:${EPHEMERAL_APP_DB_PORT}/${EPHEMERAL_APP_DB_NAME}</url>
-                    <username>${EPHEMERAL_APP_DB_USER_NAME}</username>
-                    <password>${EPHEMERAL_APP_DB_USER_PASSWORD}</password>
-                  </jdbc>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-        </plugins>
-      </build>
-    </profile>
-
 
   </profiles>
 
