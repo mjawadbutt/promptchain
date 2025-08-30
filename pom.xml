@@ -343,6 +343,12 @@
         <directory>${main-resources-dir}</directory>
         <excludes>
           <exclude>project-info.properties</exclude>
+
+          <exclude>**/node_modules/**</exclude>
+          <exclude>**/*.dll</exclude>
+          <exclude>**/*.exe</exclude>
+          <exclude>**/*.so</exclude>
+          <exclude>**/*.dylib</exclude>
         </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
@@ -717,9 +723,13 @@
               <goal>update</goal>
             </goals>
             <configuration>
-              <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>
-              <username>${APP_DB_USER_NAME}</username>
-              <password>${APP_DB_USER_PASSWORD}</password>
+<!--              <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>-->
+<!--              <username>${APP_DB_USER_NAME}</username>-->
+<!--              <password>${APP_DB_USER_PASSWORD}</password>-->
+<!--              <driver>org.postgresql.Driver</driver>-->
+              <url>jdbc:postgresql://localhost:5433/dev_promptchain</url>
+              <username>postgres</username>
+              <password>postgres</password>
               <driver>org.postgresql.Driver</driver>
             </configuration>
           </execution>
@@ -959,9 +969,12 @@
               </generator>
               <jdbc>
                 <driver>org.postgresql.Driver</driver>
-                <url>jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${APP_DB_NAME}</url>
-                <user>${APP_DB_USER_NAME}</user>
-                <password>${APP_DB_USER_PASSWORD}</password>
+<!--                <url>jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${APP_DB_NAME}</url>-->
+<!--                <user>${APP_DB_USER_NAME}</user>-->
+<!--                <password>${APP_DB_USER_PASSWORD}</password>-->
+                <url>jdbc:postgresql://localhost:5433/dev_promptchain</url>
+                <username>postgres</username>
+                <password>postgres</password>
               </jdbc>
             </configuration>
           </execution>
