@@ -1,7 +1,6 @@
 package com.promptwise.promptchain.config;
 
 import com.promptwise.promptchain.PromptChainErrorCode;
-import com.promptwise.promptchain.PromptChainSystemException;
 import com.promptwise.promptchain.common.exception.DatabaseAccessException;
 import com.promptwise.promptchain.common.exception.RequiredResourceNotFoundException;
 import com.promptwise.promptchain.common.exception.ResourceAlreadyExistsException;
@@ -72,10 +71,9 @@ public class PromptChainExceptionHandler extends ResponseEntityExceptionHandler 
     return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  //TODO-Exceptions: Handle Exception.class also?
-  @ExceptionHandler({PromptChainSystemException.class, Exception.class})
-  public ResponseEntity<Rfc7807CompliantHttpRequestProcessingErrorResponse> handleSystemException(
-          PromptChainSystemException ex, HttpMethod httpMethod, HttpServletRequest httpServletRequest) {
+  @ExceptionHandler({Exception.class})
+  public ResponseEntity<Rfc7807CompliantHttpRequestProcessingErrorResponse> handleException(
+          Exception ex, HttpMethod httpMethod, HttpServletRequest httpServletRequest) {
     LOGGER.error(ex.getMessage(), ex);
     Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = createErrorResponse(
             PromptChainErrorCode.INTERNAL_APPLICATION_ERROR.name(), HttpStatus.INTERNAL_SERVER_ERROR,
@@ -91,11 +89,18 @@ public class PromptChainExceptionHandler extends ResponseEntityExceptionHandler 
   //TODO-Exceptions: In  case exact error details are needed then we can write a special handler for it in future.
 
   //TODO: some code maybe duplicate. also refactor so that every call comes to an overloaded handleInternal method.
+
+  /**
+   * Create Rfc7807CompliantHttpRequestProcessingErrorResponse to be returned in case of Spring-specific exceptions.
+   * See {@link org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler#handleException(java.lang.Exception, org.springframework.web.context.request.WebRequest)}
+   */
   @Override
   protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
                                                            HttpStatusCode statusCode, WebRequest request) {
     ResponseEntity<Object> responseEntity = super.handleExceptionInternal(ex, body, headers, statusCode, request);
     if (responseEntity == null) {
+      //TODO-Exceptions: return Rfc7807CompliantHttpRequestProcessingErrorResponse
+      LOGGER.error(ex.getMessage(), ex);
       return null;
     } else {
       PromptChainErrorCode promptChainErrorCode;

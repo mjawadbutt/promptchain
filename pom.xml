@@ -723,14 +723,10 @@
               <goal>update</goal>
             </goals>
             <configuration>
-<!--              <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>-->
-<!--              <username>${APP_DB_USER_NAME}</username>-->
-<!--              <password>${APP_DB_USER_PASSWORD}</password>-->
-<!--              <driver>org.postgresql.Driver</driver>-->
-              <url>jdbc:postgresql://localhost:5433/dev_promptchain</url>
-              <username>postgres</username>
-              <password>postgres</password>
               <driver>org.postgresql.Driver</driver>
+              <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+              <username>${APP_DB_USER_NAME}</username>
+              <password>${APP_DB_USER_PASSWORD}</password>
             </configuration>
           </execution>
 
@@ -969,12 +965,9 @@
               </generator>
               <jdbc>
                 <driver>org.postgresql.Driver</driver>
-<!--                <url>jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${APP_DB_NAME}</url>-->
-<!--                <user>${APP_DB_USER_NAME}</user>-->
-<!--                <password>${APP_DB_USER_PASSWORD}</password>-->
-                <url>jdbc:postgresql://localhost:5433/dev_promptchain</url>
-                <username>postgres</username>
-                <password>postgres</password>
+                <url>jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+                <user>${APP_DB_USER_NAME}</user>
+                <password>${APP_DB_USER_PASSWORD}</password>
               </jdbc>
             </configuration>
           </execution>

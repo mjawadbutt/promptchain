@@ -1,6 +1,7 @@
 package com.promptwise.promptchain.test.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.promptwise.promptchain.PromptChainErrorCode;
 import com.promptwise.promptchain.common.util.Rfc7807CompliantHttpRequestProcessingErrorResponse;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -113,18 +114,24 @@ abstract class AbstractPromptChainControllerClient {
     try {
       byte[] bytes = response.getBody().readAllBytes();
       responseBody = new String(bytes, StandardCharsets.UTF_8);
+      LOGGER.debug("""
+              Trying to parse the following controller error response as 
+              Rfc7807CompliantHttpRequestProcessingErrorResponse: {}""", responseBody);
       Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse = getObjectMapper().readValue(
               responseBody, Rfc7807CompliantHttpRequestProcessingErrorResponse.class);
+      LOGGER.debug("Successfully parsed the error response as Rfc7807CompliantHttpRequestProcessingErrorResponse");
       throw new PromptChainErrorResponseException(errorResponse);
+    } catch (PromptChainErrorResponseException e) {
+      throw e;
     } catch (IOException | RuntimeException e) {
       ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, """
-              Unbale to parse error response body: {} to Rfc7807CompliantHttpRequestProcessingErrorResponse!
+              Unable to parse the error response as Rfc7807CompliantHttpRequestProcessingErrorResponse!
               Please check the exception and enhance the Controller Advice accordingly!
-              See logs for details.""");
+              See debug logs for details.""");
       LOGGER.error("{}. Please see root cause for details.", problemDetail.getDetail(), e);
       Rfc7807CompliantHttpRequestProcessingErrorResponse errorResponse =
               Rfc7807CompliantHttpRequestProcessingErrorResponse.create(
-                      com.promptwise.promptchain.PromptChainErrorCode.UNKNOWN_ERROR.name(), problemDetail, null);
+                      PromptChainErrorCode.UNKNOWN_ERROR.name(), problemDetail, null);
       throw new PromptChainErrorResponseException(errorResponse);
     }
   }

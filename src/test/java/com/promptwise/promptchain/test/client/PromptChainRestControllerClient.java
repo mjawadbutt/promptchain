@@ -26,7 +26,7 @@ public class PromptChainRestControllerClient extends AbstractPromptChainControll
     LinkedMultiValueMap<String, String> paramMultiMap = new LinkedMultiValueMap<>();
     paramMultiMap.put("appUserId", Collections.singletonList(String.valueOf(appUserId)));
     AppUserEntity appUserEntity = invokeRequest(HttpMethod.GET,
-            PromptChainRestController.WEB_CONTEXT + "/getAppUser", MediaType.APPLICATION_JSON,
+            PromptChainRestController.URI + "/getAppUser", MediaType.APPLICATION_JSON,
             null, paramMultiMap, MediaType.APPLICATION_JSON,
             (bodySpec) -> {
               return bodySpec
@@ -43,7 +43,7 @@ public class PromptChainRestControllerClient extends AbstractPromptChainControll
 
   public String ping() {
     String pingResponse = invokeRequest(HttpMethod.GET,
-            PromptChainRestController.WEB_CONTEXT + "/ping", MediaType.APPLICATION_JSON,
+            PromptChainRestController.URI + "/ping", MediaType.APPLICATION_JSON,
             null, null, MediaType.APPLICATION_JSON,
             (bodySpec) -> {
               return bodySpec

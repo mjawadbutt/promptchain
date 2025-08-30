@@ -23,7 +23,7 @@ import java.nio.file.Path;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ApplicationProperties.class})
-@EnableCaching // Enable Spring's caching abstraction, which detects JCache
+@EnableCaching //-- Enable Spring's caching abstraction, which detects JCache
 @EnableRetry
 public class PromptChainApplication {
 
