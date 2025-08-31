@@ -12,7 +12,6 @@ public class MetricDetail<T extends MetricDataPoint> {
     this.dataPoints = dataPoints == null ? List.of() : List.copyOf(dataPoints);
   }
 
-  @JsonProperty("dataPoints")
   public List<T> getDataPoints() {
     return dataPoints;
   }

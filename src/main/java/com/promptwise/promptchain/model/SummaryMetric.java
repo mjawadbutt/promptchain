@@ -9,4 +9,10 @@ public final class SummaryMetric extends Metric<SummaryMetricDetail> {
     super(name, type, unit, summaryMetricDetail);
   }
 
+  @JsonProperty("summary")
+  @Override
+  public SummaryMetricDetail getMetricDetail() {
+    return super.getMetricDetail();
+  }
+
 }

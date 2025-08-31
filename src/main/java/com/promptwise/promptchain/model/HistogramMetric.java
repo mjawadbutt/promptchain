@@ -9,4 +9,10 @@ public final class HistogramMetric extends Metric<HistogramMetricDetail> {
     super(name, type, unit, histogramMetricDetail);
   }
 
+  @JsonProperty("histogram")
+  @Override
+  public HistogramMetricDetail getMetricDetail() {
+    return super.getMetricDetail();
+  }
+
 }

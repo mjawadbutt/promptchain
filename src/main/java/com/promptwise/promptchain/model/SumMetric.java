@@ -9,4 +9,10 @@ public final class SumMetric extends Metric<SumMetricDetail> {
     super(name, type, unit, sumMetricDetail);
   }
 
+  @JsonProperty("sum")
+  @Override
+  public SumMetricDetail getMetricDetail() {
+    return super.getMetricDetail();
+  }
+
 }

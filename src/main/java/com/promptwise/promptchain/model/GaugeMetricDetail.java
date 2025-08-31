@@ -11,8 +11,7 @@ public class GaugeMetricDetail extends MetricDetail<NumberMetricDataPoint> {
 
   public GaugeMetricDetail(
           @JsonProperty("dataPoints")
-          @JsonDeserialize(using = NumberMetricDataPointDeserializer.class)
-          final List<NumberMetricDataPoint> numberMetricDataPoints) {
+          @JsonDeserialize(using = NumberMetricDataPointListDeserializer.class) final List<NumberMetricDataPoint> numberMetricDataPoints) {
     super(numberMetricDataPoints);
     this.numberMetricDataPoints = numberMetricDataPoints == null ? List.of() : List.copyOf(numberMetricDataPoints);
   }

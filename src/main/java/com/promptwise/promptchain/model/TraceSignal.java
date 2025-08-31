@@ -15,4 +15,9 @@ public final class TraceSignal extends TelemetrySignal<ScopeTraces> {
     super(signalResource, scopeTraces);
   }
 
+  @JsonProperty("scopeSpans")
+  public List<ScopeTraces> getScopeSignals() {
+    return super.getScopeSignals();
+  }
+
 }

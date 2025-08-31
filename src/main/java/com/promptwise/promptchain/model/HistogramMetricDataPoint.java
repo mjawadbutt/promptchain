@@ -5,12 +5,12 @@ import java.util.List;
 public class HistogramMetricDataPoint extends MetricDataPoint {
 
   private final Integer count;
-  private final Integer sum;
+  private final Double sum;
   private final List<Integer> bucketCounts;
   private final List<Integer> explicitBounds;
 
   public HistogramMetricDataPoint(
-          final String timeUnixNano, final String startTimeUnixNano, final Integer count, Integer sum,
+          final String timeUnixNano, final String startTimeUnixNano, final Integer count, Double sum,
           final List<Integer> bucketCounts, final List<Integer> explicitBounds, final List<SignalAttribute> attributes) {
     super(timeUnixNano, startTimeUnixNano, attributes);
     this.count = count;
@@ -23,7 +23,7 @@ public class HistogramMetricDataPoint extends MetricDataPoint {
     return count;
   }
 
-  public Integer getSum() {
+  public Double getSum() {
     return sum;
   }
 

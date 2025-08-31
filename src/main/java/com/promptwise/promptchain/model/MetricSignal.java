@@ -15,4 +15,9 @@ public final class MetricSignal extends TelemetrySignal<ScopeMetrics> {
     super(signalResource, scopeMetrics);
   }
 
+  @JsonProperty("scopeMetrics")
+  public List<ScopeMetrics> getScopeSignals() {
+    return super.getScopeSignals();
+  }
+
 }

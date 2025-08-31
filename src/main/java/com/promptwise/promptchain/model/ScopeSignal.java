@@ -1,5 +1,6 @@
 package com.promptwise.promptchain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.promptwise.promptchain.common.util.json.JacksonUtil;
 import jakarta.validation.constraints.NotNull;
 
@@ -9,6 +10,7 @@ import java.util.Objects;
 public class ScopeSignal<U> {
 
   private final ScopeSignalId scope;
+  @JsonIgnore
   private final List<U> signals;
 
   public ScopeSignal(@NotNull final ScopeSignalId scopeSignalId, @NotNull final List<U> signals) {

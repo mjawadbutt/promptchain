@@ -32,12 +32,12 @@ public class Metric<MD extends MetricDetail<? extends MetricDataPoint>> {
     return name;
   }
 
-  public String getUnit() {
-    return unit;
-  }
-
   public String getType() {
     return type;
+  }
+
+  public String getUnit() {
+    return unit;
   }
 
   public MD getMetricDetail() {

@@ -11,9 +11,9 @@ public class SumMetricDetail extends MetricDetail<SumMetricDataPoint> {
   private final boolean isMonotonic;
 
   public SumMetricDetail(
+          final String aggregationTemporality, @JsonProperty("isMonotonic") final boolean isMonotonic,
           @JsonProperty("dataPoints")
-          @JsonDeserialize(using = SumMetricDataPointDeserializer.class) final List<SumMetricDataPoint> sumMetricDataPoints,
-          final String aggregationTemporality, final boolean isMonotonic) {
+          @JsonDeserialize(using = SumMetricDataPointListDeserializer.class) final List<SumMetricDataPoint> sumMetricDataPoints) {
     super(sumMetricDataPoints);
     this.aggregationTemporality = aggregationTemporality;
     this.isMonotonic = isMonotonic;
@@ -23,6 +23,7 @@ public class SumMetricDetail extends MetricDetail<SumMetricDataPoint> {
     return aggregationTemporality;
   }
 
+  @JsonProperty("isMonotonic")
   public boolean isMonotonic() {
     return isMonotonic;
   }

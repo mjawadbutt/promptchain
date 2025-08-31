@@ -9,4 +9,10 @@ public final class GaugeMetric extends Metric<GaugeMetricDetail> {
     super(name, type, unit, gaugeMetricDetail);
   }
 
+  @JsonProperty("gauge")
+  @Override
+  public GaugeMetricDetail getMetricDetail() {
+    return super.getMetricDetail();
+  }
+
 }

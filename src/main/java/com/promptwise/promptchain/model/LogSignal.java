@@ -15,4 +15,9 @@ public final class LogSignal extends TelemetrySignal<ScopeLogs> {
     super(signalResource, scopeLogs);
   }
 
+  @JsonProperty("scopeLogs")
+  public List<ScopeLogs> getScopeSignals() {
+    return super.getScopeSignals();
+  }
+
 }

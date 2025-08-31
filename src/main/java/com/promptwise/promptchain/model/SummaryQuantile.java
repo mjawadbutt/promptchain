@@ -4,26 +4,26 @@ import com.promptwise.promptchain.common.util.json.JacksonUtil;
 
 import java.util.Objects;
 
-public class HistogramQuantile implements Comparable<HistogramQuantile> {
+public class SummaryQuantile implements Comparable<SummaryQuantile> {
 
-  private final Integer quantile;
-  private final Integer value;
+  private final Double quantile;
+  private final Double value;
 
-  public HistogramQuantile(Integer quantile, Integer value) {
+  public SummaryQuantile(Double quantile, Double value) {
     this.quantile = quantile;
     this.value = value;
   }
 
-  public Integer getQuantile() {
+  public Double getQuantile() {
     return quantile;
   }
 
-  public Integer getValue() {
+  public Double getValue() {
     return value;
   }
 
   @Override
-  public int compareTo(HistogramQuantile other) {
+  public int compareTo(SummaryQuantile other) {
     if (other == null) return 1; // non-null is greater than null
     return this.quantile.compareTo(other.quantile);
   }
@@ -31,8 +31,8 @@ public class HistogramQuantile implements Comparable<HistogramQuantile> {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof HistogramQuantile)) return false;
-    HistogramQuantile other = (HistogramQuantile) o;
+    if (!(o instanceof SummaryQuantile)) return false;
+    SummaryQuantile other = (SummaryQuantile) o;
     // equality bound to compareTo == 0
     return this.compareTo(other) == 0;
   }
