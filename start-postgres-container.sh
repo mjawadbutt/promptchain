@@ -9,6 +9,14 @@ ENV_FILE="dev-env.properties"
 
 echo "--- Starting Postgres container ---"
 
+# Check if Docker daemon is running
+echo "Checking Docker daemon status..."
+if ! docker info > /dev/null 2>&1; then
+    echo "ERROR: Docker daemon is not running or not accessible. Please start Docker."
+    exit 2
+fi
+echo "Docker daemon is running."
+
 # Load environment variables from properties file
 if [ ! -f "$ENV_FILE" ]; then
   echo "ERROR: Environment file '${ENV_FILE}' not found."
@@ -21,14 +29,6 @@ fi
 export $(grep -v '^#' "$ENV_FILE" | grep -v '^$' | sed 's/ *= */=/g')
 
 POSTGRES_PORT="${POSTGRES_PORT:-5432}"
-
-# Check if Docker daemon is running
-echo "Checking Docker daemon status..."
-if ! docker info > /dev/null 2>&1; then
-    echo "ERROR: Docker daemon is not running or not accessible. Please start Docker."
-    exit 2
-fi
-echo "Docker daemon is running."
 
 # Start the Docker-Compose services
 echo "Starting Docker-Compose services from '${COMPOSE_FILE}'..."

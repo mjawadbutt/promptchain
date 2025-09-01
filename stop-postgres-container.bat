@@ -8,6 +8,7 @@ REM ============================================================================
 setlocal enabledelayedexpansion
 
 set COMPOSE_FILE=docker-compose-postgres.yml
+set ENV_FILE=dev-env.properties
 
 echo --- Stopping Postgres stack ---
 
@@ -21,6 +22,19 @@ if errorlevel 1 (
     exit /b 1
 )
 echo Docker daemon is running.
+
+REM ----------------------------------------------------------------------------
+REM Load environment variables from the properties file
+REM ----------------------------------------------------------------------------
+if not exist "%ENV_FILE%" (
+    echo ERROR: Environment file "%ENV_FILE%" not found.
+    exit /b 1
+)
+
+for /f "tokens=1,* delims==" %%A in (dev-env.properties) do (
+    set "%%A=%%B"
+)
+if "%POSTGRES_PORT%"=="" set POSTGRES_PORT=5432
 
 REM ----------------------------------------------------------------------------
 REM Stop and remove the Docker Compose stack

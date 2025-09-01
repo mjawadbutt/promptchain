@@ -4,6 +4,7 @@
 # Stops and removes the Redis stack via docker-compose.
 
 COMPOSE_FILE="docker-compose-redis.yml"
+ENV_FILE="dev-env.properties"
 
 echo "--- Stopping Redis stack ---"
 
@@ -14,6 +15,17 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 echo "Docker daemon is running."
+
+# 1. Load environment variables from properties file
+if [ ! -f "$ENV_FILE" ]; then
+  echo "ERROR: Environment file '${ENV_FILE}' not found."
+  exit 1
+fi
+
+# Export variables from the properties file
+# This removes comments, trims whitespace, skips empty lines,
+# and exports the variables for the current shell and subprocesses
+export $(grep -v '^#' "$ENV_FILE" | grep -v '^$' | sed 's/ *= */=/g')
 
 # Stop and remove Docker Compose stack
 echo "Stopping Docker Compose services from '${COMPOSE_FILE}'..."

@@ -13,6 +13,17 @@ set ENV_FILE=dev-env.properties
 echo --- Starting Postgres container ---
 
 REM ----------------------------------------------------------------------------
+REM Check if Docker daemon is running
+REM ----------------------------------------------------------------------------
+echo Checking Docker daemon status...
+docker info >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Docker daemon is not running or not accessible. Please start Docker.
+    exit /b 2
+)
+echo Docker daemon is running.
+
+REM ----------------------------------------------------------------------------
 REM Load environment variables from the properties file
 REM ----------------------------------------------------------------------------
 if not exist "%ENV_FILE%" (
@@ -24,17 +35,6 @@ for /f "tokens=1,* delims==" %%A in (dev-env.properties) do (
     set "%%A=%%B"
 )
 if "%POSTGRES_PORT%"=="" set POSTGRES_PORT=5432
-
-REM ----------------------------------------------------------------------------
-REM Check if Docker daemon is running
-REM ----------------------------------------------------------------------------
-echo Checking Docker daemon status...
-docker info >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Docker daemon is not running or not accessible. Please start Docker.
-    exit /b 2
-)
-echo Docker daemon is running.
 
 REM ----------------------------------------------------------------------------
 REM Start the Docker-Compose services

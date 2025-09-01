@@ -13,6 +13,17 @@ set ENV_FILE=dev-env.properties
 echo --- Starting Redis container ---
 
 REM ----------------------------------------------------------------------------
+REM Check Docker daemon
+REM ----------------------------------------------------------------------------
+echo Checking Docker daemon status...
+docker info >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Docker daemon is not running or not accessible. Please start Docker.
+    exit /b 2
+)
+echo Docker daemon is running.
+
+REM ----------------------------------------------------------------------------
 REM Load environment variables from properties file
 REM ----------------------------------------------------------------------------
 if not exist "%ENV_FILE%" (
@@ -23,17 +34,6 @@ if not exist "%ENV_FILE%" (
 for /f "tokens=1,* delims==" %%A in (dev-env.properties) do (
     set "%%A=%%B"
 )
-
-REM ----------------------------------------------------------------------------
-REM Check Docker daemon
-REM ----------------------------------------------------------------------------
-echo Checking Docker daemon status...
-docker info >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Docker daemon is not running or not accessible. Please start Docker.
-    exit /b 2
-)
-echo Docker daemon is running.
 
 REM ----------------------------------------------------------------------------
 REM Start the Docker-Compose services

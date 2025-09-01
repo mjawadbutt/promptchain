@@ -9,6 +9,14 @@ ENV_FILE="dev-env.properties"
 
 echo "--- Starting Docker Compose Redis Stack ---"
 
+# Check if Docker daemon is running
+echo "Checking Docker daemon status..."
+if ! docker info > /dev/null 2>&1; then
+  echo "ERROR: Docker daemon is not running or not accessible. Please start Docker."
+  exit 2
+fi
+echo "Docker daemon is running."
+
 # 1. Load environment variables from properties file
 if [ ! -f "$ENV_FILE" ]; then
   echo "ERROR: Environment file '${ENV_FILE}' not found."
@@ -19,14 +27,6 @@ fi
 # This removes comments, trims whitespace, skips empty lines,
 # and exports the variables for the current shell and subprocesses
 export $(grep -v '^#' "$ENV_FILE" | grep -v '^$' | sed 's/ *= */=/g')
-
-# Check if Docker daemon is running
-echo "Checking Docker daemon status..."
-if ! docker info > /dev/null 2>&1; then
-  echo "ERROR: Docker daemon is not running or not accessible. Please start Docker."
-  exit 2
-fi
-echo "Docker daemon is running."
 
 # Start the stack using docker-compose up -d
 echo "Starting Docker Compose stack from '${COMPOSE_FILE}'..."
