@@ -10,24 +10,18 @@
   <!-- TODO: Add rollback for each chageset -->
   <changeSet id="v0.0.1-init_schema" author="jawad">
     <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_01_create-tables.sql"/>
-    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_02_reference-data.sql"/>
-    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_03_create-constraints.sql"/>
+    <sqlFile relativeToChangelogFile="true"
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1_02_reference-data.sql"/>
+    <sqlFile relativeToChangelogFile="true"
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1_03_create-constraints.sql"/>
+    <sqlFile relativeToChangelogFile="true"
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1_04_create-timeseries-metrics-table.sql"/>
   </changeSet>
 
-  <!-- Tag DB after v0.0.1 -->
-  <changeSet id="v0.0.1-tag" author="jawad">
-    <tagDatabase tag="0.0.1"/>
-  </changeSet>
-
-  <!-- New changeset for v0.0.2 -->
-  <changeSet id="v0.0.2-create_timeseries_metrics" author="mustafa">
-
-    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.2/promptchain-0.0.2_01_create_timeseries_metrics_table.sql"/>
-  </changeSet>
-
-  <!-- Tag DB after v0.0.2 -->
-  <changeSet id="v0.0.2-tag" author="mustafa">
-    <tagDatabase tag="0.0.2"/>
-  </changeSet>
+  <!--TODO-Release: Just before releasing first version-->
+  <!--  &lt;!&ndash; Tag DB after v0.0.1 &ndash;&gt;-->
+  <!--  <changeSet id="v0.0.1-tag" author="jawad">-->
+  <!--    <tagDatabase tag="0.0.1"/>-->
+  <!--  </changeSet>-->
 
 </databaseChangeLog>
