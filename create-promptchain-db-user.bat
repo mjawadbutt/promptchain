@@ -17,13 +17,13 @@ for %%V in (%REQUIRED_VARS%) do (
 )
 
 REM --- Find container ID ---
-for /f "delims=" %%i in ('docker ps --filter "ancestor=postgres:15" --format "{{.ID}}"') do (
+for /f "delims=" %%i in ('docker ps --filter "ancestor=timescale/timescaledb:latest-pg15" --format "{{.ID}}"') do (
     set container_id=%%i
     goto :found_container
 )
 :found_container
 if "%container_id%"=="" (
-    echo ERROR: No running postgres:15 container found
+    echo ERROR: No running ancestor=timescale/timescaledb:latest-pg15 container found! Aborting.
     exit /b 2
 )
 echo Using container ID: %container_id%
@@ -39,7 +39,7 @@ if %errorlevel%==0 (
     goto :ready
 ) else (
     if %count% GEQ %MAX_RETRIES% (
-        echo ERROR: PostgreSQL not ready after %MAX_RETRIES% attempts. Aborting.
+        echo ERROR: PostgreSQL not ready after %MAX_RETRIES% attempts! Aborting.
         exit /b 3
     )
     echo PostgreSQL unavailable — retrying in %RETRY_INTERVAL% seconds (attempt %count%/%MAX_RETRIES%)

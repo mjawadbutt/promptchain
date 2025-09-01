@@ -64,11 +64,11 @@ for /f "tokens=*" %%i in ('docker ps --filter "ancestor=timescale/timescaledb:la
 )
 
 if not defined CONTAINER_ID (
-    echo ERROR: No Postgres container found. Waiting for container to start...
+    echo ERROR: No running timescale/timescaledb:latest-pg15 container found. Waiting for container to start...
     timeout /t 2 >nul
     set /a COUNT+=1
     if !COUNT! GEQ %RETRIES% (
-        echo ERROR: Postgres container did not appear after %RETRIES% attempts.
+        echo ERROR: No running timescale/timescaledb:latest-pg15 container found after %RETRIES% attempts! Aborting.
         exit /b 4
     )
     goto WAIT_LOOP

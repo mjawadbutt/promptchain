@@ -25,9 +25,9 @@ done
 POSTGRES_PORT="${POSTGRES_PORT:-5432}"
 
 # Get the Container-ID for the Postgres container
-container_id=$(docker ps --filter "ancestor=postgres:15" --format '{{.ID}}' | head -n1)
+container_id=$(docker ps --filter "ancestor=timescale/timescaledb:latest-pg15" --format '{{.ID}}' | head -n1)
 if [ -z "$container_id" ]; then
-  echo "ERROR: No running postgres:15 container found" >&2
+  echo "ERROR: No running ancestor=timescale/timescaledb:latest-pg15 container found! Aborting." >&2
   exit 2
 fi
 
@@ -42,7 +42,7 @@ for ((i=1; i<=MAX_RETRIES; i++)); do
     break
   fi
   if [ "$i" -eq "$MAX_RETRIES" ]; then
-    echo "ERROR: PostgreSQL not ready after $MAX_RETRIES attempts. Aborting." >&2
+    echo "ERROR: PostgreSQL not ready after $MAX_RETRIES attempts! Aborting." >&2
     exit 3
   fi
   echo "PostgreSQL unavailable — retrying in $RETRY_INTERVAL seconds (attempt $i/$MAX_RETRIES)"
