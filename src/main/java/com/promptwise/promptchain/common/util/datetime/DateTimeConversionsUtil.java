@@ -14,69 +14,91 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
-//TODO-Jawad-now: add fix for Z->UTC
 public class DateTimeConversionsUtil {
   private DateTimeConversionsUtil() {
   }
 
-  public static ZonedDateTime xmlGregorianCalendarToZonedDateTime(final @NotNull XMLGregorianCalendar xmlGregorianCalendar) {
+  /**
+   * Considers the XMLGregorianCalendar to be a UTC date-time if no offset is present.
+   */
+  public static ZonedDateTime xmlGregorianCalendarToUtcZonedDateTime(
+          @NotNull final XMLGregorianCalendar xmlGregorianCalendar) {
     Assert.notNull(xmlGregorianCalendar, "The 'xmlGregorianCalendar' cannot be 'null'!");
-    return xmlGregorianCalendar.toGregorianCalendar().toZonedDateTime();
+    return xmlGregorianCalendar.toGregorianCalendar(TimeZone.getTimeZone("Z"), null, null)
+            .toZonedDateTime();
   }
 
-  public static XMLGregorianCalendar zonedDateTimeToXMLGregorianCalendar(final @NotNull ZonedDateTime zonedDateTime) {
+  public static ZonedDateTime xmlGregorianCalendarToZonedDateTime(
+          @NotNull final XMLGregorianCalendar xmlGregorianCalendar, TimeZone defaultTimeZoneIfNoOffset) {
+    Assert.notNull(xmlGregorianCalendar, "The 'xmlGregorianCalendar' cannot be 'null'!");
+    Assert.notNull(defaultTimeZoneIfNoOffset, "The 'defaultTimeZoneIfNoOffset' cannot be 'null'!");
+    return xmlGregorianCalendar.toGregorianCalendar(defaultTimeZoneIfNoOffset, null, null)
+            .toZonedDateTime();
+  }
+
+  public static XMLGregorianCalendar zonedDateTimeToUtcXmlGregorianCalendar(
+          @NotNull final ZonedDateTime zonedDateTime) {
     Assert.notNull(zonedDateTime, "The 'zonedDateTime' cannot be 'null'!");
-    GregorianCalendar gregorianCalendar = GregorianCalendar.from(zonedDateTime);
+    //-- Convert to UTC timezone
+    ZonedDateTime utcZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("Z"));
+    GregorianCalendar gregorianCalendar = GregorianCalendar.from(utcZonedDateTime);
 
     try {
       return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
-    } catch (DatatypeConfigurationException var3) {
-      DatatypeConfigurationException dce = var3;
-      throw CommonLibSystemException.create("An exception occurred while converting GregorianCalendar to XMLGregorianCalendar\nduring ZonedDateTime to XMLGregorianCalendar conversion! Please see cause for details.\n", dce);
+    } catch (DatatypeConfigurationException dce) {
+      throw CommonLibSystemException.create("""
+              An exception occurred while converting GregorianCalendar to XMLGregorianCalendar 
+              during ZonedDateTime to XMLGregorianCalendar conversion! Please see cause for details.""", dce);
     }
   }
 
-  public static Long zonedDateTimeToEpochMilliseconds(final @NotNull ZonedDateTime zonedDateTime) {
+  public static Long zonedDateTimeToEpochMilliseconds(@NotNull final ZonedDateTime zonedDateTime) {
     Assert.notNull(zonedDateTime, "The 'zonedDateTime' cannot be 'null'!");
     Instant instant = zonedDateTime.toInstant();
     Long milliSecondsSinceEpoch = instant.toEpochMilli();
     return milliSecondsSinceEpoch;
   }
 
-  public static ZonedDateTime epochMillisecondsToZonedDateTime(final @NotNull Long milliSecondsSinceEpoch) {
+  public static ZonedDateTime epochMillisecondsToZonedDateTime(@NotNull final Long milliSecondsSinceEpoch) {
     Assert.notNull(milliSecondsSinceEpoch, "The 'milliSecondsSinceEpoch' cannot be 'null'!");
     Instant instant = Instant.ofEpochMilli(milliSecondsSinceEpoch);
-    return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+    return ZonedDateTime.ofInstant(instant, ZoneId.of("Z"));
   }
 
-  public static Date localDateToDate(final @NotNull LocalDate localDate) {
+  public static Date localDateToDate(@NotNull final LocalDate localDate) {
     Assert.notNull(localDate, "The 'localDate' cannot be 'null'!");
-    return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    return Date.from(localDate.atStartOfDay(ZoneId.of("Z")).toInstant());
   }
 
   public static Date localDateTimeToDate(final @NotNull LocalDateTime localDateTime) {
     Assert.notNull(localDateTime, "The 'localDateTime' cannot be 'null'!");
-    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    return Date.from(localDateTime.atZone(ZoneId.of("Z")).toInstant());
   }
 
-  public static LocalDate dateToLocalDate(final @NotNull Date date) {
+  public static LocalDate dateToLocalDate(@NotNull final Date date) {
     Assert.notNull(date, "The 'date' cannot be 'null'!");
-    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    return date.toInstant().atZone(ZoneId.of("Z")).toLocalDate();
   }
 
-  public static LocalDateTime dateToLocalDateTime(final @NotNull Date date) {
+  public static LocalDateTime dateToLocalDateTime(@NotNull final Date date) {
     Assert.notNull(date, "The 'date' cannot be 'null'!");
-    return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    return LocalDateTime.ofInstant(date.toInstant(), ZoneId.of("Z"));
   }
 
-  public static java.sql.Date localDateToSqlDate(final @NotNull LocalDate localDate) {
+  public static java.sql.Date localDateToSqlDate(@NotNull final LocalDate localDate) {
     Assert.notNull(localDate, "The 'localDate' cannot be 'null'!");
     return java.sql.Date.valueOf(localDate);
   }
 
-  public static LocalDate sqlDateToLocalDate(@NotNull final java.sql.@NotNull Date sqlDate) {
+  public static LocalDate sqlDateToLocalDate(@NotNull final java.sql.Date sqlDate) {
     Assert.notNull(sqlDate, "The 'sqlDate' cannot be 'null'!");
     return sqlDate.toLocalDate();
   }
+
+  private ZonedDateTime normalizeToUtc(ZonedDateTime zonedDateTime) {
+    return zonedDateTime != null ? zonedDateTime.withZoneSameInstant(ZoneId.of("Z")) : null;
+  }
+
 }

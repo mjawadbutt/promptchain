@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # stop_postgres_stack.sh
 # Stops and removes the Postgres stack via docker-compose.

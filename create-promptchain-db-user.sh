@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # create-promptchain-db-user.sh
 # This script waits for PostgreSQL to be ready, then creates a new application database user
 # and grants privileges. Designed to be idempotent and short-lived.

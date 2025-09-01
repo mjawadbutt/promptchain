@@ -1,6 +1,7 @@
 package com.promptwise.promptchain.model;
 
 import com.promptwise.promptchain.common.util.json.JacksonUtil;
+import io.opentelemetry.proto.trace.v1.Span;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public class TraceSpan {
   private final String spanId;
   private final String parentSpanId;
   private final String name;
-  private final Integer kind;
+  private final Span.SpanKind kind;
   private final String startTimeUnixNano;
   private final String endTimeUnixNano;
   private final List<SignalAttribute> attributes;
@@ -18,7 +19,7 @@ public class TraceSpan {
   private final List<TraceSpanEvent> events;
 
   public TraceSpan(final String traceId, final String spanId, final String parentSpanId, final String name,
-                   final Integer kind, final String startTimeUnixNano, final String endTimeUnixNano,
+                   final Span.SpanKind kind, final String startTimeUnixNano, final String endTimeUnixNano,
                    final List<SignalAttribute> attributes, final SpanStatus status, final List<TraceSpanEvent> events) {
     this.traceId = traceId;
     this.spanId = spanId;
@@ -48,7 +49,7 @@ public class TraceSpan {
     return name;
   }
 
-  public Integer getKind() {
+  public Span.SpanKind getKind() {
     return kind;
   }
 

@@ -11,4 +11,9 @@ public class ScopeTraces extends ScopeSignal<TraceSpan> {
     super(scope, traceSpans);
   }
 
+  @JsonProperty("spans")
+  public List<TraceSpan> getTraces() {
+    return getSignals();
+  }
+
 }

@@ -11,4 +11,9 @@ public class ScopeLogs extends ScopeSignal<LogRecord> {
     super(scope, logRecords);
   }
 
+  @JsonProperty("logRecords")
+  public List<LogRecord> getTraces() {
+    return getSignals();
+  }
+
 }

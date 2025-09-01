@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # stop_redis_stack.sh
 # Stops and removes the Redis stack via docker-compose.

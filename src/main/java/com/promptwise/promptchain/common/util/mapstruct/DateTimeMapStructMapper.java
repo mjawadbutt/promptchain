@@ -12,20 +12,22 @@ public class DateTimeMapStructMapper {
   public DateTimeMapStructMapper() {
   }
 
-  public ZonedDateTime xmlGregorianCalendarToZonedDateTime(XMLGregorianCalendar xmlGregorianCalendar) {
-    return DateTimeConversionsUtil.xmlGregorianCalendarToZonedDateTime(xmlGregorianCalendar);
+  public ZonedDateTime xmlGregorianCalendarToUtcZonedDateTime(XMLGregorianCalendar xmlGregorianCalendar) {
+    ZonedDateTime utcZonedDateTime = DateTimeConversionsUtil.xmlGregorianCalendarToUtcZonedDateTime(xmlGregorianCalendar);
+    return utcZonedDateTime;
   }
 
-  public XMLGregorianCalendar zonedDateTimeToXMLGregorianCalendar(ZonedDateTime zonedDateTime) {
-    return DateTimeConversionsUtil.zonedDateTimeToXMLGregorianCalendar(zonedDateTime);
+  public XMLGregorianCalendar zonedDateTimeToUtcXmlGregorianCalendar(ZonedDateTime zonedDateTime) {
+    return DateTimeConversionsUtil.zonedDateTimeToUtcXmlGregorianCalendar(zonedDateTime);
   }
 
   public Long zonedDateTimeToEpochMilliseconds(ZonedDateTime zonedDateTime) {
     return DateTimeConversionsUtil.zonedDateTimeToEpochMilliseconds(zonedDateTime);
   }
 
-  public ZonedDateTime epochMillisecondsToZonedDateTime(Long milliSecondsSinceEpoch) {
-    return DateTimeConversionsUtil.epochMillisecondsToZonedDateTime(milliSecondsSinceEpoch);
+  public ZonedDateTime epochMillisecondsToUtcZonedDateTime(Long milliSecondsSinceEpoch) {
+    ZonedDateTime utcZonedDateTime = DateTimeConversionsUtil.epochMillisecondsToZonedDateTime(milliSecondsSinceEpoch);
+    return utcZonedDateTime;
   }
 
   public Date localDateToSqlDate(LocalDate localDate) {

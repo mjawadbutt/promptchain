@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # start_postgres_stack.sh
 # This script starts the Docker Compose Postgres stack.

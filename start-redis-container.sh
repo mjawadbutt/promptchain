@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # start_redis_stack.sh
 # This script starts the Docker Compose Redis stack.
