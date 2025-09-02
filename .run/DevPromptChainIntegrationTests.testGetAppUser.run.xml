@@ -8,8 +8,8 @@
       </pattern>
     </extension>
     <option name="PACKAGE_NAME" value="com.promptwise.promptchain.test.integrationtest" />
-    <option name="MAIN_CLASS_NAME" value="com.promptwise.promptchain.test.integrationtest.PromptChainIntegrationTests" />
-    <option name="METHOD_NAME" value="testGetAppUser" />
+    <option name="MAIN_CLASS_NAME" value="com.promptwise.promptchain.test.integrationtest.PromptChainAdminRestControllerIntegrationTests" />
+    <option name="METHOD_NAME" value="testCreateAppUser" />
     <option name="TEST_OBJECT" value="method" />
     <envs>
       <env name="APP_DATA_DIR_NAME" value="data" />

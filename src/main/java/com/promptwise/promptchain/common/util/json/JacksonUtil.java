@@ -3,10 +3,12 @@ package com.promptwise.promptchain.common.util.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,6 +73,26 @@ public class JacksonUtil {
       throw CommonLibSystemException.create(String.format("""
               Unable to serialize the given object '%s' to JSON string! Please see root cause for further info.
               """, o), je);
+    }
+  }
+
+  public String serializeObjectToCompactJson(Object o) {
+    try {
+      return getObjectMapper().writer((PrettyPrinter) null).writeValueAsString(o);
+    } catch (JacksonException je) {
+      throw CommonLibSystemException.create(String.format("""
+              Unable to serialize the given object '%s' to JSON string! Please see root cause for further info.
+              """, o), je);
+    }
+  }
+
+  public String compactJson(String str) {
+    try {
+      JsonNode tree = getObjectMapper().readTree(str);   // parse input
+      return getObjectMapper().writer((PrettyPrinter) null).writeValueAsString(tree);
+    } catch (JacksonException je) {
+      throw CommonLibSystemException.create(String.format(
+              "Unable to compact the JSON string '%s'! See root cause for further info", str), je);
     }
   }
 

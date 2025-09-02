@@ -20,9 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
 @PromptChainIntegrationTestClass
-class PromptChainIntegrationTests {
+class PromptChainAdminRestControllerIntegrationTests {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainIntegrationTests.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PromptChainAdminRestControllerIntegrationTests.class);
 
   private final PromptChainRestControllerClient promptChainRestControllerClient;
   private final PromptChainAdminRestControllerClient promptChainAdminRestControllerClient;
@@ -31,11 +31,11 @@ class PromptChainIntegrationTests {
   private final TestRestTemplate restTemplate;
 
   @Autowired
-  public PromptChainIntegrationTests(@NotNull final PromptChainRestControllerClient promptChainRestControllerClient,
-                                     @NotNull final PromptChainAdminRestControllerClient promptChainAdminRestControllerClient,
-                                     @NotNull final ApplicationProperties applicationProperties,
-                                     @NotNull final ObjectMapper objectMapper,
-                                     @NotNull final TestRestTemplate restTemplate) {
+  public PromptChainAdminRestControllerIntegrationTests(@NotNull final PromptChainRestControllerClient promptChainRestControllerClient,
+                                                        @NotNull final PromptChainAdminRestControllerClient promptChainAdminRestControllerClient,
+                                                        @NotNull final ApplicationProperties applicationProperties,
+                                                        @NotNull final ObjectMapper objectMapper,
+                                                        @NotNull final TestRestTemplate restTemplate) {
     this.promptChainRestControllerClient = promptChainRestControllerClient;
     this.promptChainAdminRestControllerClient = promptChainAdminRestControllerClient;
     this.applicationProperties = applicationProperties;
@@ -48,11 +48,12 @@ class PromptChainIntegrationTests {
   }
 
   @Test
-  @DisplayName("PromptChainRestControllerClient.getClient: Retrieves the basic details of the client having the given client-id.")
-  @Tags({@Tag("Group:IntegrationTests")})
-  void testGetAppUser() {
+  @DisplayName("REST-ENDPOINT TEST: 'POST /api/admin/createAppUser', CASE: 'Create a user and verify result.'")
+  @Tags({@Tag("AdminRestController"),@Tag("IntegrationTests")})
+  void testCreateAppUser() {
     CreateOrUpdateAppUserRequest createOrUpdateAppUserRequest = new CreateOrUpdateAppUserRequest(
             AppUserEntity.createForInsertOrUpdate("jawad", "abcd", "jawad@promptchain.com"));
+
     AppUserEntity actualResult = getPromptChainAdminRestControllerClient().createAppUser(createOrUpdateAppUserRequest);
 
     AppUserEntity expectedResult = AppUserEntity.createForSelect(actualResult.getAppUserId(),
@@ -60,9 +61,10 @@ class PromptChainIntegrationTests {
             createOrUpdateAppUserRequest.appUserEntity().getPassword(),
             createOrUpdateAppUserRequest.appUserEntity().getUserEmail(),
             actualResult.getCreatedAt(), actualResult.getLastUpdatedAt());
-LOGGER.info(expectedResult.toString());
-LOGGER.info(actualResult.toString());
+
+    //-- Cleanup as soon as we can.
     getPromptChainAdminRestControllerClient().deleteAppUser(actualResult.getAppUserId());
+
     Assertions.assertThat(actualResult).usingRecursiveComparison().isEqualTo(expectedResult);
   }
 
