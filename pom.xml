@@ -973,6 +973,15 @@
                     Watch out for case-sensitivity. Depending on your database, this might be important!
                   -->
                   <includes>.*</includes>
+                  <excludes>
+                    create_hypertable|
+                    add_dimension|
+                    attach_tablespace|
+                    compress_chunk|
+                    drop_chunks|
+                    \*internal\*|
+                    _timescaledb\..*
+                  </excludes>
                 </database>
               </generator>
               <jdbc>
