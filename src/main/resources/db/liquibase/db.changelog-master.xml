@@ -7,15 +7,20 @@
 
   <!-- contextFilter="local,dev,!prod" attribute can be used to conditionally execute. changeset elem also has it-->
   <!-- labels are similar to contexts but by convention, context are used for filtering by environment and labels for all other cases-->
-  <!-- TODO: Add rollback for each chageset -->
-  <changeSet id="v0.0.1-init_schema" author="jawad">
-    <sqlFile relativeToChangelogFile="true" path="changesets/promptchain-0.0.1/promptchain-0.0.1_01_create-tables.sql"/>
+  <!-- TODO: Add rollback for each changeset -->
+  <changeSet id="v0.0.1-init_db" author="jawad">
     <sqlFile relativeToChangelogFile="true"
-             path="changesets/promptchain-0.0.1/promptchain-0.0.1_02_reference-data.sql"/>
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1-01-create_tables.sql"/>
     <sqlFile relativeToChangelogFile="true"
-             path="changesets/promptchain-0.0.1/promptchain-0.0.1_03_create-constraints.sql"/>
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1-02-create_timescale_tables.sql"/>
     <sqlFile relativeToChangelogFile="true"
-             path="changesets/promptchain-0.0.1/promptchain-0.0.1_04_create-timeseries-metrics-table.sql"/>
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1-03-insert_system_data.sql"/>
+    <sqlFile relativeToChangelogFile="true"
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1-04-create_constraints.sql"/>
+  </changeSet>
+  <changeSet id="v0.0.1-insert_dev_test_data" author="jawad">
+    <sqlFile relativeToChangelogFile="true"
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1-05-insert_dev_test_data.sql"/>
   </changeSet>
 
   <!--TODO-Release: Just before releasing first version-->
