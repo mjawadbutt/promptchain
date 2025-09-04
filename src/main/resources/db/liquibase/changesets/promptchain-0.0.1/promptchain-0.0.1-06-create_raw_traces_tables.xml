@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet id="create-raw-traces-table" author="mustafa">
+    <!-- Traces -->
+    <createTable tableName="raw_traces">
+      <column name="id" type="BIGSERIAL">
+        <constraints nullable="false"/>
+      </column>
+      <column name="org_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_app_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="payload" type="JSONB"/>
+      <column name="received_at" type="TIMESTAMPTZ">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addPrimaryKey tableName="raw_traces"
+                   columnNames="id, client_app_id, received_at"
+                   constraintName="pk_raw_traces"/>
+  </changeSet>
+
+  <changeSet id="create-hypertable-raw-traces" author="mustafa" runAlways="true" runOnChange="true">
+    <!-- Convert table to hypertable -->
+    <sql>
+      SELECT create_hypertable('raw_traces', 'received_at', 'client_app_id', 4, if_not_exists =&gt; TRUE);
+    </sql>
+  </changeSet>
+
+  <changeSet id="create-raw-metrics-table" author="mustafa">
+    <!-- Metrics -->
+    <createTable tableName="raw_metrics">
+      <column name="id" type="BIGSERIAL">
+        <constraints nullable="false"/>
+      </column>
+      <column name="org_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_app_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="payload" type="JSONB"/>
+      <column name="received_at" type="TIMESTAMPTZ">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addPrimaryKey tableName="raw_metrics"
+                   columnNames="id, client_app_id, received_at"
+                   constraintName="pk_raw_metrics"/>  </changeSet>
+
+  <changeSet id="create-hypertable-raw-metrics" author="mustafa" runAlways="true" runOnChange="true">
+    <!-- Convert table to hypertable -->
+    <sql>
+      SELECT create_hypertable('raw_metrics', 'received_at', 'client_app_id', 4, if_not_exists =&gt; TRUE);
+    </sql>
+  </changeSet>
+
+  <changeSet id="create-raw-logs-table" author="mustafa">
+    <!-- Logs -->
+    <createTable tableName="raw_logs">
+      <column name="id" type="BIGSERIAL">
+        <constraints nullable="false"/>
+      </column>
+      <column name="org_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="client_app_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="payload" type="JSONB"/>
+      <column name="received_at" type="TIMESTAMPTZ">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addPrimaryKey tableName="raw_logs"
+                   columnNames="id, client_app_id, received_at"
+                   constraintName="pk_raw_logs"/>
+  </changeSet>
+
+
+  <changeSet id="create-hypertable-raw-logs" author="mustafa" runAlways="true" runOnChange="true">
+    <!-- Convert table to hypertable -->
+    <sql>
+      SELECT create_hypertable('raw_logs', 'received_at', 'client_app_id', 4, if_not_exists =&gt; TRUE);
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

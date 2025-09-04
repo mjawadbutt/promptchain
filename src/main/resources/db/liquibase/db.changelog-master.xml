@@ -22,6 +22,7 @@
     <sqlFile relativeToChangelogFile="true"
              path="changesets/promptchain-0.0.1/promptchain-0.0.1-05-insert_dev_test_data.sql"/>
   </changeSet>
+  <include   file="changesets/promptchain-0.0.1/promptchain-0.0.1-06-create_raw_traces_tables.xml" relativeToChangelogFile="true"/>
 
   <!--TODO-Release: Just before releasing first version-->
   <!--  &lt;!&ndash; Tag DB after v0.0.1 &ndash;&gt;-->
