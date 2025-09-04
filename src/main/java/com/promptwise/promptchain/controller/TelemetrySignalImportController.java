@@ -46,6 +46,9 @@ public class TelemetrySignalImportController {
           produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Map<String, Object>> importMetricSignals(@RequestBody MetricSignals metricSignals) {
     getExecutorService().submit(() -> {
+      //adding to Raw table (raw_metrics)
+      getMetricSignalsProcessorService().importRawMetrics(metricSignals, 1L,1L);
+      //processing the metrics
       getMetricSignalsProcessorService().processSignals(metricSignals);
     });
     return ResponseEntity.ok(Map.of());
