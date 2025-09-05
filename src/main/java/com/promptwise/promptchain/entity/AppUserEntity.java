@@ -63,6 +63,7 @@ public class AppUserEntity implements Comparable<AppUserEntity> { // Implemented
           @JsonProperty("userName") final String userName,
           @JsonProperty("password") final String password,
           @JsonProperty("userEmail") final String userEmail) {
+    //TODO: replace all Assert.notNull(param,"msg") uages with Objects.requireNonNull(param, "msg");
     Assert.notNull(userName, "The parameter 'userName' cannot be null!");
     Assert.notNull(password, "The parameter 'password' cannot be null!");
     Assert.notNull(userEmail, "The parameter 'userEmail' cannot be null!");

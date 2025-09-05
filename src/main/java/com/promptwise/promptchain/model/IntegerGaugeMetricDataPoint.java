@@ -9,7 +9,7 @@ public class IntegerGaugeMetricDataPoint extends NumberMetricDataPoint {
   private final Integer value;
 
   public IntegerGaugeMetricDataPoint(
-          @JsonProperty("timeUnixNano") final String timeUnixNano,
+          final String timeUnixNano,
           @JsonProperty("startTimeUnixNano") final String startTimeUnixNano,
           @JsonProperty("attributes") final List<SignalAttribute> attributes,
           @JsonProperty("asInt") final Integer value) {

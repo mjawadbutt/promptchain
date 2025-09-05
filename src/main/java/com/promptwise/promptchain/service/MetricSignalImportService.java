@@ -50,10 +50,10 @@ public class MetricSignalImportService implements TelemetrySignalImportService<M
     for (ScopeMetrics scopeMetrics : metricSignal.getScopeSignals()) {
       for (Metric<? extends MetricDetail<? extends MetricDataPoint>> metric : scopeMetrics.getSignals()) {
         switch (metric.getType()) {
-          case "GAUGE" -> processGaugeMetric((GaugeMetric) metric);
-          case "SUM" -> processSumMetric((SumMetric) metric);
-          case "HISTOGRAM" -> processHistogramMetric((HistogramMetric) metric);
-          case "SUMMARY" -> processSummaryMetric((SummaryMetric) metric);
+          case GAUGE -> processGaugeMetric((GaugeMetric) metric);
+          case SUM -> processSumMetric((SumMetric) metric);
+          case HISTOGRAM -> processHistogramMetric((HistogramMetric) metric);
+          case SUMMARY -> processSummaryMetric((SummaryMetric) metric);
           default -> throw new IllegalArgumentException("Unknown metric type: " + metric.getType());
         }
       }

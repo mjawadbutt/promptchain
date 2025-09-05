@@ -5,10 +5,10 @@ import com.promptwise.promptchain.common.util.json.JacksonUtil;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.util.Assert;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Objects;
 
 public class Rfc7807CompliantHttpRequestProcessingErrorResponse {
 
@@ -21,11 +21,8 @@ public class Rfc7807CompliantHttpRequestProcessingErrorResponse {
   private Rfc7807CompliantHttpRequestProcessingErrorResponse(@NotNull final String errorCode,
                                                              @NotNull final ProblemDetail problemDetail,
                                                              final Rfc7807CompliantHttpRequestProcessingErrorResponse cause) {
-    Assert.notNull(errorCode, "The 'errorCode' cannot be 'null'!");
-    Assert.notNull(problemDetail, "The 'problemDetail' cannot be 'null'!");
-
-    this.errorCode = errorCode;
-    this.problemDetail = problemDetail;
+    this.errorCode = Objects.requireNonNull(errorCode, "The 'errorCode' cannot be 'null'!");
+    this.problemDetail = Objects.requireNonNull(problemDetail, "The 'problemDetail' cannot be 'null'!");
     this.cause = cause;
   }
 

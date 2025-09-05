@@ -1,6 +1,6 @@
 package com.promptwise.promptchain.common.util;
 
-import org.springframework.util.Assert;
+import java.util.Objects;
 
 public class CheckedExceptionWrapper extends RuntimeException {
   private CheckedExceptionWrapper(Exception cause) {
@@ -8,7 +8,7 @@ public class CheckedExceptionWrapper extends RuntimeException {
   }
 
   public static CheckedExceptionWrapper create(Exception cause) {
-    Assert.notNull(cause, "The parameter cause cannot be null!");
+    Objects.requireNonNull(cause, "The parameter 'cause' cannot be 'null'!");
     return new CheckedExceptionWrapper(cause);
   }
 }

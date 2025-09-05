@@ -4,14 +4,14 @@ import java.util.List;
 
 public class HistogramMetricDataPoint extends MetricDataPoint {
 
-  private final Integer count;
+  private final Long count;
   private final Double sum;
-  private final List<Integer> bucketCounts;
-  private final List<Integer> explicitBounds;
+  private final List<Long> bucketCounts;
+  private final List<Double> explicitBounds;
 
   public HistogramMetricDataPoint(
-          final String timeUnixNano, final String startTimeUnixNano, final Integer count, Double sum,
-          final List<Integer> bucketCounts, final List<Integer> explicitBounds, final List<SignalAttribute> attributes) {
+          final String timeUnixNano, final String startTimeUnixNano, final Long count, Double sum,
+          final List<Long> bucketCounts, final List<Double> explicitBounds, final List<SignalAttribute> attributes) {
     super(timeUnixNano, startTimeUnixNano, attributes);
     this.count = count;
     this.sum = sum;
@@ -19,7 +19,7 @@ public class HistogramMetricDataPoint extends MetricDataPoint {
     this.explicitBounds = explicitBounds == null ? List.of() : List.copyOf(explicitBounds);
   }
 
-  public Integer getCount() {
+  public Long getCount() {
     return count;
   }
 
@@ -27,11 +27,11 @@ public class HistogramMetricDataPoint extends MetricDataPoint {
     return sum;
   }
 
-  public List<Integer> getBucketCounts() {
+  public List<Long> getBucketCounts() {
     return bucketCounts;
   }
 
-  public List<Integer> getExplicitBounds() {
+  public List<Double> getExplicitBounds() {
     return explicitBounds;
   }
 

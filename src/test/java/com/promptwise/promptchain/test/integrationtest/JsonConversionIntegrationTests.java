@@ -43,7 +43,7 @@ class JsonConversionIntegrationTests {
                     "metrics": [
                       {
                         "name": "cpu.utilization",
-                        "type": "GAUGE",
+                        "type": "gauge",
                         "unit": "percent",
                         "gauge": {
                           "dataPoints": [
@@ -64,7 +64,7 @@ class JsonConversionIntegrationTests {
                       },
                       {
                         "name": "http.requests",
-                        "type": "SUM",
+                        "type": "sum",
                         "unit": "count",
                         "sum": {
                           "aggregationTemporality": "CUMULATIVE",
@@ -87,7 +87,7 @@ class JsonConversionIntegrationTests {
                       },
                       {
                         "name": "http.request.duration",
-                        "type": "HISTOGRAM",
+                        "type": "histogram",
                         "unit": "ms",
                         "histogram": {
                           "aggregationTemporality": "DELTA",
@@ -102,8 +102,8 @@ class JsonConversionIntegrationTests {
                                 1
                               ],
                               "explicitBounds": [
-                                50,
-                                100
+                                50.0,
+                                100.0
                               ],
                               "attributes": [
                                 {
@@ -119,7 +119,7 @@ class JsonConversionIntegrationTests {
                       },
                       {
                         "name": "rpc.latency",
-                        "type": "SUMMARY",
+                        "type": "summary",
                         "unit": "ms",
                         "summary": {
                           "dataPoints": [

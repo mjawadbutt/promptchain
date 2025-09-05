@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class SummaryMetric extends Metric<SummaryMetricDetail> {
 
-  public SummaryMetric(final String name, final String type, final String unit,
+  public SummaryMetric(final String name, final MetricType type, final String unit,
                        @JsonProperty("summary") SummaryMetricDetail summaryMetricDetail) {
     super(name, type, unit, summaryMetricDetail);
   }

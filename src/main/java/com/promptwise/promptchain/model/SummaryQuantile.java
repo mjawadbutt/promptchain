@@ -2,9 +2,14 @@ package com.promptwise.promptchain.model;
 
 import com.promptwise.promptchain.common.util.json.JacksonUtil;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class SummaryQuantile implements Comparable<SummaryQuantile> {
+
+  private static final Comparator<SummaryQuantile> NATURAL_ORDER_COMPARATOR =
+          Comparator.comparing(SummaryQuantile::getQuantile)
+                  .thenComparing(SummaryQuantile::getValue);
 
   private final Double quantile;
   private final Double value;
@@ -23,16 +28,14 @@ public class SummaryQuantile implements Comparable<SummaryQuantile> {
   }
 
   @Override
-  public int compareTo(SummaryQuantile other) {
-    if (other == null) return 1; // non-null is greater than null
-    return this.quantile.compareTo(other.quantile);
+  public int compareTo(final SummaryQuantile other) {
+    return NATURAL_ORDER_COMPARATOR.compare(this, other);
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof SummaryQuantile)) return false;
-    SummaryQuantile other = (SummaryQuantile) o;
+    if (!(o instanceof final SummaryQuantile other)) return false;
     // equality bound to compareTo == 0
     return this.compareTo(other) == 0;
   }
@@ -40,7 +43,7 @@ public class SummaryQuantile implements Comparable<SummaryQuantile> {
   @Override
   public int hashCode() {
     // must be consistent with equals — only use quantile
-    return Objects.hash(quantile);
+    return Objects.hash(quantile, value);
   }
 
   @Override

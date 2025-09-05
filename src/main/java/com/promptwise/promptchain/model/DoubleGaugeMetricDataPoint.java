@@ -9,7 +9,7 @@ public class DoubleGaugeMetricDataPoint extends NumberMetricDataPoint {
   private final Double value;
 
   public DoubleGaugeMetricDataPoint(
-          @JsonProperty("timeUnixNano") final String timeUnixNano,
+          final String timeUnixNano,
           @JsonProperty("startTimeUnixNano") final String startTimeUnixNano,
           @JsonProperty("attributes") final List<SignalAttribute> attributes,
           @JsonProperty("asDouble") final Double value) {

@@ -9,7 +9,7 @@ public class IntegerSumMetricDataPoint extends SumMetricDataPoint {
   private final Integer value;
 
   public IntegerSumMetricDataPoint(
-          @JsonProperty("timeUnixNano") final String timeUnixNano,
+          final String timeUnixNano,
           @JsonProperty("startTimeUnixNano") final String startTimeUnixNano,
           @JsonProperty("attributes") final List<SignalAttribute> attributes,
           @JsonProperty("asInt") final Integer value) {

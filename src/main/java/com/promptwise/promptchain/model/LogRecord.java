@@ -1,5 +1,6 @@
 package com.promptwise.promptchain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.promptwise.promptchain.common.util.json.JacksonUtil;
 import jakarta.validation.constraints.NotNull;
 
@@ -30,6 +31,11 @@ public class LogRecord {
     this.attributes = attributes == null ? List.of() : List.copyOf(attributes);
     this.traceId = traceId;
     this.spanId = spanId;
+  }
+
+  @JsonIgnore
+  public Long getTimeUnixNanoAsLong() {
+    return Long.parseUnsignedLong(timeUnixNano);
   }
 
   public String getTimeUnixNano() {
