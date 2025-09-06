@@ -12,7 +12,7 @@
     <sqlFile relativeToChangelogFile="true"
              path="changesets/promptchain-0.0.1/promptchain-0.0.1-01-create_tables.sql"/>
     <sqlFile relativeToChangelogFile="true"
-             path="changesets/promptchain-0.0.1/promptchain-0.0.1-02-create_timescale_tables.sql"/>
+             path="changesets/promptchain-0.0.1/promptchain-0.0.1-02-create_extensions.sql"/>
     <sqlFile relativeToChangelogFile="true"
              path="changesets/promptchain-0.0.1/promptchain-0.0.1-03-insert_system_data.sql"/>
     <sqlFile relativeToChangelogFile="true"
@@ -22,7 +22,6 @@
     <sqlFile relativeToChangelogFile="true"
              path="changesets/promptchain-0.0.1/promptchain-0.0.1-05-insert_dev_test_data.sql"/>
   </changeSet>
-  <include   file="changesets/promptchain-0.0.1/promptchain-0.0.1-06-create_raw_traces_tables.xml" relativeToChangelogFile="true"/>
 
   <!--TODO-Release: Just before releasing first version-->
   <!--  &lt;!&ndash; Tag DB after v0.0.1 &ndash;&gt;-->

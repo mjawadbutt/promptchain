@@ -46,3 +46,28 @@ CREATE TABLE IF NOT EXISTS "CLIENT_APPLICATIONS" (
     "CREATED_AT" TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW() NOT NULL,
     "LAST_UPDATED_AT" TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW() NOT NULL
 );
+
+CREATE TABLE raw_traces (
+    id BIGSERIAL NOT NULL,
+    org_id BIGINT NOT NULL,
+    client_app_id BIGINT NOT NULL,
+    payload JSONB,
+    received_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE raw_metrics (
+    id BIGSERIAL NOT NULL,
+    org_id BIGINT NOT NULL,
+    client_app_id BIGINT NOT NULL,
+    payload JSONB,
+    received_at TIMESTAMPTZ NOT NULL
+);
+
+
+CREATE TABLE raw_logs (
+    id BIGSERIAL NOT NULL,
+    org_id BIGINT NOT NULL,
+    client_app_id BIGINT NOT NULL,
+    payload JSONB,
+    received_at TIMESTAMPTZ NOT NULL
+);
