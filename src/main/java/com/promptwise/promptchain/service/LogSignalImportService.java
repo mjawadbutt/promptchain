@@ -4,19 +4,21 @@ import com.promptwise.promptchain.model.LogRecord;
 import com.promptwise.promptchain.model.LogSignal;
 import com.promptwise.promptchain.model.LogSignals;
 import com.promptwise.promptchain.model.ScopeLogs;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LogSignalsImportService implements TelemetrySignalImportService<LogSignal> {
+public class LogSignalImportService implements TelemetrySignalImportService<LogSignal> {
 
-
-  public void processSignals(LogSignals logSignals) {
+  @Transactional
+  public void importSignals(LogSignals logSignals) {
     for (LogSignal logSignal : logSignals.getLogSignals()) {
-      processSignal(logSignal);
+      importSignal(logSignal);
     }
   }
 
-  public void processSignal(LogSignal logSignal) {
+  @Transactional
+  public void importSignal(LogSignal logSignal) {
     for (ScopeLogs scopeLogs : logSignal.getScopeSignals()) {
       for (LogRecord logRecord : scopeLogs.getSignals()) {
       }

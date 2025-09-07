@@ -2,7 +2,7 @@ package com.promptwise.promptchain.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.promptwise.promptchain.common.util.json.JacksonUtil;
-import com.promptwise.promptchain.entity.RawMetrics;
+import com.promptwise.promptchain.entity.RawMetric;
 import com.promptwise.promptchain.model.DoubleGaugeMetricDataPoint;
 import com.promptwise.promptchain.model.DoubleSumMetricDataPoint;
 import com.promptwise.promptchain.model.GaugeMetric;
@@ -25,9 +25,8 @@ import com.promptwise.promptchain.model.SumMetricDetail;
 import com.promptwise.promptchain.model.SummaryMetric;
 import com.promptwise.promptchain.model.SummaryMetricDataPoint;
 import com.promptwise.promptchain.model.SummaryMetricDetail;
-import com.promptwise.promptchain.repository.RawMetricsRepository;
+import com.promptwise.promptchain.repository.RawMetricRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -37,70 +36,83 @@ import java.time.OffsetDateTime;
 @Service
 public class MetricSignalImportService implements TelemetrySignalImportService<MetricSignal> {
 
-  @Autowired
-  RawMetricsRepository rawMetricsRepository;
+  private final RawMetricRepository rawMetricRepository;
 
-  public void processSignals(MetricSignals metricSignals) {
+  public MetricSignalImportService(final RawMetricRepository rawMetricRepository) {
+    this.rawMetricRepository = rawMetricRepository;
+  }
+
+  @Transactional
+  public void importSignals(MetricSignals metricSignals) {
     for (MetricSignal metricSignal : metricSignals.getMetricSignals()) {
-      processSignal(metricSignal);
+      importSignal(metricSignal);
     }
   }
 
-  public void processSignal(MetricSignal metricSignal) {
+  @Transactional
+  public void importSignal(MetricSignal metricSignal) {
     for (ScopeMetrics scopeMetrics : metricSignal.getScopeSignals()) {
       for (Metric<? extends MetricDetail<? extends MetricDataPoint>> metric : scopeMetrics.getSignals()) {
         switch (metric.getType()) {
-          case GAUGE -> processGaugeMetric((GaugeMetric) metric);
-          case SUM -> processSumMetric((SumMetric) metric);
-          case HISTOGRAM -> processHistogramMetric((HistogramMetric) metric);
-          case SUMMARY -> processSummaryMetric((SummaryMetric) metric);
+          case GAUGE -> importGaugeMetric((GaugeMetric) metric);
+          case SUM -> importSumMetric((SumMetric) metric);
+          case HISTOGRAM -> importHistogramMetric((HistogramMetric) metric);
+          case SUMMARY -> importSummaryMetric((SummaryMetric) metric);
           default -> throw new IllegalArgumentException("Unknown metric type: " + metric.getType());
         }
       }
     }
   }
 
-  protected void processGaugeMetric(GaugeMetric gaugeMetric) {
+  @Transactional
+  protected void importGaugeMetric(GaugeMetric gaugeMetric) {
     GaugeMetricDetail gaugeMetricDetail = gaugeMetric.getMetricDetail();
     for (NumberMetricDataPoint numberMetricDataPoint : gaugeMetricDetail.getNumberMetricDataPoints()) {
       if (numberMetricDataPoint instanceof DoubleGaugeMetricDataPoint) {
-        processDoubleGaugeMetricDataPoint((DoubleGaugeMetricDataPoint) numberMetricDataPoint);
+        importDoubleGaugeMetricDataPoint((DoubleGaugeMetricDataPoint) numberMetricDataPoint);
       } else if (numberMetricDataPoint instanceof IntegerGaugeMetricDataPoint) {
-        processIntegerGaugeMetricDataPoint((IntegerGaugeMetricDataPoint) numberMetricDataPoint);
+        importIntegerGaugeMetricDataPoint((IntegerGaugeMetricDataPoint) numberMetricDataPoint);
       }
     }
   }
 
-  protected void processDoubleGaugeMetricDataPoint(DoubleGaugeMetricDataPoint doubleGaugeMetricDataPoint) {
+  @Transactional
+  protected void importDoubleGaugeMetricDataPoint(DoubleGaugeMetricDataPoint doubleGaugeMetricDataPoint) {
   }
 
-  protected void processIntegerGaugeMetricDataPoint(IntegerGaugeMetricDataPoint integerGaugeMetricDataPoint) {
+  @Transactional
+  protected void importIntegerGaugeMetricDataPoint(IntegerGaugeMetricDataPoint integerGaugeMetricDataPoint) {
   }
 
-  protected void processSumMetric(SumMetric sumMetric) {
+  @Transactional
+  protected void importSumMetric(SumMetric sumMetric) {
     SumMetricDetail sumMetricDetail = sumMetric.getMetricDetail();
     for (SumMetricDataPoint sumMetricDataPoint : sumMetricDetail.getSumMetricDataPoints()) {
       if (sumMetricDataPoint instanceof DoubleSumMetricDataPoint) {
-        processDoubleSumMetricDataPoint((DoubleSumMetricDataPoint) sumMetricDataPoint);
+        importDoubleSumMetricDataPoint((DoubleSumMetricDataPoint) sumMetricDataPoint);
       } else if (sumMetricDataPoint instanceof IntegerSumMetricDataPoint) {
-        processIntegerSumMetricDataPoint((IntegerSumMetricDataPoint) sumMetricDataPoint);
+        importIntegerSumMetricDataPoint((IntegerSumMetricDataPoint) sumMetricDataPoint);
       }
     }
   }
 
-  protected void processDoubleSumMetricDataPoint(DoubleSumMetricDataPoint doubleSumMetricDataPoint) {
+  @Transactional
+  protected void importDoubleSumMetricDataPoint(DoubleSumMetricDataPoint doubleSumMetricDataPoint) {
   }
 
-  protected void processIntegerSumMetricDataPoint(IntegerSumMetricDataPoint integerSumMetricDataPoint) {
+  @Transactional
+  protected void importIntegerSumMetricDataPoint(IntegerSumMetricDataPoint integerSumMetricDataPoint) {
   }
 
-  protected void processHistogramMetric(HistogramMetric histogramMetric) {
+  @Transactional
+  protected void importHistogramMetric(HistogramMetric histogramMetric) {
     HistogramMetricDetail histogramMetricDetail = histogramMetric.getMetricDetail();
     for (HistogramMetricDataPoint histogramMetricDataPoint : histogramMetricDetail.getHistogramMetricDataPoints()) {
     }
   }
 
-  protected void processSummaryMetric(SummaryMetric summaryMetric) {
+  @Transactional
+  protected void importSummaryMetric(SummaryMetric summaryMetric) {
     SummaryMetricDetail summaryMetricDetail = summaryMetric.getMetricDetail();
     for (SummaryMetricDataPoint summaryMetricDataPoint : summaryMetricDetail.getSummaryMetricDataPoints()) {
     }
@@ -108,6 +120,7 @@ public class MetricSignalImportService implements TelemetrySignalImportService<M
 
   /**
    * This method would import the metrics payload into raw_metrics table
+   *
    * @param metricSignals
    * @param orgId
    * @param clientAppId
@@ -119,10 +132,10 @@ public class MetricSignalImportService implements TelemetrySignalImportService<M
       // Serialize the entire MetricSignals object into JSON
       JsonNode jsonPayload = JacksonUtil.getInstance().getObjectMapper().valueToTree(metricSignals);
       // Fetching nextId as we are using composite key which is not supported to be autogenerated
-      Long nextId = rawMetricsRepository.getNextId();
+      Long nextId = rawMetricRepository.getNextId();
 
       // Create the entity
-      RawMetrics entity = new RawMetrics(
+      RawMetric entity = new RawMetric(
               nextId,
               orgId,
               clientAppId,
@@ -130,7 +143,7 @@ public class MetricSignalImportService implements TelemetrySignalImportService<M
               OffsetDateTime.now()
       );
       // Persist
-      rawMetricsRepository.save(entity);
+      rawMetricRepository.save(entity);
 
     } catch (Exception e) {
       throw new RuntimeException("Failed to import raw metrics", e);

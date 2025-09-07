@@ -1,13 +1,14 @@
 package com.promptwise.promptchain.repository;
 
-import com.promptwise.promptchain.domain.RawMetricsId;
-import com.promptwise.promptchain.entity.RawMetrics;
+import com.promptwise.promptchain.entity.RawMetricId;
+import com.promptwise.promptchain.entity.RawMetric;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+//TODO: Use JOOQ instead of Hibernate. See AppUserRepository for example.
 @Repository
-public interface RawMetricsRepository extends JpaRepository<RawMetrics, RawMetricsId> {
+public interface RawMetricRepository extends JpaRepository<RawMetric, RawMetricId> {
 
   /**
    * Fetches the next value from the Postgres sequence `raw_metrics_id_seq`.

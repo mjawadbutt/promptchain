@@ -1,4 +1,4 @@
-package com.promptwise.promptchain.domain;
+package com.promptwise.promptchain.entity;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -6,26 +6,27 @@ import java.util.Objects;
 
 /**
  * Composite primary key class for the RawMetrics entity.
- *
+ * <p>
  * Why we need this:
- *  - The table `raw_metrics` has a composite primary key made up of
- *    (id, client_app_id, received_at).
- *  - JPA requires a separate Serializable class to represent that key
- *    when using @IdClass in the entity.
- *
+ * - The table `raw_metrics` has a composite primary key made up of
+ * (id, client_app_id, received_at).
+ * - JPA requires a separate Serializable class to represent that key
+ * when using @IdClass in the entity.
+ * <p>
  * Key points:
- *  - Must implement Serializable.
- *  - Must override equals() and hashCode() based on all PK fields.
- *  - Must have a no-args constructor (required by JPA).
+ * - Must implement Serializable.
+ * - Must override equals() and hashCode() based on all PK fields.
+ * - Must have a no-args constructor (required by JPA).
  */
-public class RawMetricsId implements Serializable {
+public class RawMetricId implements Serializable {
   private Long id;
   private Long clientAppId;
   private OffsetDateTime receivedAt;
 
-  public RawMetricsId() {}
+  public RawMetricId() {
+  }
 
-  public RawMetricsId(Long id, Long clientAppId, OffsetDateTime receivedAt) {
+  public RawMetricId(Long id, Long clientAppId, OffsetDateTime receivedAt) {
     this.id = id;
     this.clientAppId = clientAppId;
     this.receivedAt = receivedAt;
@@ -34,8 +35,8 @@ public class RawMetricsId implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof RawMetricsId)) return false;
-    RawMetricsId that = (RawMetricsId) o;
+    if (!(o instanceof RawMetricId)) return false;
+    RawMetricId that = (RawMetricId) o;
     return Objects.equals(id, that.id) &&
             Objects.equals(clientAppId, that.clientAppId) &&
             Objects.equals(receivedAt, that.receivedAt);

@@ -4,21 +4,21 @@ import com.promptwise.promptchain.model.ScopeTraces;
 import com.promptwise.promptchain.model.TraceSignal;
 import com.promptwise.promptchain.model.TraceSignals;
 import com.promptwise.promptchain.model.TraceSpan;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TraceSignalsImportService implements TelemetrySignalImportService<TraceSignal> {
+public class TraceSignalImportService implements TelemetrySignalImportService<TraceSignal> {
 
-
-
-  public void processSignals(TraceSignals traceSignals) {
+  @Transactional
+  public void importSignals(TraceSignals traceSignals) {
     for (TraceSignal traceSignal : traceSignals.getTraceSignals()) {
-      processSignal(traceSignal);
+      importSignal(traceSignal);
     }
   }
 
-  public void processSignal(TraceSignal traceSignal) {
+  @Transactional
+  public void importSignal(TraceSignal traceSignal) {
     for (ScopeTraces scopeTraces : traceSignal.getScopeSignals()) {
       for (TraceSpan traceSpan : scopeTraces.getSignals()) {
       }

@@ -725,21 +725,26 @@
           -->
           <changeLogDirectory>src/main/resources</changeLogDirectory>
           <changeLogFile>db/liquibase/db.changelog-master.xml</changeLogFile>
+          <driver>org.postgresql.Driver</driver>
+          <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>
+          <username>${APP_DB_USER_NAME}</username>
+          <password>${APP_DB_USER_PASSWORD}</password>
         </configuration>
         <executions>
 
           <execution>
             <id>update-db-schema</id>
+            <!--
+              Note that since the output of this plugin is used by the jooq-codegen-maven plugin (defined just below),
+              AND, since it executes in the same phase as the jooq-codegen-maven plugin, it HAS TO BE DEFINED before
+              the jooq-codegen-maven plugin in order to make sure it executes before the jooq-codegen-maven plugin.
+              Alternatively, we could bind it to the initialize phase and then the order would no longer matter,
+              however, the generate-sources phase seems more appropriate for this goal.
+            -->
             <phase>generate-sources</phase>
             <goals>
               <goal>update</goal>
             </goals>
-            <configuration>
-              <driver>org.postgresql.Driver</driver>
-              <url>jdbc:postgresql://localhost:${POSTGRES_PORT}/${APP_DB_NAME}</url>
-              <username>${APP_DB_USER_NAME}</username>
-              <password>${APP_DB_USER_PASSWORD}</password>
-            </configuration>
           </execution>
 
           <execution>
@@ -765,6 +770,7 @@
               <driver>${hsqldb.driver-class-name}</driver>
             </configuration>
           </execution>
+
         </executions>
       </plugin>
 

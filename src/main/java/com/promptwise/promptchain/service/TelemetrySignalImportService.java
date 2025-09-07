@@ -5,5 +5,5 @@ import com.promptwise.promptchain.model.TelemetrySignal;
 
 public interface TelemetrySignalImportService<T extends TelemetrySignal<? extends ScopeSignal<?>>> {
 
-  void processSignal(T telemetrySignal);
+  void importSignal(T telemetrySignal);
 }

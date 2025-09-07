@@ -22,6 +22,10 @@ src/main/resources/static/client/
 !GIT-GITHUB-GPG-SETUP.md
 !GIT_SETUP.md
 !LICENSE
+!mvn-liquibase-rollbackOneChangeset.bat
+!mvn-liquibase-rollbackOneChangeset.sh
+!mvn-liquibase-update.bat
+!mvn-liquibase-update.sh
 !pom.xml
 !prune-docker.bat
 !prune-docker.sh

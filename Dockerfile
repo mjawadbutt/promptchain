@@ -32,6 +32,12 @@ COPY --chown=promptchain:promptchain --chmod=644 \
 # Make it executable and set ownership
 COPY --chown=promptchain:promptchain --chmod=755 src/main/container-resources/entrypoint.sh /app/entrypoint.sh
 
+#TODO-Jawad: Also copy the start/stop scripts and liquibase apply/rollback scripts and properties file into the
+#TODO-Jawad: image. The dev-env.properties should be renamed to env-dev.properties and another env-prod.propeties
+#TODO-Jawad: should be created. AND an init-env.sh should define all as env vars via "source env-*.properties"
+#TODO-Jawad: (shell expansion i.e. PORT=${PORT:-5432}. The start/stop scripts should be updated so they dont have
+#TODO-Jawad: to parse the env file and just assume env vars are defined in the context.
+
 # --- NEW: Convert line endings if coming from a Windows host ---
 # Option 1: Using dos2unix (recommended for clarity)
 RUN apk add --no-cache dos2unix  \
