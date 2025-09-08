@@ -14,16 +14,21 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -260,57 +265,101 @@ public final class FileIoUtil {
       List<Path> pathsToDelete = getMatchingPathsInDir(dirToDelete, true, null,
               FILE_OR_DIRECTORY_MATCHING_OPTION.MATCH_BOTH, true);
       for (Path path : pathsToDelete) {
-        Files.delete(path);
+        try {
+          Files.delete(path);
+        } catch (NoSuchFileException e) {
+          //-- This catch and ignore addresses an edge case where:
+          //-- 1. A temp-file is created somewhere inside dirToDelete by an async process invoked by this thread
+          //-- 2. The invoked process ends and this thread tries to delete the dirToDelete.
+          //-- 3. The temp-file created in step 1 is listed in pathsToDelete
+          //-- 4. The temp-file is removed by the OS because it was a temp file and the owning process has ended.
+          //-- 5. This method (deleteDirRecursivelyIfItExists) tries to delete it because it appeared in the pathsToDelete
+          //-- 6. This method fails with java.nio.file.NoSuchFileException
+          //-- File already gone (NFS .nfs* cleanup or race condition) → ignore
+        }
       }
-      Files.delete(dirToDelete);
+      try {
+        Files.delete(dirToDelete);
+      } catch (NoSuchFileException e) {
+        //-- See above. Same logic for dir itself
+      }
     }
   }
 
-  public static List<Path> getMatchingPathsInDir(Path dirToSearch, boolean searchRecursively, Pattern matchPattern,
-                                                 FILE_OR_DIRECTORY_MATCHING_OPTION fileOrDirectoryMatchingOption,
-                                                 boolean reverseSortResult)
-          throws IOException {
+  public static List<Path> getMatchingPathsInDir(
+          Path dirToSearch,
+          boolean searchRecursively,
+          Pattern matchPattern,
+          FILE_OR_DIRECTORY_MATCHING_OPTION fileOrDirectoryMatchingOption,
+          boolean reverseSortResult) throws IOException {
+
     Assert.notNull(dirToSearch, "The parameter 'dirToSearch' cannot be null!");
-    if (Files.exists(dirToSearch)) {
-      Path realDirToSearch = dirToSearch.toRealPath();
-      int maxDepth = searchRecursively ? Integer.MAX_VALUE : 1;
-      List<Path> matchingPaths = new ArrayList<>();
-      final List<RuntimeException> suppressedExceptions = new ArrayList<>();
-
-      try (Stream<Path> stream = Files.walk(realDirToSearch, maxDepth)) {
-        stream.forEach(path -> {
-          //-- Skip the root dir
-          if (!path.equals(realDirToSearch)) {
-            try {
-              String fileName = path.getFileName() != null ? path.getFileName().toString() : "";
-              boolean matches = matchPattern == null || matchPattern.matcher(fileName).matches();
-              if (matches && fileOrDirectoryMatchingOption.isApplicableTo(path)) {
-                matchingPaths.add(path);
-              }
-            } catch (RuntimeException r) {
-              suppressedExceptions.add(r);
-            }
-          }
-        });
-      } catch (IOException e) {
-        suppressedExceptions.forEach(e::addSuppressed);
-        throw e;
-      }
-
-      if (suppressedExceptions.isEmpty()) {
-        //-- Order the returned list so that it is delete-friendly.
-        if (reverseSortResult) {
-          matchingPaths.sort(Comparator.reverseOrder());
-        }
-        return matchingPaths;
-      } else {
-        Throwable lastThrowable = suppressedExceptions.remove(suppressedExceptions.size() - 1);
-        suppressedExceptions.forEach(lastThrowable::addSuppressed);
-        throw new IOException("An exception occurred while searching for matching files in the specified dir",
-                lastThrowable);
-      }
-    } else {
+    if (!Files.exists(dirToSearch)) {
       throw new FileNotFoundException("The directory: '" + dirToSearch + "' does not exist!");
+    }
+
+    Path realDirToSearch = dirToSearch.toRealPath();
+    List<Path> matchingPaths = new ArrayList<>();
+    List<RuntimeException> suppressedExceptions = new ArrayList<>();
+
+    Files.walkFileTree(realDirToSearch, EnumSet.noneOf(FileVisitOption.class),
+            searchRecursively ? Integer.MAX_VALUE : 1,
+            new SimpleFileVisitor<>() {
+
+              @Override
+              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                try {
+                  String fileName = file.getFileName() != null ? file.getFileName().toString() : "";
+                  if (!fileName.startsWith(".nfs") &&
+                          (matchPattern == null || matchPattern.matcher(fileName).matches()) &&
+                          fileOrDirectoryMatchingOption.isApplicableTo(file)) {
+                    matchingPaths.add(file);
+                  }
+                } catch (RuntimeException r) {
+                  suppressedExceptions.add(r);
+                }
+                return FileVisitResult.CONTINUE;
+              }
+
+              @Override
+              public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                try {
+                  if (!dir.equals(realDirToSearch)) { // skip root dir if desired
+                    String dirName = dir.getFileName() != null ? dir.getFileName().toString() : "";
+                    if (!dirName.startsWith(".nfs") &&
+                            (matchPattern == null || matchPattern.matcher(dirName).matches()) &&
+                            fileOrDirectoryMatchingOption.isApplicableTo(dir)) {
+                      matchingPaths.add(dir);
+                    }
+                  }
+                } catch (RuntimeException r) {
+                  suppressedExceptions.add(r);
+                }
+                return FileVisitResult.CONTINUE;
+              }
+
+              @Override
+              public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                // Ignore transient .nfs files, otherwise wrap in RuntimeException
+                if (file.getFileName() != null && file.getFileName().toString().startsWith(".nfs")) {
+                  return FileVisitResult.CONTINUE;
+                }
+                suppressedExceptions.add(new RuntimeException(exc));
+                return FileVisitResult.CONTINUE;
+              }
+            });
+
+    if (suppressedExceptions.isEmpty()) {
+      if (reverseSortResult) {
+        matchingPaths.sort(Comparator.reverseOrder());
+      }
+      return matchingPaths;
+    } else {
+      Throwable lastThrowable = suppressedExceptions.remove(suppressedExceptions.size() - 1);
+      suppressedExceptions.forEach(lastThrowable::addSuppressed);
+      throw new IOException(
+              "An exception occurred while searching for matching files in the specified dir",
+              lastThrowable);
     }
   }
 
