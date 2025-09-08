@@ -38,7 +38,7 @@
     <!-- The dir where angular.json is placed -->
     <client-root-dir>${project.basedir}/src/main/client</client-root-dir>
     <!-- The output dir of the npm build command -->
-    <client-dist-dir>${main-resources-dir}/static/client</client-dist-dir>
+    <client-dist-dir>${client-root-dir}/.next</client-dist-dir>
 
     <antrun.echo.property>Usage mvn antrun:run@echo -Dantrun.echo.property=&lt;property-name&gt;</antrun.echo.property>
 
@@ -380,6 +380,18 @@
       </testResource>
     </testResources>
     <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${client-dist-dir}</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -1150,6 +1162,7 @@
             <nonFilteredFileExtension>mp4</nonFilteredFileExtension>
             <nonFilteredFileExtension>node</nonFilteredFileExtension>
             <nonFilteredFileExtension>otf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>pack</nonFilteredFileExtension>
             <nonFilteredFileExtension>png</nonFilteredFileExtension>
             <nonFilteredFileExtension>svg</nonFilteredFileExtension>
             <nonFilteredFileExtension>tar</nonFilteredFileExtension>
@@ -1458,6 +1471,35 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.1</version>
         <executions>
+          <execution>
+            <id>exec-npm-install</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <executable>npm</executable>
+              <arguments>
+                <argument>install</argument>
+              </arguments>
+              <workingDirectory>${client-root-dir}</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>exec-npm-run-build</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <executable>npm</executable>
+              <arguments>
+                <argument>run</argument>
+                <argument>build</argument>
+              </arguments>
+              <workingDirectory>${client-root-dir}</workingDirectory>
+            </configuration>
+          </execution>
           <execution>
             <id>build-docker-image</id>
             <phase>install</phase>

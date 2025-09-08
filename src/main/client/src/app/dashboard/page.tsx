@@ -6,7 +6,7 @@ export default function DashboardPage() {
       <h1 className="text-4xl font-bold mb-6">Dashboard</h1>
       <hr className="border-gray-700 mb-8" />
       <section className="mb-10">
-        <h2 className="text-2xl font-bold mb-2">Comprehensive insights into your LLM application's performance.</h2>
+        <h2 className="text-2xl font-bold mb-2">Comprehensive insights into your LLM application&apos;s performance.</h2>
         <p className="mb-4 text-gray-300">
           Monitor real-time request latencies, error rates, token consumption, and quality metrics. Our platform supports multiple metrics across major foundation models (OpenAI, Anthropic, Cohere, Bedrock), vector databases (Pinecone, Weaviate)
         </p>
