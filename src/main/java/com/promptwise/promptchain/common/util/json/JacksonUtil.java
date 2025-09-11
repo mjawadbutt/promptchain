@@ -99,7 +99,7 @@ public class JacksonUtil {
   public static synchronized JacksonUtil getInstance() {
     if (jacksonUtil == null) {
       ApplicationBuildInfo applicationBuildInfo = ApplicationBuildInfo.load(
-              "classpath:/com/promptwise/promptchain/project-info.properties", null);
+              "classpath:/META-INF/build-info.properties", null);
       String objectMapperModuleName = applicationBuildInfo == null ? null : applicationBuildInfo.getApplicationName();
       Version version = applicationBuildInfo == null ? null : applicationBuildInfo.getArtifactVersion();
 
