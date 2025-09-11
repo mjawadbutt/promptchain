@@ -85,7 +85,7 @@ public class ApplicationProperties {
   @Bean
   public ApplicationBuildInfo applicationBuildInfo() {
     return ApplicationBuildInfo.load(
-            "classpath:/com/promptwise/promptchain/project-info.properties", null);
+            "classpath:/META-INF/build-info.properties", null);
   }
 
   @Bean

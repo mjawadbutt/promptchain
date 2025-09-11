@@ -26,14 +26,15 @@ import com.promptwise.promptchain.model.SummaryMetric;
 import com.promptwise.promptchain.model.SummaryMetricDataPoint;
 import com.promptwise.promptchain.model.SummaryMetricDetail;
 import com.promptwise.promptchain.repository.RawMetricRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
 //TODO: Implement processing of metrics
 
 @Service
+@Transactional
 public class MetricSignalImportService implements TelemetrySignalImportService<MetricSignal> {
 
   private final RawMetricRepository rawMetricRepository;

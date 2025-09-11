@@ -4,8 +4,8 @@ import com.promptwise.promptchain.model.ScopeTraces;
 import com.promptwise.promptchain.model.TraceSignal;
 import com.promptwise.promptchain.model.TraceSignals;
 import com.promptwise.promptchain.model.TraceSpan;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TraceSignalImportService implements TelemetrySignalImportService<TraceSignal> {

@@ -27,6 +27,7 @@
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <os.line-separator-char>${line.separator}</os.line-separator-char>
+    <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss.SSSXXX</maven.build.timestamp.format>
     <main-resources-dir>${project.basedir}/src/main/resources</main-resources-dir>
     <test-resources-dir>${project.basedir}/src/test/resources</test-resources-dir>
     <generated-sources-dir>${project.build.directory}/generated-sources</generated-sources-dir>
@@ -353,15 +354,6 @@
     <resources>
       <resource>
         <directory>${main-resources-dir}</directory>
-        <excludes>
-          <exclude>project-info.properties</exclude>
-
-          <exclude>**/node_modules/**</exclude>
-          <exclude>**/*.dll</exclude>
-          <exclude>**/*.exe</exclude>
-          <exclude>**/*.so</exclude>
-          <exclude>**/*.dylib</exclude>
-        </excludes>
         <!--
           Enable filtering explicitly, because otherwise only files directly under resources are processed
           as templates and any files in sub-dirs are not.
@@ -437,6 +429,20 @@
               <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.incrementalVersion} -->
               <!-- mvn build-helper:parse-version antrun:run@echo -Dantrun.echo.property=${parsedVersion.nextIncrementalVersion} -->
               <propertyPrefix>parsedVersion</propertyPrefix>
+            </configuration>
+          </execution>
+          <execution>
+            <id>set-version-label</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>versionLabel</name>
+              <value>${project.version}</value>
+              <regex>(.*-SNAPSHOT)</regex>
+              <replacement>$1-${maven.build.timestamp}</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
             </configuration>
           </execution>
           <execution>
@@ -1174,27 +1180,6 @@
             <nonFilteredFileExtension>zip</nonFilteredFileExtension>
           </nonFilteredFileExtensions>
         </configuration>
-        <executions>
-          <execution>
-            <id>copy-project-info-properties-file</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>${main-resources-dir}</directory>
-                  <includes>
-                    <include>project-info.properties</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-              <outputDirectory>${project.build.directory}/classes/com/promptwise/promptchain</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -1409,45 +1394,56 @@
         </executions>
       </plugin>
 
-      <!--      <plugin>-->
-      <!--        <artifactId>maven-jar-plugin</artifactId>-->
-      <!--        <executions>-->
-      <!--          <execution>-->
-      <!--            <id>default-jar</id>-->
-      <!--            <phase>prepare-package</phase>-->
-      <!--            <goals>-->
-      <!--              <goal>jar</goal>-->
-      <!--            </goals>-->
-      <!--          </execution>-->
-      <!--        </executions>-->
-      <!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Implementation-Version>${versionLabel}</Implementation-Version>
+            </manifestEntries>
+          </archive>
+        </configuration>
+        <!--        <executions>-->
+        <!--          <execution>-->
+        <!--            <id>default-jar</id>-->
+        <!--            <phase>prepare-package</phase>-->
+        <!--            <goals>-->
+        <!--              <goal>jar</goal>-->
+        <!--            </goals>-->
+        <!--          </execution>-->
+        <!--        </executions>-->
+      </plugin>
 
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <additionalProperties>
-            <applicationId>
-              ${project.artifactId}
-            </applicationId>
-            <description>
+            <!-- Override default value of ${project.version} -->
+            <version>
+              ${versionLabel}
+            </version>
+            <!-- Override default value to ensure it is consistent with Maven -->
+            <time>${maven.build.timestamp}</time>
+            <additionalProperty.description>
               ${project.description}
-            </description>
-            <majorVersion>
+            </additionalProperty.description>
+            <additionalProperty.majorVersion>
               ${parsedVersion.majorVersion}
-            </majorVersion>
-            <minorVersion>
+            </additionalProperty.majorVersion>
+            <additionalProperty.minorVersion>
               ${parsedVersion.minorVersion}
-            </minorVersion>
-            <incrementalVersion>
+            </additionalProperty.minorVersion>
+            <additionalProperty.incrementalVersion>
               ${parsedVersion.incrementalVersion}
-            </incrementalVersion>
-            <snapshotQualifier>
+            </additionalProperty.incrementalVersion>
+            <additionalProperty.snapshotQualifier>
               ${parsedVersion.qualifier}
-            </snapshotQualifier>
-            <scmUrl>
+            </additionalProperty.snapshotQualifier>
+            <additionalProperty.scmUrl>
               ${project.scm.url}
-            </scmUrl>
+            </additionalProperty.scmUrl>
           </additionalProperties>
         </configuration>
         <executions>
@@ -1459,6 +1455,7 @@
           <!--            </goals>-->
           <!--          </execution>-->
           <execution>
+            <phase>generate-resources</phase>
             <goals>
               <goal>build-info</goal>
             </goals>

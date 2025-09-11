@@ -4,8 +4,8 @@ import com.promptwise.promptchain.model.LogRecord;
 import com.promptwise.promptchain.model.LogSignal;
 import com.promptwise.promptchain.model.LogSignals;
 import com.promptwise.promptchain.model.ScopeLogs;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LogSignalImportService implements TelemetrySignalImportService<LogSignal> {
