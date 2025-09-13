@@ -25,9 +25,9 @@ done
 POSTGRES_PORT="${POSTGRES_PORT:-5432}"
 
 # Get the Container-ID for the Postgres container
-container_id=$(docker ps --filter "ancestor=timescale/timescaledb:latest-pg15" --format '{{.ID}}' | head -n1)
+container_id=$(docker ps --filter "ancestor=timescale/timescaledb-ha:pg17-ts2.21-all-oss" --format '{{.ID}}' | head -n1)
 if [ -z "$container_id" ]; then
-  echo "ERROR: No running ancestor=timescale/timescaledb:latest-pg15 container found! Aborting." >&2
+  echo "ERROR: No running ancestor=timescale/timescaledb-ha:pg17-ts2.21-all-oss container found! Aborting." >&2
   exit 2
 fi
 
@@ -87,6 +87,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"$APP_DB_USER_NAME\";
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"$APP_DB_USER_NAME\";
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO \"$APP_DB_USER_NAME\";
 CREATE EXTENSION IF NOT EXISTS timescaledb;
+CREATE EXTENSION IF NOT EXISTS vector;
 "
 
 docker exec "$container_id" psql -p "$POSTGRES_PORT" -U "$POSTGRES_SUPER_USER_NAME" -d "$APP_DB_NAME" -v ON_ERROR_STOP=1 \

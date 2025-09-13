@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: timescale/timescaledb:latest-pg15
+    image: timescale/timescaledb-ha:pg17-ts2.21-all-oss
     hostname: postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB_NAME}
