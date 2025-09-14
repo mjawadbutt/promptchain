@@ -378,9 +378,9 @@
         <artifactId>maven-clean-plugin</artifactId>
         <configuration>
           <filesets>
-            <fileset>
-              <directory>${client-dist-dir}</directory>
-            </fileset>
+<!--            <fileset>-->
+<!--              <directory>${client-dist-dir}</directory>-->
+<!--            </fileset>-->
           </filesets>
         </configuration>
       </plugin>
@@ -1468,35 +1468,35 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.1</version>
         <executions>
-          <execution>
-            <id>exec-npm-install</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>generate-resources</phase>
-            <configuration>
-              <executable>npm</executable>
-              <arguments>
-                <argument>install</argument>
-              </arguments>
-              <workingDirectory>${client-root-dir}</workingDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>exec-npm-run-build</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>generate-resources</phase>
-            <configuration>
-              <executable>npm</executable>
-              <arguments>
-                <argument>run</argument>
-                <argument>build</argument>
-              </arguments>
-              <workingDirectory>${client-root-dir}</workingDirectory>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>exec-npm-install</id>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <phase>generate-resources</phase>-->
+<!--            <configuration>-->
+<!--              <executable>npm</executable>-->
+<!--              <arguments>-->
+<!--                <argument>install</argument>-->
+<!--              </arguments>-->
+<!--              <workingDirectory>${client-root-dir}</workingDirectory>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          <execution>-->
+<!--            <id>exec-npm-run-build</id>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <phase>generate-resources</phase>-->
+<!--            <configuration>-->
+<!--              <executable>npm</executable>-->
+<!--              <arguments>-->
+<!--                <argument>run</argument>-->
+<!--                <argument>build</argument>-->
+<!--              </arguments>-->
+<!--              <workingDirectory>${client-root-dir}</workingDirectory>-->
+<!--            </configuration>-->
+<!--          </execution>-->
           <execution>
             <id>build-docker-image</id>
             <phase>install</phase>

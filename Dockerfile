@@ -1,12 +1,17 @@
 # Dockerfile
-FROM eclipse-temurin:21-jdk-alpine AS base
+# Switching from Alpine to Debian-based base image (Ubuntu) for better compatibility with certain tools
+#FROM eclipse-temurin:21-jdk-alpine AS base
+FROM eclipse-temurin:21-jdk-jammy AS base
 
 ARG PROJECT_BUILD_DIRECTORY
 ARG PROJECT_BUILD_FINAL_NAME
 ARG APP_DATA_DIR_NAME
 ARG APP_LOGS_DIR_NAME
 
-RUN apk add --no-cache postgresql-client
+# Switching from Alpine to Debian-based base image (Ubuntu) for better compatibility with certain tools
+#RUN apk add --no-cache postgresql-client
+RUN apt-get update && apt-get install -y postgresql-client
+
 
 # Define a non-root user and group
 # Using --system creates a system user, suitable for service accounts
@@ -40,8 +45,9 @@ COPY --chown=promptchain:promptchain --chmod=755 src/main/container-resources/en
 
 # --- NEW: Convert line endings if coming from a Windows host ---
 # Option 1: Using dos2unix (recommended for clarity)
-RUN apk add --no-cache dos2unix  \
-    && dos2unix /app/entrypoint.sh
+# Switching from Alpine to Debian-based base image (Ubuntu) for better compatibility with certain tools
+#RUN apk add --no-cache dos2unix && dos2unix /app/entrypoint.sh
+RUN apt-get install -y dos2unix && dos2unix /app/entrypoint.sh
 
 ENV APP_JAR_NAME=${PROJECT_BUILD_FINAL_NAME}
 
