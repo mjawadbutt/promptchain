@@ -17,13 +17,13 @@ for %%V in (%REQUIRED_VARS%) do (
 )
 
 REM --- Find container ID ---
-for /f "delims=" %%i in ('docker ps --filter "ancestor=timescale/timescaledb-ha:pg17-ts2.21-all-oss" --format "{{.ID}}"') do (
+for /f "delims=" %%i in ('docker ps --filter "ancestor=timescale/timescaledb:latest-pg15" --format "{{.ID}}"') do (
     set container_id=%%i
     goto :found_container
 )
 :found_container
 if "%container_id%"=="" (
-    echo ERROR: No running ancestor=timescale/timescaledb-ha:pg17-ts2.21-all-oss container found! Aborting.
+    echo ERROR: No running ancestor=timescale/timescaledb:latest-pg15 container found! Aborting.
     exit /b 2
 )
 echo Using container ID: %container_id%
@@ -77,8 +77,7 @@ set SQL_COMMANDS=GRANT CONNECT ON DATABASE "%APP_DB_NAME%" TO "%APP_DB_USER_NAME
  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "%APP_DB_USER_NAME%";^
  GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "%APP_DB_USER_NAME%";^
  GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "%APP_DB_USER_NAME%";^
- CREATE EXTENSION IF NOT EXISTS timescaledb;^
- CREATE EXTENSION IF NOT EXISTS vector;
+ CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 docker exec %container_id% psql -p %POSTGRES_PORT% -U %POSTGRES_SUPER_USER_NAME% -d %APP_DB_NAME% -v ON_ERROR_STOP=1 -c "%SQL_COMMANDS%"
 

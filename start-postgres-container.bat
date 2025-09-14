@@ -59,16 +59,16 @@ set /a COUNT=0
 :WAIT_LOOP
 REM Get Postgres container ID fresh each loop
 set CONTAINER_ID=
-for /f "tokens=*" %%i in ('docker ps --filter "ancestor=timescale/timescaledb-ha:pg17-ts2.21-all-oss" --format "{{.ID}}"') do (
+for /f "tokens=*" %%i in ('docker ps --filter "ancestor=timescale/timescaledb:latest-pg15" --format "{{.ID}}"') do (
     set CONTAINER_ID=%%i
 )
 
 if not defined CONTAINER_ID (
-    echo ERROR: No running timescale/timescaledb-ha:pg17-ts2.21-all-oss container found. Waiting for container to start...
+    echo ERROR: No running timescale/timescaledb:latest-pg15 container found. Waiting for container to start...
     timeout /t 2 >nul
     set /a COUNT+=1
     if !COUNT! GEQ %RETRIES% (
-        echo ERROR: No running timescale/timescaledb-ha:pg17-ts2.21-all-oss container found after %RETRIES% attempts! Aborting.
+        echo ERROR: No running timescale/timescaledb:latest-pg15 container found after %RETRIES% attempts! Aborting.
         exit /b 4
     )
     goto WAIT_LOOP
