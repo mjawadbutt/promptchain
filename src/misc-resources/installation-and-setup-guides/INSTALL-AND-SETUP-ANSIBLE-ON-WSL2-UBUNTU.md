@@ -131,11 +131,15 @@ Add `/etc/profile.d/fix_hosts.sh`:
 #!/bin/bash
 # fix_hosts.sh — keep ubuntu-2 resolvable
 
+# Skip if non-interactive and not SSH (cron, system jobs excluded)
 [[ $- != *i* && -z "$SSH_CONNECTION" ]] && exit 0
+
+# Skip if root in interactive shell (to avoid login annoyance)
 if [ "$(id -u)" -eq 0 ] && [[ $- == *i* ]]; then exit 0; fi
 
 POWERSHELL_EXE="/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
-UBUNTU2_IP=$($POWERSHELL_EXE -Command "wsl -d ubuntu-2 hostname -I"              2>/dev/null | tr -d '' | awk '{print $1}')
+UBUNTU2_IP=$($POWERSHELL_EXE -Command "wsl -d ubuntu-2 hostname -I"              2>/dev/null | tr -d '
+' | awk '{print $1}')
 
 if [ -n "$UBUNTU2_IP" ]; then
     sudo sed -i "/ubuntu-2/d" /etc/hosts
