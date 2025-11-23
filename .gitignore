@@ -3,34 +3,18 @@
 
 # Whitelist the files that should be part of the respository.
 !.github
-!.run
 # Note:
 # Do not use single or double asteriks at the end. They are not working properly.
 # To ignore all files in a dir recursively just add / at the end.
-!src/
-src/main/resources/static/client/
-!.editorconfig
+!otel-collector/
+!promptchain-otel-exporter/
+promptchain-otel-exporter/src/main/resources/static/client/
+!sdks/
 !.gitattributes
 !.gitignore
-!.mvn
-!create-promptchain-db-user.*
-!dev-env.properties
-!docker-compose.yml
-!docker-compose-postgres.yml
-!docker-compose-redis.yml
-!Dockerfile
-!GIT-GITHUB-GPG-SETUP.md
-!GIT_SETUP.md
+!SETUP-GUIDES/
+!test-ai-agents/
 !LICENSE
-!mvn-liquibase-rollbackOneChangeset.bat
-!mvn-liquibase-rollbackOneChangeset.sh
-!mvn-liquibase-update.bat
-!mvn-liquibase-update.sh
-!pom.xml
 !prune-docker.bat
 !prune-docker.sh
 !README.md
-!start-postgres-container.*
-!start-redis-container.*
-!stop-postgres-container.*
-!stop-redis-container.*
