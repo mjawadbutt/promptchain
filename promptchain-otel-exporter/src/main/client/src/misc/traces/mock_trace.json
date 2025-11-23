@@ -1,0 +1,73 @@
+{
+  "theme": {
+    "mode": "dark",
+    "colors": {
+      "primary": "#4F46E5",
+      "secondary": "#6366F1",
+      "background": "#0F172A",
+      "surface": "#1E293B",
+      "textPrimary": "#F8FAFC",
+      "textSecondary": "#94A3B8",
+      "success": "#10B981",
+      "warning": "#FBBF24",
+      "error": "#EF4444",
+      "cardBorder": "#334155"
+    },
+    "font": {
+      "family": "Inter, sans-serif",
+      "size": "14px"
+    }
+  },
+  "sidebar": {
+    "app_name": "PromptChain",
+    "profile": {
+      "name": "Syed"
+    },
+    "sections": [
+      {
+        "title": "OBSERVE",
+        "items": [
+          { "name": "Dashboard", "icon": "dashboard" },
+          { "name": "Tracing", "icon": "tracing" },
+          { "name": "LLM Observability", "icon": "dashboard"}
+        ]
+      },
+      
+      {
+        "title": "SETTINGS",
+        "items": [
+          { "name": "Settings", "icon": "settings" },
+          { "name": "Help", "icon": "help" }
+        ]
+      }
+    ]
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Comprehensive insights into your LLM application's performance.",
+    "details": "Monitor real-time request latencies, error rates, token consumption, and quality metrics. Our platform supports multiple metrics across major foundation models (OpenAI, Anthropic, Cohere, Bedrock), vector databases (Pinecone, Weaviate)",
+    "buttons": [
+      { "text": "Connect Application" },
+      { "text": "View Documentation" }
+    ],
+    "metrics": {
+      "title": "Models",
+      "models": {
+        "claude-3-opus-20240229": 10699,
+        "gpt-4o": 18475,
+        "command-r-plus": 28777
+      },
+      "total_price": {
+        "title": "Total Price",
+        "amount": 260,
+        "currency": "USD",
+        "breakdown": {
+          "claude-3-opus": 6044,
+          "gpt-4o": 1240,
+          "command-r-plus": 200
+        }
+      },
+      "tokens_per_minute": "Chart"
+    }
+  }
+}
